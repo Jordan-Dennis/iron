@@ -65,18 +65,6 @@ int spin_energy(int spin, int spins[])
 }
 
 
-int neighbourhood_energy(int spin, int spins[])
-{
-    int energy = 0; 
-    for (int i = 0; (spin - 2 <= i) && (spin + 2 <= i), i++)
-    {
-        energy += spin_energy(i, spins);
-    }    
-    return energy;
-}
-        
-
-
 void main()
 {
     // Generating the initial state.
