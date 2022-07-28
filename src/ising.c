@@ -9,7 +9,10 @@ const float temperature = 1.;
 
 
 // TODO: Provide doc-string.
-float random(void) { return (float) rand() / (float) RAND_MAX }
+float random(void)
+{ 
+    return (float) rand() / (float) RAND_MAX
+}
 
 
 /* 
@@ -45,7 +48,8 @@ int random_spin(void)
 int ensamble_energy(int spins[])
 {
     int energy = 0;
-    for (int spin = 0; spin < N; spin++) {
+    for (int spin = 0; spin < N; spin++) 
+    {
         // Just the nearest neighours contribute to the energy.
         energy += spin_energy[spin];
     }
@@ -61,11 +65,24 @@ int spin_energy(int spin, int spins[])
 }
 
 
+int neighbourhood_energy(int spin, int spins[])
+{
+    int energy = 0; 
+    for (int i = 0; (spin - 2 <= i) && (spin + 2 <= i), i++)
+    {
+        energy += spin_energy(i, spins);
+    }    
+    return energy;
+}
+        
+
+
 void main()
 {
     // Generating the initial state.
     int spins[N];
-    for (int spin = 0; spin < N; spin++) {
+    for (int spin = 0; spin < N; spin++) 
+    {
         spins[spin] = random_spin();
         // printf("%i ", spins[spin]);
     }
@@ -84,12 +101,25 @@ void main()
     // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)
     // (+1, -1, -1 =>  0) --> (+1, +1, -1 =>  0)
     // (+1, -1, +1 => -2) --> (+1, +1, +1 => +2)
-    // (-1, +1, -1)
+    // (-1, +1, -1 => -2) --> (-1, -1, -1 => +2)
     // (+1, +1, +1 => +2) --> (+1, -1, +1 => -2)
+    // (-1, -1, -1 => +2) --> (-1, +1, -1 => -2)
+    // (-1, +1, +1 =>  0) --> (-1, -1, +1 =>  0)
+    // (-1, -1, +1 =>  0) --> (-1, +1, +1 =>  0)
     // So I also need to calculate how the neighbours contribution to 
     // the energy will change. This may well be different to what I 
     // have.
-    int energy_change = -2 * spin_energy(spin, spins); 
+    //
+    // Energy change will be different for the end spins. What will this 
+    // be? Just the change in the single element. 
+    //
+    // Might be easiest to call energy on the neighbourhood of the 
+    // spin. This is just the 5 symmetric elements that will be required.
+    // centred on the spin.
+    // 
+    // For the edge ones I think you add or subtract 2 based on the 
+    // sign that was flipped. Seems to work.
+    int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin]; 
     // Since the only possible value of energy that is greater than 
     // zero is 1, this means that the probability of the flip 
     // is a constant. NOTE: This is only for a given temperature. 
