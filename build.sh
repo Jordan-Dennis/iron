@@ -14,3 +14,8 @@ run() {
 edit() {
     vim src/ising.c
 }
+
+
+clean() {
+    rm out/*txt
+}

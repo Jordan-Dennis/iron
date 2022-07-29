@@ -86,50 +86,6 @@ int ensamble_energy(int spins[])
 }
 
 
-int* _metropolis_step(int* spins)
-{    
-    int spin = (int) rand();
-    printf("metropolis_step: %i", spin);
-    // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)
-    // (+1, -1, -1 =>  0) --> (+1, +1, -1 =>  0)
-    // (+1, -1, +1 => -2) --> (+1, +1, +1 => +2)
-    // (-1, +1, -1 => -2) --> (-1, -1, -1 => +2)
-    // (+1, +1, +1 => +2) --> (+1, -1, +1 => -2)
-    // (-1, -1, -1 => +2) --> (-1, +1, -1 => -2)
-    // (-1, +1, +1 =>  0) --> (-1, -1, +1 =>  0)
-    // (-1, -1, +1 =>  0) --> (-1, +1, +1 =>  0)
-    // For the edge ones I think you add or subtract 2 based on the 
-    // sign that was flipped. Seems to work.
-    int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
-   
-    printf("energy_change: %i", energy_change); 
-//    if (energy_change <= 0)
-//    {
-//        spins[spin] = -spins[spin];
-//    } 
-//    else
-//    {
-//        float probability = exp(-energy_change / T);
-//        if (probability <= normalised_random()) 
-//        {
-//            spins[spin] = -spins[spin];
-//        }
-//    }
-    return spins;
-}
-
-
-int* _initialise(int spins[N])
-{
-    // Generating the initial state.
-    for (int spin = 0; spin < N; spin++) 
-    {
-        spins[spin] = random_spin();
-    }
-    return spins;
-}
-
-
 int main(void)
 {
     int spins[N]; 
@@ -170,25 +126,21 @@ int main(void)
                 spins[spin] = -spins[spin];
             }
         }
-    }
 
-    for (int spin=0; spin < N; spin++)
-    {
-        printf("%i", spins[spin]);
-    }
-    printf("\n");
+        if ((epoch == 0) || (epoch == N))
+        {
+            printf("to_file: %i \n", epoch);
+            FILE *data = fopen("/home/jordan/Documents/PHYS3920/"
+                "computational_project/out/ising_epoch_zero.txt", "w");
 
-//        if ((epoch == 0) || (epoch == N))
-//        {
-//            FILE *data = fopen("../out/ising_epoch_zero.txt", "w");
-//            for (int spin = 0; spin < N, spin++;)
-//            {
-//                putc(spins[spin], data);
-//                putc(',', data);
-//            }
-//            fclose(data);
-//        }
-//    }
+            for (int spin = 0; spin < N; spin++)
+            {
+                printf("spin: %i \n", spins[spin]);
+                fprintf(data, "%i,", spins[spin]);
+            }
+            fclose(data);
+        }
+    }
     return 0;
 }
 
