@@ -3,7 +3,7 @@
 #include <math.h>
 
 
-const int N = 1e2;
+const int N = 16;
 const float T = 1.;
 
 
@@ -86,29 +86,65 @@ int ensamble_energy(int spins[])
 }
 
 
-int main(void)
+int* _metropolis_step(int* spins)
+{    
+    int spin = (int) rand();
+    printf("metropolis_step: %i", spin);
+    // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)
+    // (+1, -1, -1 =>  0) --> (+1, +1, -1 =>  0)
+    // (+1, -1, +1 => -2) --> (+1, +1, +1 => +2)
+    // (-1, +1, -1 => -2) --> (-1, -1, -1 => +2)
+    // (+1, +1, +1 => +2) --> (+1, -1, +1 => -2)
+    // (-1, -1, -1 => +2) --> (-1, +1, -1 => -2)
+    // (-1, +1, +1 =>  0) --> (-1, -1, +1 =>  0)
+    // (-1, -1, +1 =>  0) --> (-1, +1, +1 =>  0)
+    // For the edge ones I think you add or subtract 2 based on the 
+    // sign that was flipped. Seems to work.
+    int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
+   
+    printf("energy_change: %i", energy_change); 
+//    if (energy_change <= 0)
+//    {
+//        spins[spin] = -spins[spin];
+//    } 
+//    else
+//    {
+//        float probability = exp(-energy_change / T);
+//        if (probability <= normalised_random()) 
+//        {
+//            spins[spin] = -spins[spin];
+//        }
+//    }
+    return spins;
+}
+
+
+int* _initialise(int spins[N])
 {
     // Generating the initial state.
-    int spins[N];
     for (int spin = 0; spin < N; spin++) 
     {
         spins[spin] = random_spin();
     }
-    
+    return spins;
+}
 
-    for (int epoch=0; epoch <= N; epoch++;)
+
+int main(void)
+{
+    int spins[N]; 
+    // Generating the initial state.
+    for (int spin = 0; spin < N; spin++) 
     {
-        // Metropolis walk over the states.
-        // So basically I chose a spin using the rand function
-        int spin = (int) rand();
-        // Flipping a spin changes the sign of its energy. The middle one 
-        // is the one that is in question in the bellow comments. The
-        // format is:
-        //
-        // left, self, right -> energy_change
-        //
-        // Some useful information to note is that same sign = 1 and 
-        // different sign = -1.
+        spins[spin] = random_spin();
+    }
+
+    for (int epoch = 0; epoch <= N; epoch++)
+    {
+        printf("epoch: %i \n", epoch);
+        
+        int spin = (int) (normalised_random() * 16);
+        printf("metropolis_step: %i \n", spin);
         // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)
         // (+1, -1, -1 =>  0) --> (+1, +1, -1 =>  0)
         // (+1, -1, +1 => -2) --> (+1, +1, +1 => +2)
@@ -117,24 +153,11 @@ int main(void)
         // (-1, -1, -1 => +2) --> (-1, +1, -1 => -2)
         // (-1, +1, +1 =>  0) --> (-1, -1, +1 =>  0)
         // (-1, -1, +1 =>  0) --> (-1, +1, +1 =>  0)
-        // So I also need to calculate how the neighbours contribution to 
-        // the energy will change. This may well be different to what I 
-        // have.
-        //
-        // Energy change will be different for the end spins. What will this 
-        // be? Just the change in the single element. 
-        //
-        // Might be easiest to call energy on the neighbourhood of the 
-        // spin. This is just the 5 symmetric elements that will be required.
-        // centred on the spin.
-        // 
         // For the edge ones I think you add or subtract 2 based on the 
         // sign that was flipped. Seems to work.
-        int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin]; 
-        // Since the only possible value of energy that is greater than 
-        // zero is 1, this means that the probability of the flip 
-        // is a constant. NOTE: This is only for a given temperature. 
-        
+        int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
+       
+        printf("energy_change: %i \n", energy_change); 
         if (energy_change <= 0)
         {
             spins[spin] = -spins[spin];
@@ -147,18 +170,25 @@ int main(void)
                 spins[spin] = -spins[spin];
             }
         }
-
-        if ((epoch == 0) || (epoch == N))
-        {
-            FILE *data = fopen("../out/ising_epoch_zero.txt", "w");
-            for (int spin = 0; spin < N, spin++;)
-            {
-                putc(spins[spin], data);
-                putc(',', data);
-            }
-            fclose(data);
-        }
     }
+
+    for (int spin=0; spin < N; spin++)
+    {
+        printf("%i", spins[spin]);
+    }
+    printf("\n");
+
+//        if ((epoch == 0) || (epoch == N))
+//        {
+//            FILE *data = fopen("../out/ising_epoch_zero.txt", "w");
+//            for (int spin = 0; spin < N, spin++;)
+//            {
+//                putc(spins[spin], data);
+//                putc(',', data);
+//            }
+//            fclose(data);
+//        }
+//    }
     return 0;
 }
 
