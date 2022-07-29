@@ -4,7 +4,7 @@
 
 
 const int N = 1e2;
-const float temperature = 1.;
+const float T = 1.;
 
 
 /*
@@ -16,9 +16,9 @@ const float temperature = 1.;
  * -------
  * float: random number.
  */
-float random(void)
+float normalised_random(void)
 { 
-    return (float) rand() / (float) RAND_MAX
+    return (float) rand() / (float) RAND_MAX;
 }
 
 
@@ -33,34 +33,9 @@ float random(void)
  */ 
 int random_spin(void) 
 {
-    float normalised_random = random();
-    float translated_random = normalised_random - .5;
+    float normed_random = normalised_random();
+    float translated_random = normed_random - .5;
     return (int) ((translated_random > 0) - (translated_random < 0));
-}
-
-
-/*
- * potential_energy
- * ----------------
- * The energy stored by the ensamble of spins.
- * 
- * parameters
- * ----------
- * int spins[]: The spin state of the ensamble.
- *
- * returns
- * -------
- * int: The energy of the ensamble in units of epsilon.
- */
-int ensamble_energy(int spins[])
-{
-    int energy = 0;
-    for (int spin = 0; spin < N; spin++) 
-    {
-        // Just the nearest neighours contribute to the energy.
-        energy += spin_energy[spin];
-    }
-    return energy;
 }
 
 
@@ -86,7 +61,32 @@ int spin_energy(int spin, int spins[])
 }
 
 
-void main()
+/*
+ * potential_energy
+ * ----------------
+ * The energy stored by the ensamble of spins.
+ * 
+ * parameters
+ * ----------
+ * int spins[]: The spin state of the ensamble.
+ *
+ * returns
+ * -------
+ * int: The energy of the ensamble in units of epsilon.
+ */
+int ensamble_energy(int spins[])
+{
+    int energy = 0;
+    for (int spin = 0; spin < N; spin++) 
+    {
+        // Just the nearest neighours contribute to the energy.
+        energy += spin_energy(spin, spins);
+    }
+    return energy;
+}
+
+
+int main(void)
 {
     // Generating the initial state.
     int spins[N];
@@ -96,7 +96,7 @@ void main()
     }
     
 
-    for (int epoch=0; epoch <= 1e2 * N; epoch++)
+    for (int epoch=0; epoch <= N; epoch++;)
     {
         // Metropolis walk over the states.
         // So basically I chose a spin using the rand function
@@ -142,23 +142,24 @@ void main()
         else
         {
             float probability = exp(-energy_change / T);
-            if (probability <= random()) 
+            if (probability <= normalised_random()) 
             {
                 spins[spin] = -spins[spin];
             }
         }
 
-        if (epoch == 0) || (epoch == N)
+        if ((epoch == 0) || (epoch == N))
         {
             FILE *data = fopen("../out/ising_epoch_zero.txt", "w");
-            for (int spin = 0; spin < N, spin++)
+            for (int spin = 0; spin < N, spin++;)
             {
-                fputc(data, spins[spin]);
-                fputc(data, ",");
+                putc(spins[spin], data);
+                putc(',', data);
             }
-            fclose(&data);
+            fclose(data);
         }
     }
+    return 0;
 }
 
 
