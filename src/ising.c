@@ -88,19 +88,23 @@ int ensamble_energy(int spins[])
 
 int main(void)
 {
+
+    FILE *data = fopen("/home/jordan/Documents/PHYS3920/"
+        "computational_project/out/ising_epoch_zero.txt", "w");
+
     int spins[N]; 
-    // Generating the initial state.
+    // Copy initial state so that it can be written to a file.
     for (int spin = 0; spin < N; spin++) 
     {
-        spins[spin] = random_spin();
+        int value = random_spin();
+        spins[spin] = value;
+        fprintf(data, "%i, %i, %i\n", 0, spin, value);
     }
+
 
     for (int epoch = 0; epoch <= N; epoch++)
     {
-        printf("epoch: %i \n", epoch);
-        
         int spin = (int) (normalised_random() * 16);
-        printf("metropolis_step: %i \n", spin);
         // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)
         // (+1, -1, -1 =>  0) --> (+1, +1, -1 =>  0)
         // (+1, -1, +1 => -2) --> (+1, +1, +1 => +2)
@@ -113,7 +117,6 @@ int main(void)
         // sign that was flipped. Seems to work.
         int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
        
-        printf("energy_change: %i \n", energy_change); 
         if (energy_change <= 0)
         {
             spins[spin] = -spins[spin];
@@ -126,21 +129,15 @@ int main(void)
                 spins[spin] = -spins[spin];
             }
         }
-
-        if ((epoch == 0) || (epoch == N))
-        {
-            printf("to_file: %i \n", epoch);
-            FILE *data = fopen("/home/jordan/Documents/PHYS3920/"
-                "computational_project/out/ising_epoch_zero.txt", "w");
-
-            for (int spin = 0; spin < N; spin++)
-            {
-                printf("spin: %i \n", spins[spin]);
-                fprintf(data, "%i,", spins[spin]);
-            }
-            fclose(data);
-        }
     }
+       
+       
+    for (int spin = 0; spin < N; spin++)
+    {
+        fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
+    }
+       
+    fclose(data);
     return 0;
 }
 
