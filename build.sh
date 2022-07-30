@@ -9,7 +9,10 @@ COMPILABLE=src/ising.c
 EXECUTABLE=out/ising
 PUBLISHABLE=pub/report.tex
 READABLE=out/data.txt
-VIEWABLE=pub/figures.gnu
+VIEWABLE=pub/figures.gpi
+
+
+EXTRAS=( "report.log" "report.aux" "pub/report.log" "pub/report.aux" )
 
 
 RED="\033[0;31m"
@@ -106,6 +109,8 @@ edit() {
         vim ${COMPILABLE}
     elif [[ $1 == "viewable" ]] || [[ $1 == "v" ]]; then
         vim ${VIEWABLE}
+    elif [[ $1 == "publishable" ]] || [[ $1 == "p" ]]; then
+        vim ${PUBLISHABLE}
     fi
 }
 
@@ -123,6 +128,12 @@ print_clean_help() {
 clean() {
     rm ${READABLE}
     rm ${EXECUTABLE}
+    for extra in "${EXTRAS[@]}"; do
+        echo "Removing ${extra}: "
+        if [[ -e "${extra}" ]]; then
+            rm ${extra}
+        fi
+    done
 }
 
 
@@ -177,19 +188,41 @@ plot() {
 }
 
 
-print_publish_help() {}
+print_publish_help() {
+    echo -e "${BLUE}publish${NORMAL}"
+    echo -e "-------"
+    echo -e "Generate the .pdf file associated with the final output"
+    echo 
+    echo -e "${GREEN}parameters${NORMAL}"
+    echo -e "----------"
+    echo -e "${RED}-h${NORMAL} : Display this help message and exit."
+    echo -e "${RED}-q${NORMAL} : Run latex in quiet mode to supress output."
+}
 publish() {
     while getopts ":hq:" option; do
         case $option in
-            h) ;;
-            q) ;;
+            h) print_publish_help
+               OPTIND=1
+               return 0
+               ;;
+            q) pdflatex ${PUBLISHABLE} >> ~/dev/null
+               OPTIND=1
+               return 0
         esac
     done 
-    pdflatex ${PUBLISHABLE} >> ~/dev/null
+    pdflatex ${PUBLISHABLE}
 }
 
 
-print_execute_help() {}
+print_execute_help() {
+    echo -e "${BLUE}execute${NORMAL}"
+    echo -e "-------"
+    echo -e "Compile, build, run, plot and generate the report."
+    echo
+    echo -e "${GREEN}parameters${NORMAL}"
+    echo -e "----------"
+    echo -e "${RED}-h${NORMAL} : Display this help message then exit."
+}
 execute() {
     build -o
     run 
