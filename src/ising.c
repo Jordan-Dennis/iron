@@ -3,8 +3,10 @@
 #include <math.h>
 
 
-const int N = 16;
+const int N = 1e3;
 const float T = 1.;
+const char DATA[] = "/home/jordan/Documents/PHYS3920/"
+    "computational_project/out/data.txt";
 
 
 /*
@@ -89,8 +91,7 @@ int ensamble_energy(int spins[])
 int main(void)
 {
 
-    FILE *data = fopen("/home/jordan/Documents/PHYS3920/"
-        "computational_project/out/ising_epoch_zero.txt", "w");
+    FILE *data = fopen(DATA, "w");
 
     int spins[N]; 
     // Copy initial state so that it can be written to a file.
@@ -102,7 +103,7 @@ int main(void)
     }
 
 
-    for (int epoch = 0; epoch <= N; epoch++)
+    for (int epoch = 0; epoch <= 1e3 * N; epoch++)
     {
         int spin = (int) (normalised_random() * 16);
         // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)

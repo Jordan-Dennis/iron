@@ -1,2 +1,1 @@
-
-plot "./../out/ising_epoch_zero.txt" with image
+plot "./../out/data.txt" with image
