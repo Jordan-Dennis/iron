@@ -3,10 +3,9 @@
 #include <math.h>
 
 
-const int N = 1e3;
+const int N = 1e2;
 const float T = 1.;
-const char DATA[] = "/home/jordan/Documents/PHYS3920/"
-    "computational_project/out/data.txt";
+const char DATA[] = "/home/jordan/Documents/PHYS3920/computational_project/pub/data.txt";
 
 
 /*

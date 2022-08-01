@@ -8,7 +8,7 @@
 COMPILABLE=src/ising.c
 EXECUTABLE=out/ising
 PUBLISHABLE=pub/report.tex
-READABLE=out/data.txt
+READABLE=pub/data.txt
 VIEWABLE=pub/figures.gpi
 
 
@@ -126,11 +126,14 @@ print_clean_help() {
     echo -e "${RED}-h${NORMAL} : Display this help message then exit."
 }
 clean() {
-    rm ${READABLE}
-    rm ${EXECUTABLE}
+    if [[ -f "${EXECUTABLE}" ]]; then
+        rm ${EXECUTABLE}
+    fi
+    if [[ -f "${READABLE}" ]]; then
+        rm ${READABLE}
+    fi
     for extra in "${EXTRAS[@]}"; do
-        echo "Removing ${extra}: "
-        if [[ -e "${extra}" ]]; then
+        if [[ -f "${extra}" ]]; then
             rm ${extra}
         fi
     done

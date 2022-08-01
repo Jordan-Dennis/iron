@@ -1,1 +1,8 @@
-plot "./../out/data.txt" with image
+file_name = '/home/jordan/Documents/PHYS3920/computational_project/pub/data.txt'
+
+set xlabel "Spin"
+set ylabel "Epoch"
+set title "Spin System Evolution"
+set terminal pdf
+set output "1d_ising_model.pdf" 
+plot file_name using 1:2:3 with image
