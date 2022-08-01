@@ -245,3 +245,18 @@ execute() {
         clean
     fi
 }
+
+
+help() {
+    echo -e "${BLUE}help${NORMAL}"
+    echo -e "----"
+    echo -e "The useful functions available in this directory are:"
+    echo -e "${RED}execute${NORMAL} ${BLUE}(clean)${NORMAL}"
+    echo -e "${RED}run${NORMAL} ${BLUE}(-h -l)${NORMAL}"
+    echo -e "${RED}publish${NORMAL} ${BLUE}(-h -q)${NORMAL}"
+    echo -e "${RED}build${NORMAL} ${BLUE}(-h -o)${NORMAL}"
+    echo -e "${RED}clean${NORMAL} ${BLUE}(-h)${NORMAL}"
+    echo -e "${RED}peak${NORMAL} ${BLUE}(-h -f)${NORMAL}"
+    echo -e "${red}view${NORMAL} ${BLUE}(-h)${NORMAL}"
+    echo -e "${RED}edit${NORMAL} ${BLUE}(compilable viewable publishable)${NORMAL}"
+}
