@@ -1,8 +1,9 @@
-file_name = '/home/jordan/Documents/PHYS3920/computational_project/pub/data.txt'
-
+set size ratio 50
 set xlabel "Spin"
 set ylabel "Epoch"
 set title "Spin System Evolution"
 set terminal pdf
-set output "1d_ising_model.pdf" 
-plot file_name using 1:2:3 with image
+set output "pub/1d_ising_model.pdf" 
+# Note that the following assumes that you have called the script from
+# the compuational_project directory.
+plot 'pub/data.txt' using 1:2:3 with image

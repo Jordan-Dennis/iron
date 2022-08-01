@@ -126,6 +126,14 @@ print_clean_help() {
     echo -e "${RED}-h${NORMAL} : Display this help message then exit."
 }
 clean() {
+    while getopts ":h:" option; do
+        case $option in
+            h) print_clean_help
+               OPTIND=1
+               return 0
+               ;;
+        esac
+    done
     if [[ -f "${EXECUTABLE}" ]]; then
         rm ${EXECUTABLE}
     fi
@@ -199,21 +207,22 @@ print_publish_help() {
     echo -e "${GREEN}parameters${NORMAL}"
     echo -e "----------"
     echo -e "${RED}-h${NORMAL} : Display this help message and exit."
-    echo -e "${RED}-q${NORMAL} : Run latex in quiet mode to supress output."
+    echo -e "${RED}-l${NORMAL} : Run latex in quiet mode to supress output."
 }
 publish() {
-    while getopts ":hq:" option; do
-        case $option in
+    while getopts "hq" option; do
+        case ${option} in
             h) print_publish_help
                OPTIND=1
                return 0
                ;;
-            q) pdflatex ${PUBLISHABLE} >> ~/dev/null
+            q) pdflatex -output-directory=pub/ ${PUBLISHABLE}
                OPTIND=1
                return 0
+               ;;
         esac
     done 
-    pdflatex ${PUBLISHABLE}
+    pdflatex -output-directory=pub/ ${PUBLISHABLE} > /dev/null
 }
 
 
