@@ -104,7 +104,7 @@ int main(void)
 
     for (int epoch = 0; epoch <= 1e3 * N; epoch++)
     {
-        int spin = (int) (normalised_random() * 16);
+        int spin = (int) (normalised_random() * N);
         // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)
         // (+1, -1, -1 =>  0) --> (+1, +1, -1 =>  0)
         // (+1, -1, +1 => -2) --> (+1, +1, +1 => +2)

@@ -3,7 +3,11 @@ set xlabel "Spin"
 set ylabel "Epoch"
 set title "Spin System Evolution"
 set terminal pdf
-set output "pub/1d_ising_model.pdf" 
+set output "pub/q1.pdf"
+set key noautotitle
+unset xtics
+unset ytics
+unset y2tics 
 # Note that the following assumes that you have called the script from
 # the compuational_project directory.
 plot 'pub/data.txt' using 1:2:3 with image

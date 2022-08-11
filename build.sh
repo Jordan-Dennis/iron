@@ -7,7 +7,7 @@
 
 COMPILABLE=src/ising.c
 EXECUTABLE=out/ising
-PUBLISHABLE=pub/report.tex
+PUBLISHABLE=report.tex
 READABLE=pub/data.txt
 VIEWABLE=pub/figures.gpi
 
@@ -110,7 +110,7 @@ edit() {
     elif [[ $1 == "viewable" ]] || [[ $1 == "v" ]]; then
         vim ${VIEWABLE}
     elif [[ $1 == "publishable" ]] || [[ $1 == "p" ]]; then
-        vim ${PUBLISHABLE}
+        vim "pub/${PUBLISHABLE}"
     fi
 }
 
@@ -185,11 +185,17 @@ print_plot_help() {
     echo -e "${GREEN}parameters${NORMAL}"
     echo -e "----------"
     echo -e "${RED}-h${NORMAL} : Display this message and exit"
+    echo -e "${RED}-v${NORMAL} : Open the result in the pdf viewer"
 }
 plot() {
-    while getopts ":h:" option; do
+    while getopts "hv" option; do
         case $option in
             h) print_plot_help
+               OPTIND=1
+               return 0
+               ;;
+            v) gnuplot ${VIEWABLE}
+               evince pub/q1.pdf
                OPTIND=1
                return 0
                ;;
@@ -210,19 +216,21 @@ print_publish_help() {
     echo -e "${RED}-l${NORMAL} : Run latex in quiet mode to supress output."
 }
 publish() {
+    cd pub
     while getopts "hq" option; do
         case ${option} in
             h) print_publish_help
                OPTIND=1
                return 0
                ;;
-            q) pdflatex -output-directory=pub/ ${PUBLISHABLE}
+            q) pdftex ${PUBLISHABLE} > /dev/null/
                OPTIND=1
                return 0
                ;;
         esac
     done 
-    pdflatex -output-directory=pub/ ${PUBLISHABLE} > /dev/null
+    pdftex ${PUBLISHABLE} 
+    cd ..
 }
 
 
@@ -236,6 +244,9 @@ print_execute_help() {
     echo -e "${RED}-h${NORMAL} : Display this help message then exit."
 }
 execute() {
+    if [[ $1 == "-h" ]]; then
+        print_execute_help
+    fi
     build -o
     run 
     plot
@@ -257,6 +268,10 @@ help() {
     echo -e "${RED}build${NORMAL} ${BLUE}(-h -o)${NORMAL}"
     echo -e "${RED}clean${NORMAL} ${BLUE}(-h)${NORMAL}"
     echo -e "${RED}peak${NORMAL} ${BLUE}(-h -f)${NORMAL}"
-    echo -e "${red}view${NORMAL} ${BLUE}(-h)${NORMAL}"
     echo -e "${RED}edit${NORMAL} ${BLUE}(compilable viewable publishable)${NORMAL}"
 }
+
+
+if [[ $1 == "execute" ]]; then 
+    execute 
+fi 
