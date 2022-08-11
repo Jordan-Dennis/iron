@@ -33,7 +33,8 @@ print_build_help() {
     echo -e "${RED}-o${NORMAL} : Pass additional optimisation flags to gcc"
 }
 build() {
-    while getopts ":ho:" option; do
+    OPTIND=1
+    while getopts "ho" option; do
         case $option in
             h) print_build_help
                OPTIND=1
@@ -63,7 +64,8 @@ print_run_help() {
 # TODO: Allow the additional optimisation flag to get passed into 
 # the -l command which would further compile the code. 
 run() {
-    while getopts ":hl:" option; do
+    OPTIND=1
+    while getopts "hl" option; do
         case $option in
             h) print_run_help
                OPTIND=1
@@ -79,7 +81,7 @@ run() {
     if [ -e "$file" ]; then
         out/ising
     else
-        echo "The code has not been compile. Use instead:"
+        echo "The code has not been compiled. Use instead:"
         echo "run -l or build; run."
     fi
 }
@@ -96,6 +98,7 @@ print_edit_help() {
     echo -e "${RED}-h${NORMAL} : Display this help message and exit"
 }
 edit() {
+    OPTIND=1
     while getopts ":h:" option; do
         case $option in
             h) print_edit_help
@@ -126,7 +129,8 @@ print_clean_help() {
     echo -e "${RED}-h${NORMAL} : Display this help message then exit."
 }
 clean() {
-    while getopts ":h:" option; do
+    OPTIND=1
+    while getopts "h" option; do
         case $option in
             h) print_clean_help
                OPTIND=1
@@ -160,7 +164,8 @@ print_peak_help() {
     echo -e "${RED}-l${NORMAL} : Display the full data set"
 }
 peak() {
-    while getopts ":hl:" option; do
+    OPTIND=1
+    while getopts "hl" option; do
         case $option in
             h) print_peak_help
                OPTIND=1
@@ -188,6 +193,7 @@ print_plot_help() {
     echo -e "${RED}-v${NORMAL} : Open the result in the pdf viewer"
 }
 plot() {
+    OPTIND=1
     while getopts "hv" option; do
         case $option in
             h) print_plot_help
@@ -217,6 +223,7 @@ print_publish_help() {
 }
 publish() {
     cd pub
+    OPTIND=1
     while getopts "hq" option; do
         case ${option} in
             h) print_publish_help
