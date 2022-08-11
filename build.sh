@@ -8,7 +8,7 @@
 COMPILABLE=src/ising.c
 EXECUTABLE=out/ising
 PUBLISHABLE=report.tex
-READABLE=pub/data.txt
+READABLES=( "pub/1d_1.txt" "pub/1d_2.txt" "pub/1d_3.txt" )
 VIEWABLE=pub/figures.gpi
 
 
@@ -171,13 +171,16 @@ peak() {
                OPTIND=1
                return 0
                ;;
-            l) cat ${READABLE}
+            l) cat ${READABLES[@]}
                OPTIND=1
                return 0
                ;;
         esac
     done
-    head ${READABLE}
+    for readable in ${READABLES[@]}; do
+        echo -e "${BLUE}${readable}${NORMAL}"
+        head ${readable}
+    done
 }
 
 

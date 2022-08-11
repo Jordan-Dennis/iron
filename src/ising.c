@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 
-const int N = 1e2;
-const float T = 1.;
-const char DATA[] = "/home/jordan/Documents/PHYS3920/computational_project/pub/data.txt";
+const int n = 1e2;
+const char dir[] = "/home/jordan/Documents/PHYS3920/computational_project/pub/";
 
 
 /*
@@ -78,7 +78,7 @@ int spin_energy(int spin, int spins[])
 int ensamble_energy(int spins[])
 {
     int energy = 0;
-    for (int spin = 0; spin < N; spin++) 
+    for (int spin = 0; spin < n; spin++) 
     {
         // Just the nearest neighours contribute to the energy.
         energy += spin_energy(spin, spins);
@@ -89,55 +89,53 @@ int ensamble_energy(int spins[])
 
 int main(void)
 {
-
-    FILE *data = fopen(DATA, "w");
-
-    int spins[N]; 
-    // Copy initial state so that it can be written to a file.
-    for (int spin = 0; spin < N; spin++) 
+    for (float temperature=1.; temperature <= 3.; temperature++)
     {
-        int value = random_spin();
-        spins[spin] = value;
-        fprintf(data, "%i, %i, %i\n", 0, spin, value);
-    }
+        char file[10];
+        sprintf(file, "1d_%i.txt", (int)temperature);
+        char address[strlen(file) + strlen(dir)];
+        strcpy(address, dir);
+        strcat(address, file);
+        FILE *data = fopen(address, "w");
+        
+
+        int spins[n]; 
+        // Copy initial state so that it can be written to a file.
+        for (int spin = 0; spin < n; spin++) 
+        {
+            int value = random_spin();
+            spins[spin] = value;
+            // fprintf(data, "%i, %i, %i\n", 0, spin, value);
+        }
 
 
-    for (int epoch = 0; epoch <= 1e3 * N; epoch++)
-    {
-        int spin = (int) (normalised_random() * N);
-        // (+1, +1, -1 =>  0) --> (+1, -1, -1 =>  0)
-        // (+1, -1, -1 =>  0) --> (+1, +1, -1 =>  0)
-        // (+1, -1, +1 => -2) --> (+1, +1, +1 => +2)
-        // (-1, +1, -1 => -2) --> (-1, -1, -1 => +2)
-        // (+1, +1, +1 => +2) --> (+1, -1, +1 => -2)
-        // (-1, -1, -1 => +2) --> (-1, +1, -1 => -2)
-        // (-1, +1, +1 =>  0) --> (-1, -1, +1 =>  0)
-        // (-1, -1, +1 =>  0) --> (-1, +1, +1 =>  0)
-        // For the edge ones I think you add or subtract 2 based on the 
-        // sign that was flipped. Seems to work.
-        int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
-       
-        if (energy_change <= 0)
-        {
-            spins[spin] = -spins[spin];
-        } 
-        else
-        {
-            float probability = exp(-energy_change / T);
-            if (probability <= normalised_random()) 
+        for (int epoch = 0; epoch <= 1e3 * n; epoch++)
+        { 
+            int spin = (int) (normalised_random() * n);
+            int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
+           
+            if (energy_change <= 0)
             {
                 spins[spin] = -spins[spin];
+            } 
+            else
+            {
+                float probability = exp(-energy_change / temperature);
+                if (probability <= normalised_random()) 
+                {
+                    spins[spin] = -spins[spin];
+                }
             }
         }
+           
+           
+        for (int spin = 0; spin < n; spin++)
+        {
+            fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
+        }
+           
+        fclose(data);
     }
-       
-       
-    for (int spin = 0; spin < N; spin++)
-    {
-        fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
-    }
-       
-    fclose(data);
     return 0;
 }
 
