@@ -1,0 +1,5 @@
+*.log
+pub/*.log
+pub/*.aux
+pub/*.pdf
+out/*
