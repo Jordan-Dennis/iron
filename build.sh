@@ -282,6 +282,30 @@ help() {
 }
 
 
+print_todo_help() {
+    echo -e "${BLUE}todo${NORMAL}"
+    echo -e "----"
+    echo -e "Draft and get reminders for yourself"
+    echo
+    echo -e "${GREEN}parameters${NORMAL}"
+    echo -e "----------"
+    echo -e "${RED}-h${NORMAL}: Print this message then exit"
+    echo -e "${RED}add${NORMAL}: Add a new todo to the list"
+    echo -e "${RED}remove${NORMAL}: Remove a todo from the list"
+    echo -e "${RED}complete${NORMAL}: Complete a todo"
+}
+_add_todo() {
+    #TODO: Finsish this ofe because it will be a nice feature
+    if [[ $1 == "--title" ]]; then
+        echo "    title: ${1}" >> .todo.yml
+    else
+        echo "Please pass a title"
+    fi    
+}
+     
+    
+
+
 if [[ $1 == "execute" ]]; then 
     execute 
 fi 
