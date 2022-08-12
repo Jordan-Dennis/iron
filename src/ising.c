@@ -98,14 +98,13 @@ int main(void)
         strcat(address, file);
         FILE *data = fopen(address, "w");
         
-
         int spins[n]; 
         // Copy initial state so that it can be written to a file.
         for (int spin = 0; spin < n; spin++) 
         {
             int value = random_spin();
             spins[spin] = value;
-            // fprintf(data, "%i, %i, %i\n", 0, spin, value);
+            fprintf(data, "%i, %i, %i\n", 0, spin, value);
         }
 
 

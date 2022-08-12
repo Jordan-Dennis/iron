@@ -2,4 +2,5 @@
 pub/*.log
 pub/*.aux
 pub/*.pdf
+pub/*.txt
 out/*
