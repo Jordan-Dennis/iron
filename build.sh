@@ -74,12 +74,13 @@ run() {
             l) build 
                ${EXECUTABLE}
                OPTIND=1
+               return
                ;;
         esac
     done
     file=out/ising
-    if [ -e "$file" ]; then
-        out/ising
+    if [[ -e "$file" ]]; then
+        out/ising $1
     else
         echo "The code has not been compiled. Use instead:"
         echo "run -l or build; run."
@@ -294,15 +295,68 @@ print_todo_help() {
     echo -e "${RED}remove${NORMAL}: Remove a todo from the list"
     echo -e "${RED}complete${NORMAL}: Complete a todo"
 }
-_add_todo() {
-    #TODO: Finsish this ofe because it will be a nice feature
-    if [[ $1 == "--title" ]]; then
-        echo "    title: ${1}" >> .todo.yml
+_check_todo() {
+    if [[ -f .todo.yml ]]; then 
+        return 
     else
-        echo "Please pass a title"
-    fi    
+        echo "${GREEN}todos:${NORMAL}" > .todo.yml
+    fi
 }
-     
+_add_todo() {
+    for i in "$@"; do
+        if [[ "$i" == "--title" ]]; then
+            printf "    ${BLUE}title${NORMAL}: " >> .todo.yml
+        elif [[ $i == "--description" ]]; then 
+            title="false"
+            printf "\n" >> .todo.yml
+            printf "    ${BLUE}description${NORMAL}: " >> .todo.yml
+        else 
+            printf "$i " >> .todo.yml
+        fi
+    done
+    printf "\n" >> .todo.yml
+}
+_remove_todo() {
+    mv .todo.yml .save.yml
+    target=$(printf "${BLUE}title${NORMAL}: $1\n")
+    line_number=0
+    while read line; do
+        let line_number++
+        if [[ "$target" == "$line" ]]; then
+            let target_line_number=$line_number+1
+        elif [[ "$target_line_number" == "$line_number" ]]; then
+            true
+        else
+            if [[ "$line_number" == "1" ]]; then
+                _check_todo 
+            else
+                printf "    $line\n" >> .todo.yml
+            fi 
+        fi
+    done < .save.yml   
+    rm .save.yml
+}
+todo() {
+    OPTIND=1
+    while getopts "h" option; do
+        case ${option} in
+            h) print_todo_help
+               OPTIND=1
+               return
+               ;;
+        esac
+    done
+    _check_todo
+    if [[ $1 == "add" ]]; then 
+        _add_todo $2 $3 $4 $5
+    elif [[ $1 == "remove" ]]; then 
+        _remove_todo $2 
+    elif [[ $1 == "view" ]]; then 
+        echo -e "$(cat .todo.yml)"
+    elif [[ $1 == "clear" ]]; then 
+        rm .todo.yml
+    fi    
+}    
     
 
 

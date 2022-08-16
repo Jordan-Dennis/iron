@@ -172,7 +172,16 @@ int main(int number_of_args, char *args[])
 {
     if (number_of_args == 2)
     {
-        printf("That worked! %s", args[1]);
+        printf("%s\n", args[1]);
+        printf("%i\n", strcmp(args[1], "hello"));
+        if (strcmp(args[1], "hello"))
+        {
+            printf("I made it");
+        }
+    }
+    else 
+    {
+        printf("\033[31merror\033[0mPlease provide a question number");
     }
 
     for (float temperature=1.; temperature <= MAX; temperature++)
