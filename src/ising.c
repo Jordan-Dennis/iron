@@ -5,12 +5,6 @@
 #include "ising.h"
 
 
-const int n = 1e2;
-const char dir[] = "/home/jordan/Documents/PHYS3920/computational_project/pub/";
-const float MAX = 5.;
-const int REPS = 1e3;
-
-
 /*
  * length
  * ------
@@ -191,5 +185,87 @@ float heat_capacity(int spins[], float temperature)
 }
 
 
+/*
+ * metropolis_step
+ * ---------------
+ * Evolve the spin state according to a metropolis algorithm. 
+ *
+ * parameters
+ * ----------
+ * int spins[]: The spin system to evolve. 
+ * float temperature: The temperature of the system in natural units.
+ * 
+ * returns
+ * -------
+ * void: The array modifications are done in place. 
+ */
+void metropolis_step(int spins[], float temperature)
+{
+
+    int spin = (int) (normalised_random() * n);
+    int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
+   
+    if (energy_change <= 0)
+    {
+        spins[spin] = -spins[spin];
+    } 
+    else
+    {
+        float probability = exp(-energy_change / temperature);
+        if (probability <= normalised_random()) 
+        {
+            spins[spin] = -spins[spin];
+        }
+    }
+}
 
 
+/*
+ * random_system
+ * -------------
+ * Generate a random spin system.
+ * 
+ * parameters
+ * ----------
+ * int spins[]: An empty array to house the spins. 
+ * 
+ * returns 
+ * -------
+ * void: The spins array is internal modified on the heap. 
+ */
+void random_system(int spins[])
+{
+    int number_of_spins = length(spins);
+    for (int spin = 0; spin < number_of_spins; spin++) 
+    {
+        int value = random_spin();
+        spins[spin] = value;
+    }
+}
+
+
+/*
+ * system_to_file
+ * --------------
+ * Write the current state of the system to a file. 
+ *
+ * parameters
+ * ----------
+ * char file_name[]: The file name to write the spin system to.
+ * int spins[]: The current state of the system. 
+ * 
+ * returns
+ * -------
+ * void: Writes the state to a file.
+ */
+void system_to_file(char file_name[], int spins[])
+{
+    FILE *data = fopen(address, "w");
+    int number_of_spins = length(spins);
+    for (int spin = 0; spin < number_of_spins; spin++)
+    {
+        fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
+    }
+       
+    fclose(data);
+}
