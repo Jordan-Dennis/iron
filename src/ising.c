@@ -2,12 +2,32 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "ising.h"
 
 
 const int n = 1e2;
 const char dir[] = "/home/jordan/Documents/PHYS3920/computational_project/pub/";
 const float MAX = 5.;
 const int REPS = 1e3;
+
+
+/*
+ * length
+ * ------
+ * Find the length of an array of integers.
+ * 
+ * parameters
+ * ----------
+ * int spins[]: The array of integers.
+ * 
+ * returns
+ * -------
+ * int length: The length of the array.
+ */
+int length(int spins[])
+{
+    return (int)(sizeof(spins) / sizeof(int));
+}
 
 
 /*
@@ -93,10 +113,11 @@ int spin_energy(int spin, int spins[])
  * -------
  * int: The energy of the ensamble in units of epsilon.
  */
-int energy(int spins[])
+int energy(int spins[], int n)
 {
     int energy = 0;
-    for (int spin = 0; spin < n; spin++) 
+    int number_of_spins = length(spins);
+    for (int spin = 0; spin < number_of_spins; spin++) 
     {
         // Just the nearest neighours contribute to the energy.
         energy += spin_energy(spin, spins);
@@ -117,7 +138,8 @@ int energy(int spins[])
 float entropy(int spins[]) 
 {
     int up_spins = 0;
-    for (int spin=0; spin < n; spin++)
+    int number_of_spins = length(spins);
+    for (int spin=0; spin < number_of_spins; spin++)
     {
         up_spins += (int)(spins[spin] > 0);
     }
@@ -155,7 +177,8 @@ float free_energy(int spins[], float temperature)
 float heat_capacity(int spins[], float temperature)
 {
     int total = 0;
-    for (int spin=0; spin < n; spin++)
+    int number_of_spins = length(spins);
+    for (int spin=0; spin < number_of_spins; spin++)
     {
         total += spins[spin];
     }
@@ -168,69 +191,5 @@ float heat_capacity(int spins[], float temperature)
 }
 
 
-int main(int number_of_args, char *args[])
-{
-    if (number_of_args == 2)
-    {
-        printf("%s\n", args[1]);
-        printf("%i\n", strcmp(args[1], "hello"));
-        if (strcmp(args[1], "hello"))
-        {
-            printf("I made it");
-        }
-    }
-    else 
-    {
-        printf("\033[31merror\033[0mPlease provide a question number");
-    }
-
-    for (float temperature=1.; temperature <= MAX; temperature++)
-    {
-        char file[10];
-        sprintf(file, "1d_%i.txt", (int)temperature);
-        char address[strlen(file) + strlen(dir)];
-        strcpy(address, dir);
-        strcat(address, file);
-        FILE *data = fopen(address, "w");
-        
-        int spins[n]; 
-        // Copy initial state so that it can be written to a file.
-        for (int spin = 0; spin < n; spin++) 
-        {
-            int value = random_spin();
-            spins[spin] = value;
-            fprintf(data, "%i, %i, %i\n", 0, spin, value);
-        }
-
-
-        for (int epoch = 0; epoch <= REPS * n; epoch++)
-        { 
-            int spin = (int) (normalised_random() * n);
-            int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
-           
-            if (energy_change <= 0)
-            {
-                spins[spin] = -spins[spin];
-            } 
-            else
-            {
-                float probability = exp(-energy_change / temperature);
-                if (probability <= normalised_random()) 
-                {
-                    spins[spin] = -spins[spin];
-                }
-            }
-        }
-           
-           
-        for (int spin = 0; spin < n; spin++)
-        {
-            fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
-        }
-           
-        fclose(data);
-    }
-    return 0;
-}
 
 
