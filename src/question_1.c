@@ -20,53 +20,93 @@ int main(int number_of_args, char *args[])
         printf("\033[31merror\033[0mPlease provide a question number");
     }
 
-    for (float temperature=1.; temperature <= MAX; temperature++)
-    {
-        char file[10];
-        sprintf(file, "1d_%i.txt", (int)temperature);
-        char address[strlen(file) + strlen(dir)];
-        strcpy(address, dir);
-        strcat(address, file);
-        FILE *data = fopen(address, "w");
-        
-        int spins[n]; 
-        // Copy initial state so that it can be written to a file.
-        for (int spin = 0; spin < n; spin++) 
-        {
-            int value = random_spin();
-            spins[spin] = value;
-            fprintf(data, "%i, %i, %i\n", 0, spin, value);
-        }
-
-
-        for (int epoch = 0; epoch <= REPS * n; epoch++)
-        { 
-            int spin = (int) (normalised_random() * n);
-            int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
-           
-            if (energy_change <= 0)
-            {
-                spins[spin] = -spins[spin];
-            } 
-            else
-            {
-                float probability = exp(-energy_change / temperature);
-                if (probability <= normalised_random()) 
-                {
-                    spins[spin] = -spins[spin];
-                }
-            }
-        }
-           
-           
-        for (int spin = 0; spin < n; spin++)
-        {
-            fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
-        }
-           
-        fclose(data);
-    }
     return 0;
+}
+
+
+/*
+ * metropolis_step
+ * ---------------
+ * Evolve the spin state according to a metropolis algorithm. 
+ *
+ * parameters
+ * ----------
+ * int spins[]: The spin system to evolve. 
+ * float temperature: The temperature of the system in natural units.
+ * 
+ * returns
+ * -------
+ * void: The array modifications are done in place. 
+ */
+void metropolis_step(int spins[], float temperature)
+{
+
+    int spin = (int) (normalised_random() * n);
+    int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
+   
+    if (energy_change <= 0)
+    {
+        spins[spin] = -spins[spin];
+    } 
+    else
+    {
+        float probability = exp(-energy_change / temperature);
+        if (probability <= normalised_random()) 
+        {
+            spins[spin] = -spins[spin];
+        }
+    }
+}
+
+
+/*
+ * random_system
+ * -------------
+ * Generate a random spin system.
+ * 
+ * parameters
+ * ----------
+ * int spins[]: An empty array to house the spins. 
+ * 
+ * returns 
+ * -------
+ * void: The spins array is internal modified on the heap. 
+ */
+void random_system(int spins[])
+{
+    int number_of_spins = length(spins);
+    for (int spin = 0; spin < number_of_spins; spin++) 
+    {
+        int value = random_spin();
+        spins[spin] = value;
+    }
+}
+
+
+/*
+ * system_to_file
+ * --------------
+ * Write the current state of the system to a file. 
+ *
+ * parameters
+ * ----------
+ * char file_name[]: The file name to write the spin system to.
+ * int spins[]: The current state of the system. 
+ * 
+ * returns
+ * -------
+ * void: Writes the state to a file.
+ */
+void system_to_file(char file_name[], int spins[])
+{
+    FILE *data = fopen(address, "w");
+    int number_of_spins = length(spins);
+    for (int spin = 0; spin < number_of_spins; spin++)
+    {
+        fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
+    }
+       
+    fclose(data);
 }
 
 
@@ -89,9 +129,27 @@ int main(int number_of_args, char *args[])
  * Writes the outputs of the first and final states to external files 
  * for use with GNUPlot. 
  */
-void question_1_a(int number_of_spins, int temperatures[])
+void question_1_a(int number_of_spins, float temperatures[])
 {
+    for (float temperature; temperature <= MAX; temperature++)
+    {
+        char file[10];
+        sprintf(file, "1d_%i.txt", (int)temperature);
+        char address[strlen(file) + strlen(dir)];
+        strcpy(address, dir);
+        strcat(address, file);
+        
+        int spins[n];
+        random_system(spins); 
+        system_to_file(spins);
 
+        for (int epoch = 0; epoch <= REPS * n; epoch++)
+        { 
+            metropolis_step(spins, temperature);
+        }
+        
+        system_to_file(spins);
+    }
 }
 
 
