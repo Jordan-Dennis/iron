@@ -4,24 +4,6 @@
 #include"ising.h"
 
 
-int main(int number_of_args, char *args[])
-{
-    if (number_of_args == 2)
-    {
-        printf("%s\n", args[1]);
-        printf("%i\n", strcmp(args[1], "hello"));
-        if (strcmp(args[1], "hello"))
-        {
-            printf("I made it");
-        }
-    }
-    else 
-    {
-        printf("\033[31merror\033[0mPlease provide a question number");
-    }
-
-    return 0;
-}
 
 
 /*
