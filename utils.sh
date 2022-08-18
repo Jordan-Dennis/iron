@@ -5,6 +5,9 @@
 # that simplifies commonly used functionality.
 
 
+
+
+
 COMPILABLE=src/ising.c
 EXECUTABLE=out/ising
 PUBLISHABLE=report.tex

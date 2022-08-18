@@ -5,8 +5,8 @@
 
 
 /*
- * parse_args_q1
- * -------------
+ * parse_temperatures
+ * ------------------
  * A helper function for parsing the arguments to the question 1 code. 
  *
  * parameters
@@ -14,15 +14,21 @@
  * int number_of_args: The number of arguments.
  * char args[]: The arguments.
  * float temperatures[]: The array to store the temperatures in.
- * int number_of_spins: A pointed to the address for the number of spins.
  * 
  * returns
  * -------
- * void: Modifications to the state are internal.
+ * int: The number of spins. 
  */
-void parse_args_q1()
-{
-
+void parse_temperatures(int number_of_args, char *args[], 
+    float temperatures[])
+{ 
+    if (number_of_args > 3)
+    {
+        for (int arg = 3; arg < number_of_args; arg++)
+        {
+            temperatures[arg - 3] = args[arg];
+        }
+    }
 }
 
 
@@ -38,27 +44,23 @@ int main(int number_of_args, char *args[])
     {
         if (strcmp(args[1], "1a"))
         {
-            if (number_of_args > 3)
-            {
-                int number_of_spins = args[2];
-                float temperatures[number_of_args - 3];
-                for (int arg = 3; arg < number_of_args; arg++)
-                {
-                    temperatures[arg - 3] = args[arg];
-                }
-            }
+            int number_of_spins = args[2];
+            float temperatures[number_of_args - 3];
+            parse_temperatures(number_of_args, args, temperatures);
             question_1_a(number_of_spins, temperatures);
         }
         else if (strcmp(args[1], "1c")
         {
             int number_of_spins = args[2];
-            float temperature = args[3];
+            float temperatures[number_of_args - 3];
+            parse_temperatures(number_of_args, args, temperatures);
             question_1_c(number_of_spins, temperatures);
         }
         else if (strcmp(args[1], "1e")
         {
             int number_of_spins = args[2];
-            float temperature = args[3];
+            float temperatures[number_of_args - 3];
+            parse_temperatures(number_of_args, args, temperatures);
             question_1_e(number_of_spins, temperatures);
         }
     }
