@@ -5,7 +5,40 @@
 # that simplifies commonly used functionality.
 
 
-
+_read_config() {
+    if [[ -f ".config.toml" ]]; then
+        let line_number=0
+        let was_success=0
+        while read line; do
+            let line_number++
+            if [[ $line == "[compilable]" ]]; then
+                let target=line_number+1
+                let COMPILABLE=$(sed -n "${target}p")
+                let was_success++
+            elif [[ $line == "[executable]" ]]; then
+                let target=line_number+1
+                let EXECUTABLE=$(sed -n "${target}p")
+                let was_success++
+            elif [[ $line == "[viewable]" ]]; then
+                let target=line_number+1
+                let VIEWABLE=$(sed -n "${target}p")
+                let was_success++
+            elif [[ $line == "[publishable]" ]]; then
+                let target=line_number+1
+                let PUBLISHABLE=$(sed -n "${target}p")
+                let was_success++
+            elif [[ $line == "[viewable]" ]]; then
+                let target=line_number+1 
+                let VIEWABLE=$(sed -n "${target}p")
+                let was_success++
+            fi
+        done < .config.toml
+    else
+        echo -e "${RED}error:${NORMAL} The config file has not been "
+        echo -e "found. Aborting!"
+        return 
+    fi
+}
 
 
 COMPILABLE=src/ising.c

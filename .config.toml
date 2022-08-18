@@ -1,15 +1,15 @@
-[data]
+[readable]
 pub/data/1a.csv
 pub/data/1c.csv
 pub/data/1e.csv
 
-[code]
+[compilable]
 out/project
 
-[markup]
+[publishable]
 pub/report.tex
 
-[graphics]
+[viewable]
 pub/figures.gpi
 
 [extras]
