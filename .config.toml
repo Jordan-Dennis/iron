@@ -1,9 +1,9 @@
-[readable]
+[readables]
 pub/data/1a.csv
 pub/data/1c.csv
 pub/data/1e.csv
 
-[compilable]
+[executable]
 out/project
 
 [publishable]

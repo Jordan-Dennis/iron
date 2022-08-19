@@ -5,56 +5,81 @@
 # that simplifies commonly used functionality.
 
 
-_read_config() {
+load_config() {
     if [[ -f ".config.toml" ]]; then
         let line_number=0
-        let was_success=0
+        if [[ ! -z "$block" ]]; then
+            unset block
+        fi 
+        declare -l block
+        if [[ ! -z "$extras" ]]; then 
+            unset extras
+        fi 
+        declare -g extras
+        if [[ ! -z "$executable" ]]; then 
+            unset executable
+        fi
+        declare -g executable
+        if [[ ! -z "$viewable" ]]; then 
+            unset viewable
+        fi
+        declare -g viewable
+        if [[ ! -z "$publishable" ]]; then 
+            unset publishable 
+        fi
+        declare -g publishable
+        if [[ ! -z "$readables" ]]; then 
+            unset readables
+        fi
+        declare -g readables
         while read line; do
             let line_number++
-            if [[ $line == "[compilable]" ]]; then
+            if [[ $line == "[executable]" ]]; then
                 let target=line_number+1
-                let COMPILABLE=$(sed -n "${target}p")
-                let was_success++
-            elif [[ $line == "[executable]" ]]; then
-                let target=line_number+1
-                let EXECUTABLE=$(sed -n "${target}p")
-                let was_success++
+                executable="$(sed -n "${target}p" .config.toml)"
             elif [[ $line == "[viewable]" ]]; then
                 let target=line_number+1
-                let VIEWABLE=$(sed -n "${target}p")
-                let was_success++
+                viewable="$(sed -n "${target}p" .config.toml)"
             elif [[ $line == "[publishable]" ]]; then
                 let target=line_number+1
-                let PUBLISHABLE=$(sed -n "${target}p")
-                let was_success++
-            elif [[ $line == "[viewable]" ]]; then
-                let target=line_number+1 
-                let VIEWABLE=$(sed -n "${target}p")
-                let was_success++
+                publishable="$(sed -n "${target}p" .config.toml)"
+            else
+                if [[ $line == "[extras]" ]]; then
+                    block="extras"
+                elif [[ $line == "[readables]" ]]; then 
+                    block="readables"
+                elif [[ $block == "extras" ]]; then 
+                    extras+=( "$line" )
+                    if [[ -z "${line/ //}" ]]; then
+                        block="null"
+                    fi
+                elif [[ $block == "readables" ]]; then
+                    readables+=( "$line" )
+                    if [[ -z "${line/ //}" ]]; then
+                        block="null"
+                    fi
+                fi 
             fi
         done < .config.toml
     else
         echo -e "${RED}error:${NORMAL} The config file has not been "
         echo -e "found. Aborting!"
-        return 
     fi
+    if [[ -z "$executable" ]] ||
+        [[ -z "$viewable" ]] ||
+        [[ -z "$publishable" ]]; then  
+        echo "${RED}error:${NORMAL} Configuration not read correctly"
+    fi 
+    return 
 }
 
 
-COMPILABLE=src/ising.c
-EXECUTABLE=out/ising
-PUBLISHABLE=report.tex
-READABLES=( "pub/1d_1.txt" "pub/1d_2.txt" "pub/1d_3.txt" )
-VIEWABLE=pub/figures.gpi
+load_config
 
-
-EXTRAS=( "report.log" "report.aux" "pub/report.log" "pub/report.aux" )
-
-
-RED="\033[0;31m"
-NORMAL="\033[0m"
-GREEN="\033[0;32m"
-BLUE="\033[0;36m"
+RED="\033[[0;31m"
+NORMAL="\033[[0m"
+GREEN="\033[[0;32m"
+BLUE="\033[[0;36m"
 
 
 print_build_help() {
@@ -76,13 +101,13 @@ build() {
                OPTIND=1
                return 0
                ;;
-            o) gcc -O3 -lm -o -ftree-loop-vectorize -ftree-loop-optimize ${EXECUTABLE} ${COMPILABLE}
+            o) gcc -O3 -lm -o -ftree-loop-vectorize -ftree-loop-optimize ${executable} ${COMPILABLE}
                OPTIND=1
                return 0
                ;;
         esac
     done
-    gcc -o ${EXECUTABLE} ${COMPILABLE} -lm
+    gcc -o ${executable} ${COMPILABLE} -lm
 }
 
 
@@ -108,7 +133,7 @@ run() {
                return 0
                ;;
             l) build 
-               ${EXECUTABLE}
+               ${executable}
                OPTIND=1
                return
                ;;
@@ -148,9 +173,9 @@ edit() {
     if [[ $1 == "compilable" ]] || [[ $1 == "c" ]]; then
         vim ${COMPILABLE}
     elif [[ $1 == "viewable" ]] || [[ $1 == "v" ]]; then
-        vim ${VIEWABLE}
+        vim ${viewable}
     elif [[ $1 == "publishable" ]] || [[ $1 == "p" ]]; then
-        vim "pub/${PUBLISHABLE}"
+        vim "pub/${publishable}"
     fi
 }
 
@@ -175,13 +200,13 @@ clean() {
                ;;
         esac
     done
-    if [[ -f "${EXECUTABLE}" ]]; then
-        rm ${EXECUTABLE}
+    if [[ -f "${executable}" ]]; then
+        rm ${executable}
     fi
     if [[ -f "${READABLE}" ]]; then
         rm ${READABLE}
     fi
-    for extra in "${EXTRAS[@]}"; do
+    for extra in "${extras[[@]]}"; do
         if [[ -f "${extra}" ]]; then
             rm ${extra}
         fi
@@ -208,13 +233,13 @@ peak() {
                OPTIND=1
                return 0
                ;;
-            l) cat ${READABLES[@]}
+            l) cat ${readables[[@]]}
                OPTIND=1
                return 0
                ;;
         esac
     done
-    for readable in ${READABLES[@]}; do
+    for readable in ${readables[[@]]}; do
         echo -e "${BLUE}${readable}${NORMAL}"
         head ${readable}
     done
@@ -240,14 +265,14 @@ plot() {
                OPTIND=1
                return 0
                ;;
-            v) gnuplot ${VIEWABLE}
+            v) gnuplot ${viewable}
                evince pub/q1.pdf
                OPTIND=1
                return 0
                ;;
         esac
     done
-    gnuplot ${VIEWABLE}
+    gnuplot ${viewable}
 }
 
 
@@ -270,13 +295,13 @@ publish() {
                OPTIND=1
                return 0
                ;;
-            q) pdftex ${PUBLISHABLE} > /dev/null/
+            q) pdftex ${publishable} > /dev/null/
                OPTIND=1
                return 0
                ;;
         esac
     done 
-    pdftex ${PUBLISHABLE} 
+    pdftex ${publishable} 
     cd ..
 }
 
