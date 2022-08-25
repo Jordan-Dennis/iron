@@ -1,24 +1,64 @@
 #include<stdio.h>
+#include<string.h>
 #include<stdlib.h>
 #include<stdbool.h>
-#include<string.h>
+#include"include/io.h"
 #include"include/toml.h"
+#include"include/debug.h"
 #include"include/errors.h"
 
+
+/*
+ * done
+ * ----
+ * Check for the end of file.
+ * 
+ * parameters
+ * ----------
+ * Toml* toml: The Toml containing the scanned file.
+ *
+ * returns
+ * ------- 
+ * bool done: True if the end of the file has been reached else false.
+ */ 
 bool done(Toml* toml)
 {
     return peek(toml) == EOF;
 }
 
 
+/*
+ * peek
+ * ----
+ * View the next char in the stream from the toml.
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml stream to peak. 
+ *
+ * returns
+ * -------
+ * char next: The next character in the stream. 
+ */
 char peek(Toml* toml)
 {
-    FILE* file = toml -> toml;
-    int next = fgetc(file);
-    return ungetc(next, file);
+    return toml -> toml[toml -> cursor];
 }
 
 
+/*
+ * next
+ * ----
+ * Get the next character in the stream.
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml stream from which to get the new character.
+ *
+ * returns
+ * -------
+ * char next: The next file in the stream. 
+ */
 char next(Toml* toml)
 {
     if (done(toml))
@@ -26,39 +66,63 @@ char next(Toml* toml)
         printf("Error: Unexpected EOF!");
         exit(1);
     }
-    return fgetc(toml -> toml);
+    char next = toml -> toml[toml -> cursor];
+    toml -> cursor += 1;
+    return next;
 }
 
 
-char* until(Toml* toml, char exit)
+/*
+ * word
+ * -----
+ * Parse a word from the toml file until an exit is reached. 
+ * ignoring whitespace.
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml stream to parse from.
+ * char exit: The exit point of the stream.
+ *
+ * returns
+ * -------
+ * char* word: The word that was parsed. 
+ */
+char* word(Toml* toml, char exit)
 {
     char* word = calloc(1, sizeof(char));
-    while (peek(toml) != exit)
+    while (isalpha(next(toml))) {
     {
-        if ((peek(toml) != ' ') && (peek(toml) != '\n'))
-        { 
-            word = realloc(word, (strlen(word) + 2) * sizeof(char));
-            strcat(word, (char[]){next(toml), 0});
-        }
-        else
-        {
-            next(toml);
-        }
+        word = realloc(word, (strlen(word) + 2) * sizeof(char));
+        strcat(word, (char[]){next(toml), 0});
     }  
-    char _ = next(toml); 
     return word;
 }
 
 
+/*
+ * group
+ * -----
+ * Parse a header from the toml. This will have the format [group_name]
+ * and should not contain whitespace. 
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml to parse. 
+ * 
+ * returns
+ * -------
+ * char* group: The group name.
+ */
 char* group(Toml* toml)
 {
-    if (peek(toml) != '[')
-    {
-        printf("Error: '[' expected but got %c", next(toml));
-        exit(1);
-    }
+    validate_char('[', peek(toml));
+
     char lsparen = next(toml);
-    char* head = until(toml, ']'); 
+    char* head = word(toml);
+ 
+    validate_char(']', peek(toml));    
+
+    char rparen = next(toml);
     return head;
 }
 
@@ -98,12 +162,26 @@ char* find(Toml* toml, char* header, char* field)
 }
 
 
+/*
+ * __toml__
+ * --------
+ * Read a toml file into memory.
+ *
+ * parameters
+ * ----------
+ * char* file_name: The name of the toml.
+ *
+ * returns
+ * -------
+ * Toml* toml: The parsed toml file. 
+ */
 Toml* __toml__(char* file_name)
 {
-    Toml* toml = calloc(1, sizeof(Toml));
-    FILE* file = fopen(file_name, "r");
-	validate_file(file, file_name);
-    toml -> toml = file;
+    char* toml = read(file_name);
+    Toml* toml = malloc(sizeof(Toml));
+    toml -> toml = toml;
+    toml -> cursor = 0;
+    toml -> debug = __debug__("log.txt");
     return toml;
 }
 

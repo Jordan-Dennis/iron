@@ -21,6 +21,7 @@ Debug* __debug__(char* file_name)
 {
     Debug* logger = malloc(sizeof(Debug));
     logger -> file_name = file_name;
+    wipe(logger);
     return logger;
 }
 
@@ -37,7 +38,7 @@ Debug* __debug__(char* file_name)
  */
 void debug(Debug* debug, char* message)
 {
-    char* contents = read(debug); 
+    char* contents = read(debug -> file_name); 
     
     FILE* file = fopen(debug -> file_name, "w");
     validate_file(file, debug -> file_name);
@@ -47,30 +48,19 @@ void debug(Debug* debug, char* message)
 }
 
 
+
 /*
- * read
+ * wipe
  * ----
- * Save the current state of the file to memory. 
- *
+ * Delete the contents of the log.
+ * 
  * parameters
  * ----------
- * Debug* debug: The debugger to retrieve the state from.
- *
- * returns
- * -------
- * char* file_contents: The contents of the file.  
+ * Debug* debug: The debugger to wipe. 
  */
-char* read(Debug* debug)                                                        
-{                                                          
-    FILE* source = fopen(debug -> file_name, "r"); 
-    validate_file(source, debug -> file_name); 
-
-    fseek(source, 0, SEEK_END); 
-    float numbytes = ftell(source); 
-    fseek(source, 0, SEEK_SET); 
-                                                                                   
-    char* text = (char*) calloc(numbytes, sizeof(char));                           
-    fread(text, sizeof(char), numbytes, source);                                   
-    fclose(source); 
-    return text;                                                                   
-}  
+void wipe(Debug* debug)
+{
+    FILE* file = fopen(debug -> file_name, "w");
+    validate_file(file, debug -> file_name);
+    fclose(file);
+} 

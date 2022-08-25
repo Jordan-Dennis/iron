@@ -57,9 +57,11 @@ int main(int num_args, char *args[])
 
 	// Reading the temperature array from the file. 
 	float low_temp = atof(find(task, "temperatures", "low"));
+    debug(logger, "Success: Temperature low.");
 	float high_temp = atof(find(task, "temperatures", "high"));
+    debug(logger, "Success: Temperature high.");
 	float step = atof(find(task, "temperatures", "step"));
-    debug(logger, "Success: Temperature info parsed.");
+    debug(logger, "Success: Temperature step.");
 
 	float temperatures[(int) ((high_temp - low_temp) / step)];
 	parse_temperatures(temperatures, low_temp, high_temp, step);

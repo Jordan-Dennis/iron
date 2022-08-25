@@ -69,3 +69,22 @@ void validate_option(char* option)
 	exit(1);
 }
 
+
+/*
+ * validate_char
+ * -------------
+ * Checks that the expected char was recieved and rasies an error if not. 
+ *
+ * parameters
+ * ----------
+ * char target: The expected char.
+ * char recieved: The recieved char.
+ */
+void validate_char(char target, char recieved)
+{
+    if (target != recieved)
+    {
+        printf("Error: '%c' expected but got %c", target, recieved);
+        exit(1);
+    }
+}

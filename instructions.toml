@@ -1,7 +1,7 @@
 [reps]
 	number = 100o
 
-[temperature]
+[temperatures]
 	low = 1.
 	high = 6.
 	step = 1.

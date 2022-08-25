@@ -1,4 +1,5 @@
 *.log
+*.swp
 pub/*.log
 pub/*.aux
 pub/*.pdf
