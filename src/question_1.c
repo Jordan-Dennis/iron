@@ -30,19 +30,76 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
     printf("Invoking toml!\n");
     char* out = find(__toml__("config.toml"), "readables", "1a");
     printf("File: %s\n", out);
-    for (float temperature; temperature <= num_temps; temperature++)
+    int results[2][num_spins][num_temps];
+    for (int temperature = 0; temperature <= num_temps; temperature++)
     {
+        printf("Temperature: %f\n", temperatures[temperature]);
         int spins[num_spins];
         random_system(spins, num_spins); 
-        system_to_file(spins, out, num_spins);
+        // system_to_file(spins, out, num_spins);
+        // Saving the initial configuration of this temeprature in the 
+        // memory.
+        for (int spin = 0; spin < num_spins; spin++)
+        {
+            results[0][spin][temperature] = spins[spin];
+        }
 
+        // Running the metropolis algorithm over the system. 
         for (int epoch = 0; epoch <= reps; epoch++)
         { 
-            metropolis_step(spins, temperature, num_spins);
+            metropolis_step(spins, temperatures[temperature], num_spins);
         }
-        
-        system_to_file(spins, out, num_spins);
+
+        // Saving the final state of the system to memory   
+        for (int spin = 0; spin < num_spins; spin++)
+        {
+            results[1][spin][temperature] = spins[spin];
+        }
+        // system_to_file(spins, out, num_spins);
     }
+
+    //TODO: Look into migrating this upward into the existing loops to 
+    // simplify the logic of the code. 
+    // Opening the file. 
+    FILE* data = fopen(out, "w");
+    if (!data)
+    {
+        printf("Error: Could not open file!\n");
+        exit(1);
+    }
+
+    // Writing a header row to the file. 
+    fprintf(data, "# S/F, spin");
+    for (int temperature = 0; temperature < num_temps; temperature++)
+    {
+        fprintf(data, "T%i,", temperature);
+    }
+    fprintf(data, "\n");
+
+    // Writing the initial state data to the file.
+    for (int spin = 0; spin < num_spins; spin++) // Columns
+    {
+        // Writing each row.
+        fprintf(data, "%i, %i", 0, spin);
+        for (int temperature = 0; temperature < num_temps; temperature++)
+        {
+            fprintf(data, "%i, ", results[0][spin][temperature]);
+        }
+        fprintf(data, "\n");
+    }
+
+    // Writing the final state data to the file. 
+    for (int spin = 0; spin < num_spins; spin++) // Columns
+    {
+        // Writing each row.
+        fprintf(data, "%i, %i", 1, spin);
+        for (int temperature = 0; temperature < num_temps; temperature++)
+        {
+            fprintf(data, "%i, ", results[1][spin][temperature]);
+        }
+        fprintf(data, "\n");
+    }
+
 }
 
 
