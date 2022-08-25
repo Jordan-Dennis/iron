@@ -77,13 +77,11 @@ char* find(Toml* toml, char* header, char* field)
         if (peek(toml) == '[')
         {
             char* head = group(toml);
-            printf("Header: %s, Target: %s\n", head, header);
             if (strcmp(head, header) == 0)
             {
                 while (peek(toml) != '[')
                 {
                     KeyValue* dict = entry(toml);
-                    printf("Field: %s, Target: %s", dict -> key, field);
                     if (strcmp(dict -> key, field) == 0)
                     {
                         return dict -> value;

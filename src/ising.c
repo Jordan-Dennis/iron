@@ -1,27 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "ising.h"
-
-
-/*
- * length
- * ------
- * Find the length of an array of integers.
- * 
- * parameters
- * ----------
- * int spins[]: The array of integers.
- * 
- * returns
- * -------
- * int length: The length of the array.
- */
-int length(int spins[])
-{
-    return (int)(sizeof(spins) / sizeof(int));
-}
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<math.h>
+#include"include/ising.h"
 
 
 /*
@@ -102,16 +83,16 @@ int spin_energy(int spin, int spins[])
  * parameters
  * ----------
  * int spins[]: The spin state of the ensamble.
+ * int num_spins: The number of spins in the system. 
  *
  * returns
  * -------
  * int: The energy of the ensamble in units of epsilon.
  */
-int energy(int spins[], int n)
+int energy(int spins[], int num_spins)
 {
     int energy = 0;
-    int number_of_spins = length(spins);
-    for (int spin = 0; spin < number_of_spins; spin++) 
+    for (int spin = 0; spin < num_spins; spin++) 
     {
         // Just the nearest neighours contribute to the energy.
         energy += spin_energy(spin, spins);
@@ -128,17 +109,21 @@ int energy(int spins[], int n)
  * parameters
  * ----------
  * int spins[] : An array representing the spins of the system.
+ * int num_spins: The number of spins in the system.
+ *
+ * returns
+ * -------
+ * float entropy: The entropy of the system.  
  */
-float entropy(int spins[]) 
+float entropy(int spins[], int num_spins) 
 {
     int up_spins = 0;
-    int number_of_spins = length(spins);
-    for (int spin=0; spin < number_of_spins; spin++)
+    for (int spin=0; spin < num_spins; spin++)
     {
         up_spins += (int)(spins[spin] > 0);
     }
-    int down_spins = n - up_spins;
-    int multiplicity = factorial(n) /\
+    int down_spins = num_spins - up_spins;
+    int multiplicity = factorial(num_spins) /\
         (factorial(up_spins) * factorial(down_spins));
     return log(multiplicity);
 }
@@ -152,10 +137,17 @@ float entropy(int spins[])
  * parameters
  * ----------
  * int spins[]: The spin esamble.
+ * float temperature: The temperature of the ensamble.
+ * int num_spins: The number of spins in the ensamble.
+ * 
+ * returns
+ * -------
+ * float free_energy: The free energy.
  */
-float free_energy(int spins[], float temperature)
+float free_energy(int spins[], float temperature, int num_spins)
 {
-    return (float)energy(spins) - temperature * entropy(spins);
+    return (float)energy(spins, num_spins) - temperature *\
+        entropy(spins, num_spins);
 }
 
 
@@ -167,16 +159,21 @@ float free_energy(int spins[], float temperature)
  * parameters
  * ----------
  * int spins[]: The spins ensamble.
+ * float temperature: The temperature of the ensamble.
+ * int num_spins: The number of spins in the ensamle.
+ * 
+ * returns
+ * -------
+ * float heat_capacity: The heat capacity. 
  */
-float heat_capacity(int spins[], float temperature)
+float heat_capacity(int spins[], float temperature, int num_spins)
 {
     int total = 0;
-    int number_of_spins = length(spins);
-    for (int spin=0; spin < number_of_spins; spin++)
+    for (int spin=0; spin < num_spins; spin++)
     {
         total += spins[spin];
     }
-    float energy_average = (float)total / (float)n;
+    float energy_average = (float) total / (float) num_spins;
     // Note that the square of all the spins is 1
     // Hence the expected value of the distance from 
     // 0 must be 1.
@@ -194,15 +191,16 @@ float heat_capacity(int spins[], float temperature)
  * ----------
  * int spins[]: The spin system to evolve. 
  * float temperature: The temperature of the system in natural units.
+ * int num_spins: The number of spins in the system. 
  * 
  * returns
  * -------
  * void: The array modifications are done in place. 
  */
-void metropolis_step(int spins[], float temperature)
+void metropolis_step(int spins[], float temperature, int num_spins)
 {
 
-    int spin = (int) (normalised_random() * n);
+    int spin = (int) (normalised_random() * num_spins);
     int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
    
     if (energy_change <= 0)
@@ -228,15 +226,15 @@ void metropolis_step(int spins[], float temperature)
  * parameters
  * ----------
  * int spins[]: An empty array to house the spins. 
+ * int num_spins: The number of spins in the system. 
  * 
  * returns 
  * -------
  * void: The spins array is internal modified on the heap. 
  */
-void random_system(int spins[])
+void random_system(int spins[], int num_spins)
 {
-    int number_of_spins = length(spins);
-    for (int spin = 0; spin < number_of_spins; spin++) 
+    for (int spin = 0; spin < num_spins; spin++) 
     {
         int value = random_spin();
         spins[spin] = value;
@@ -253,21 +251,22 @@ void random_system(int spins[])
  * ----------
  * char file_name[]: The file name to write the spin system to.
  * int spins[]: The current state of the system. 
+ * int num_spins: The number of spins in the system. 
  * 
  * returns
  * -------
  * void: Writes the state to a file.
  */
-void system_to_file(int spins[], char* file_name) 
+void system_to_file(int spins[], char* file_name, int num_spins) 
 {
-    FILE *data = fopen(address, "w");
+    FILE *data = fopen(file_name, "w");
     if (!data)
     {
         printf("Error: File not found!");
         exit(1);
     }
-    int number_of_spins = length(spins);
-    for (int spin = 0; spin < number_of_spins; spin++)
+    printf("Writing to file!");
+    for (int spin = 0; spin < num_spins; spin++)
     {
         fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
     }

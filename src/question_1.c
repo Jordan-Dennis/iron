@@ -2,9 +2,8 @@
 #include<string.h>
 #include<math.h>
 #include"include/ising.h"
+#include"include/question_1.h"
 #include"include/toml.h"
-
-
 
 
 /*
@@ -26,21 +25,23 @@
  * Writes the outputs of the first and final states to external files 
  * for use with GNUPlot. 
  */
-void question_1_a(int number_of_spins, float temperatures[])
+void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
 {
-    char* find(__toml__("config.toml"), "readables", "1a");
-    for (float temperature; temperature <= MAX; temperature++)
+    printf("Invoking toml!\n");
+    char* out = find(__toml__("config.toml"), "readables", "1a");
+    printf("File: %s\n", out);
+    for (float temperature; temperature <= num_temps; temperature++)
     {
-        int spins[n];
-        random_system(spins); 
-        system_to_file(spins);
+        int spins[num_spins];
+        random_system(spins, num_spins); 
+        system_to_file(spins, out, num_spins);
 
-        for (int epoch = 0; epoch <= REPS * n; epoch++)
+        for (int epoch = 0; epoch <= reps; epoch++)
         { 
-            metropolis_step(spins, temperature);
+            metropolis_step(spins, temperature, num_spins);
         }
         
-        system_to_file(spins);
+        system_to_file(spins, out, num_spins);
     }
 }
 
@@ -67,7 +68,7 @@ void question_1_a(int number_of_spins, float temperatures[])
  * -----
  * Writes the output to a file for GNUPlot to plot. 
  */
-void question_1_c(int number_o_spins, int temperatures[])
+void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
 {
 
 }
@@ -88,7 +89,7 @@ void question_1_c(int number_o_spins, int temperatures[])
  * -----
  * Writes the output to a file for gnuplot. 
  */
-void question_1_e(int number_of_spins, int temperatures[])
+void question_1_e(int num_spins, float temperatures[], int num_temps, int reps)
 {
 
 }
