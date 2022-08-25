@@ -1,0 +1,15 @@
+[reps]
+	number = 100o
+
+[temperature]
+	low = 1.
+	high = 6.
+	step = 1.
+
+[spins]
+	number = 100
+
+[question]
+	index = "1a"
+
+

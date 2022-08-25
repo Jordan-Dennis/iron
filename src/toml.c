@@ -3,6 +3,7 @@
 #include<stdbool.h>
 #include<string.h>
 #include"include/toml.h"
+#include"include/errors.h"
 
 bool done(Toml* toml)
 {
@@ -101,11 +102,7 @@ Toml* __toml__(char* file_name)
 {
     Toml* toml = calloc(1, sizeof(Toml));
     FILE* file = fopen(file_name, "r");
-    if (!file)
-    {
-        printf("Error: File '%s' could not be opened!", file_name);
-        exit(1);
-    }
+	validate_file(file, file_name);
     toml -> toml = file;
     return toml;
 }

@@ -2,8 +2,8 @@
 #include<stdlib.h>
 #include"include/errors.h"
 
-const char* RED = "\033[31;1m"
-const char* WHITE = "\033[97m"
+const char* RED = "\033[31;1m";
+const char* WHITE = "\033[97m";
 
 
 /*
@@ -44,7 +44,7 @@ void validate_args(int num_args)
  * ----
  * 1: If the file pointer is NULL.
  */
-void vaildate_file(FILE* file, char* file_name)
+void validate_file(FILE* file, char* file_name)
 {
 	if (!file)
 	{
@@ -65,7 +65,7 @@ void vaildate_file(FILE* file, char* file_name)
  */
 void validate_option(char* option)
 {
-	printf("%sError:%s '%s' is not a valid option!", option);
+	printf("%sError:%s '%s' is not a valid option!", RED, WHITE, option);
 	exit(1);
 }
 
