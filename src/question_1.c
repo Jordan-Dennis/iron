@@ -127,7 +127,78 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
  */
 void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
 {
+    printf("Invoking toml!\n");
+    char* out = find(__toml__("config.toml"), "readables", "1c");
+    printf("File: %s\n", out);
 
+    // Arrays to store the collected data on the physical state. 
+    float sim_heat_capacity[num_temps];
+    float sim_energy[num_temps];
+    float sim_free_energy[num_temps];
+    float sim_entropy[num_temps];
+
+    // Simulating the system. 
+    for (int temperature = 0; temperature <= num_temps; temperature++)
+    {
+        int spins[num_spins];
+        random_system(spins, num_spins); 
+
+        // Running the burnin period. 
+        for (int epoch = 0; epoch <= 1000; epoch++)
+        { 
+            metropolis_step(spins, temperatures[temperature], num_spins);
+        }
+
+        // Collecting the data'
+		// TODO: I think that I will have new arrays here to simply store
+		// the information and then I will invoke a mean and variance function 
+		// on these arrays. Damn, I keep adding linear complexity. 
+        for (int epoch = 0; epoch <= reps; epoch++)
+        { 
+            metropolis_step(spins, temperatures[temperature], num_spins);
+
+            sim_heat_capacity[temperature] = 
+				heat_capacity(spins, temperature, num_spins);
+
+            sim_energy[temperature] = energy(spins, num_spins);
+
+            sim_free_energy[temperature] = 
+				free_energy(spins, temperature, num_spins);
+
+            sim_entropy[temperature] = entropy(spins, num_spins);
+        }
+        
+        // Averaging over the simulation. 
+        sim_heat_capacity[temperature] = sim_heat_capacity[temperature] / reps;
+        sim_free_energy[temperature] = sim_free_energy[temperature] / reps;
+        sim_energy[temperature] = sim_energy[temperature] / reps;
+        sim_entropy[temperature] = sim_entropy[temperature] / reps;
+
+		// TODO: Add the variance calculation. 
+    }
+
+	// Writing the data to the file
+	FILE* data = fopen(out, "w");
+	if (!data)
+	{
+		printf("Error: Could not open file!\n");
+		exit(1);
+	}
+
+	// Writing the header row to the data. 
+	fprintf(data, "# Temperature, Heat Capacity, Free Energy,"\ 
+		"Entropy, Energy\n");
+
+	for (int temperature = 0; temperature < num_temps; temperature++)
+	{
+		fprintf(data, "%f, %f, %f, %f, %f\n", 
+			temperatures[temperature], sim_heat_capacity[temperature],
+			sim_free_energy[temperature], sim_energy[temperature],
+			sim_entropy[temperature]);
+	}
+	
+	// Closing the file
+	fclose(data);
 }
 
 
