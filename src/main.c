@@ -14,19 +14,22 @@
  *
  * parameters
  * ----------
- * int number_of_args: The number of arguments.
- * char args[]: The arguments.
  * float temperatures[]: The array to store the temperatures in.
+ * float low: The lowest temperature to simulate.
+ * float high: The highest temperature to simulate. 
+ * float step: The increment for the temperature. 
  */
-void parse_temperatures(int number_of_args, char *args[], float temperatures[])
+void parse_temperatures(float temperatures[], float low, float high, 
+	float step)
 { 
-    if (number_of_args > 3)
-    {
-        for (int arg = 3; arg < number_of_args; arg++)
-        {
-            temperatures[arg - 3] = atof(args[arg]);
-        }
-    }
+	temperatures[0] = low;
+	float temperature = low;
+	int index = 1;
+	while (temperature <= high)
+	{
+		temperature += step;
+		temperatures[index] = temperature;
+	}
 }
 
 
@@ -36,54 +39,54 @@ void parse_temperatures(int number_of_args, char *args[], float temperatures[])
  * Navigate the implementations for questions 1 - 3. Please provide the 
  * number of spins as the first argument followed by the temperatures that
  * you wish to run the simulation at. 
- *
- * For example:
- *
- * out/ising 100 1. 2. 3.
- *           --- -------
- *            |     |
- *        num_spins |
- *             temperatures
  */
 int main(int num_args, char *args[])
 {
-    printf("Welcome!\n");
-    printf("Requested Q: %s\n", args[1]);
-    if (num_args >= 2)
-    {
-        if (strcmp(args[1], "1a") == 0)
-        {
-            printf("Entering Q1a)!\n");
-            int number_of_spins = atoi(args[2]);
-            float temperatures[num_args - 3];
-            parse_temperatures(num_args, args, temperatures);
-            question_1_a(number_of_spins, temperatures, num_args - 3, 1000);
-        }
-        else if (strcmp(args[1], "1c") == 0)
-        {
-            printf("Entering Q1c)!\n");
-            int number_of_spins = atoi(args[2]);
-            float temperatures[num_args - 3];
-            parse_temperatures(num_args, args, temperatures);
-            question_1_c(number_of_spins, temperatures, num_args - 3, 1000);
-        }
-        else if (strcmp(args[1], "1e") == 0)
-        {
-            printf("Entering Q1e)!\n");
-            int number_of_spins = atoi(args[2]);
-            float temperatures[num_args - 3];
-            parse_temperatures(num_args, args, temperatures);
-            question_1_e(number_of_spins, temperatures, num_args - 3, 1000);
-        }
-        else
-        {
-            printf("Error: Option not found!\n");
-        }
-    }
-    else 
-    {
-        printf("Error: Please provide a question number!\n");
-    }
+	// Check a config was provided. 
+	validate_args(num_args);
+
+	// Check that the file was safely opened. 
+	Toml* task = __toml__(args[1]);
+	validate_file(task, args[1]);
+
+	// Reading the temperature array from the file. 
+	float low_temp = atof(find(task, "temperatures", "low"));
+	float high_temp = atof(find(task, "temperatures", "high"));
+	float step = atof(fing(task, "temperatures", "step"));
+
+	float temperatures[];
+	parse_temperatures(temperatures, low_temp, high_temp, step);
+	int num_temps = (int) sizeof(temperatures) / sizeof(float);
+
+	// Reading the number of spins from the file.
+	int number_of_spins = atoi(find(task, "spins", "number"));
+
+	// Reading the number of reps from the file
+	int reps = atoi(find(task, "reps", "number"));
+
+	// Parsing the question index from the file. 
+	// TODO: Make it possible to parse a toml array of multiple indexes.
+	char* question = find(task, "question", "index");
+	
+	if (strcmp(question, "1a") == 0)
+	{
+		printf("Entering Q1a)!\n");
+		question_1_a(number_of_spins, temperatures, num_temps, reps);
+	}
+	else if (strcmp(question, "1c") == 0)
+	{
+		printf("Entering Q1c)!\n");
+		question_1_c(number_of_spins, temperatures, num_temps, reps);
+	}
+	else if (strcmp(question, "1e") == 0)
+	{
+		printf("Entering Q1e)!\n");
+		question_1_e(number_of_spins, temperatures, num_temps, reps);
+	}
+	else
+	{
+		validate_option(question);
+	}
 
     return 0;
 }

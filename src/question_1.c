@@ -186,7 +186,7 @@ void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
 	}
 
 	// Writing the header row to the data. 
-	fprintf(data, "# Temperature, Heat Capacity, Free Energy,"\ 
+	fprintf(data, "# Temperature, Heat Capacity, Free Energy," 
 		"Entropy, Energy\n");
 
 	for (int temperature = 0; temperature < num_temps; temperature++)
