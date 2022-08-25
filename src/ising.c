@@ -68,10 +68,22 @@ int random_spin(void)
  * -------
  * int: The energy contribution of this specific spin.
  */
-int spin_energy(int spin, int spins[])
+int spin_energy(int spin, int spins[], int num_spins)
 {
-    return spins[spin] * spins[spin - 1] + 
-        spins[spin] * spins[spin + 1];
+    int energy;
+    if (spin == 0) 
+    {
+        energy = spins[0] * (spins[num_spins] + spins[1]);
+    }
+    else if (spin == num_spins - 1) 
+    {
+        energy = spins[num_spins - 1] * (spins[0] + spins[spin - 1]);
+    }
+    else
+    {
+        energy = spins[spin] * (spins[spin - 1] + spins[spin + 1]);
+    }
+    return energy;
 }
 
 
@@ -95,7 +107,7 @@ int energy(int spins[], int num_spins)
     for (int spin = 0; spin < num_spins; spin++) 
     {
         // Just the nearest neighours contribute to the energy.
-        energy += spin_energy(spin, spins);
+        energy += spin_energy(spin, spins, num_spins);
     }
     return energy;
 }
@@ -201,7 +213,8 @@ void metropolis_step(int spins[], float temperature, int num_spins)
 {
 
     int spin = (int) (normalised_random() * num_spins);
-    int energy_change = -2 * spin_energy(spin, spins) - 4 * spins[spin];
+    int energy_change = -2 * spin_energy(spin, spins, num_spins) - 
+        4 * spins[spin];
    
     if (energy_change <= 0)
     {
