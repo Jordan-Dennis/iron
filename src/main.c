@@ -1,7 +1,9 @@
 #include<stdio.h>
 #include<string.h>
-#include"question_1.h"
-#include"ising.h"
+#include"include/question_1.h"
+#include"inlcude/ising.h"
+#include"include/toml.h"
+#include"include/question_2.h"
 
 
 /*

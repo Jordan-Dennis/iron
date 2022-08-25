@@ -258,9 +258,14 @@ void random_system(int spins[])
  * -------
  * void: Writes the state to a file.
  */
-void system_to_file(char file_name[], int spins[])
+void system_to_file(int spins[], char* file_name) 
 {
     FILE *data = fopen(address, "w");
+    if (!data)
+    {
+        printf("Error: File not found!");
+        exit(1);
+    }
     int number_of_spins = length(spins);
     for (int spin = 0; spin < number_of_spins; spin++)
     {

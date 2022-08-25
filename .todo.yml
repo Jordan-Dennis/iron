@@ -13,3 +13,5 @@
     [0;36mdescription[0m: Add a configuration file in order to share the same file names throughout the script files 
     [0;36mtitle[0m: Legacy 
     [0;36mdescription[0m: Fix the legacy issues in the bash script now that the scope of the project has expanded 
+    [[0;36mtitle[[0m: Data 
+    [[0;36mdescription[[0m: Format the data in an array so that it can be written to the file in a single hit 

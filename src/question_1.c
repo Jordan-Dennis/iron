@@ -1,7 +1,8 @@
 #include<stdio.h>
 #include<string.h>
 #include<math.h>
-#include"ising.h"
+#include"include/ising.h"
+#include"include/toml.h"
 
 
 
@@ -27,14 +28,9 @@
  */
 void question_1_a(int number_of_spins, float temperatures[])
 {
+    char* find(__toml__("config.toml"), "readables", "1a");
     for (float temperature; temperature <= MAX; temperature++)
     {
-        char file[10];
-        sprintf(file, "1d_%i.txt", (int)temperature);
-        char address[strlen(file) + strlen(dir)];
-        strcpy(address, dir);
-        strcat(address, file);
-        
         int spins[n];
         random_system(spins); 
         system_to_file(spins);

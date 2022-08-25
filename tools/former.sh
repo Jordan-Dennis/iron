@@ -74,7 +74,7 @@ load_config() {
 }
 
 
-load_config
+#load_config
 
 RED="\033[[0;31m"
 NORMAL="\033[[0m"

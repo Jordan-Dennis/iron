@@ -11,6 +11,6 @@ float free_energy(int spins[], float temperature);
 float heat_capacity(int spins[], float temperature);
 void metropolis_step(int spins[], float temperature);
 void random_system(int spins[]);
-void system_to_file(int spins[]);
+void system_to_file(int spins[], char* file_name);
 
 #endif
