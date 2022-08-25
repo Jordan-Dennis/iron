@@ -72,7 +72,7 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
     fprintf(data, "# S/F, spin");
     for (int temperature = 0; temperature < num_temps; temperature++)
     {
-        fprintf(data, "T%i,", temperature);
+        fprintf(data, "T%i, ", temperature);
     }
     fprintf(data, "\n");
 
@@ -80,7 +80,7 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
     for (int spin = 0; spin < num_spins; spin++) // Columns
     {
         // Writing each row.
-        fprintf(data, "%i, %i", 0, spin);
+        fprintf(data, "%i, %i, ", 0, spin);
         for (int temperature = 0; temperature < num_temps; temperature++)
         {
             fprintf(data, "%i, ", results[0][spin][temperature]);
@@ -92,7 +92,7 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
     for (int spin = 0; spin < num_spins; spin++) // Columns
     {
         // Writing each row.
-        fprintf(data, "%i, %i", 1, spin);
+        fprintf(data, "%i, %i, ", 1, spin);
         for (int temperature = 0; temperature < num_temps; temperature++)
         {
             fprintf(data, "%i, ", results[1][spin][temperature]);
