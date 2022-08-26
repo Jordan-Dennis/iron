@@ -100,6 +100,22 @@ char* word(Toml* toml, char exit)
 
 
 /*
+ * whitespace
+ * ----------
+ * Skip whitespace. 
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml file that is parsing. 
+ */
+void whitespace(Toml* toml)
+{
+    char _;
+    while (isspace(peek(toml))) { _ = next(toml); }
+}
+
+
+/*
  * group
  * -----
  * Parse a header from the toml. This will have the format [group_name]
@@ -127,14 +143,46 @@ char* group(Toml* toml)
 }
 
 
-KeyValue* entry(Toml* toml)
+/*
+ * entry
+ * -----
+ * Read a '=' separated entry in the toml file into memory.
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml file that is parsing. 
+ *
+ * returns
+ * -------
+ * Pair* dict: The '=' separated entry.
+ */
+Pair* entry(Toml* toml)
 {
-    char* key = until(toml, '=');
-    char* value = until(toml, '\n');   
+    whitespace(toml);
+    char* key = word(toml);
+    whitespace(toml);
+    validate_char('=', peek(toml));
+    whitespace(toml);
+    char* value = word(toml);   
     return __key_value__(key, value);
 }
 
 
+/*
+ * find
+ * ----
+ * Find a specific entry in the toml file.
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml file that is parsing.
+ * char* header: The [header] to seek.
+ * char* field: The field = ... to seek.
+ *
+ * returns
+ * -------
+ * Pair* dict: The key, value separated pair. 
+ */
 char* find(Toml* toml, char* header, char* field)
 {
     while (!done(toml))
@@ -146,7 +194,7 @@ char* find(Toml* toml, char* header, char* field)
             {
                 while (peek(toml) != '[')
                 {
-                    KeyValue* dict = entry(toml);
+                    Pair* dict = entry(toml);
                     if (strcmp(dict -> key, field) == 0)
                     {
                         return dict -> value;
@@ -186,13 +234,22 @@ Toml* __toml__(char* file_name)
 }
 
 
-KeyValue* __key_value__(char* key, char* value)
+/*
+ * __pair__
+ * --------
+ * Create a key value pair. 
+ *
+ * parameters
+ * ---------- 
+ * char* key: The key = ....
+ * char* value: The ... = value.
+ *
+ * returns
+ * -------
+ * Pair* pair: The key value pair. 
+ */
+Pair* __pair__(char* key, char* value)
 {
-    if (!((key) && (value)))
-    {
-        printf("Error: Cannot assign null pointers!");
-        exit(1);
-    }
     KeyValue* dict = calloc(1, sizeof(KeyValue));
     dict -> key = key;
     dict -> value = value;
