@@ -4,9 +4,14 @@
 #include<stdio.h>
 #include<stdbool.h>
 
-typedef struct Toml { char* toml; int cursor; Debug* debug; } Toml;
+typedef struct Toml 
+{
+    char* toml; 
+    int cursor, length; 
+    Debug* debug;
+} Toml;
 
-bool done(Toml* toml);
+int done(Toml* toml);
 char peek(Toml* toml);
 char next(Toml* toml);
 void whitespace(Toml* toml);

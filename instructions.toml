@@ -1,5 +1,5 @@
 [reps]
-	number = 100o
+	number = 1000
 
 [temperatures]
 	low = 1.
@@ -10,6 +10,6 @@
 	number = 100
 
 [question]
-	index = "1a"
+	index = 1a
 
 

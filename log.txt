@@ -1,1 +1,14 @@
-Success: Toml opened.
+Debugging Session Started
+
+Entered parse!
+
+Entered while!
+
+Entered switch!
+
+reps
+reps
+Entered nested while!
+
+Entered entry!
+

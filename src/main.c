@@ -9,9 +9,6 @@
 #include"include/question_2.h"
 
 
-char* log_file = "log.txt";
-
-
 /*
  * parse_temperatures
  * ------------------
@@ -51,22 +48,16 @@ int main(int num_args, char *args[])
 	validate_args(num_args);
 
 	// Check that the file was safely opened. 
-    Debug* logger = __debug__(log_file);
 	Toml* task = __toml__(args[1]);
-    debug(logger, "Success: Toml opened.");
 
-	// Reading the temperature array from the file. 
+	// Reading the temperature array from the file.
 	float low_temp = atof(find(task, "temperatures", "low"));
-    debug(logger, "Success: Temperature low.");
 	float high_temp = atof(find(task, "temperatures", "high"));
-    debug(logger, "Success: Temperature high.");
 	float step = atof(find(task, "temperatures", "step"));
-    debug(logger, "Success: Temperature step.");
 
 	float temperatures[(int) ((high_temp - low_temp) / step)];
 	parse_temperatures(temperatures, low_temp, high_temp, step);
 	int num_temps = (int) sizeof(temperatures) / sizeof(float);
-    debug(logger, "Success: Temperature array constructed.");
 
 	// Reading the number of spins from the file.
 	int number_of_spins = atoi(find(task, "spins", "number"));

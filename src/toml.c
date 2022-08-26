@@ -20,11 +20,11 @@
  *
  * returns
  * ------- 
- * bool done: True if the end of the file has been reached else false.
+ * int done: True if the end of the file has been reached else false.
  */ 
-bool done(Toml* toml)
+int done(Toml* toml)
 {
-    return peek(toml) == EOF;
+    return (toml -> cursor == toml -> length);
 }
 
 
@@ -68,7 +68,7 @@ char next(Toml* toml)
         exit(1);
     }
     char next = toml -> toml[toml -> cursor];
-    toml -> cursor += 1;
+    toml -> cursor++;
     return next;
 }
 
@@ -91,11 +91,11 @@ char next(Toml* toml)
 char* word(Toml* toml)
 {
     char* str = calloc(1, sizeof(char));
-    while (isalpha(peek(toml))) 
+    while (isalpha(peek(toml)) || isdigit(peek(toml))) 
     {
         str = realloc(str, (strlen(str) + 2) * sizeof(char));
         strcat(str, (char[]){next(toml), 0});
-    }  
+    }
     return str;
 }
 
@@ -111,8 +111,7 @@ char* word(Toml* toml)
  */
 void whitespace(Toml* toml)
 {
-    char _;
-    while (isspace(peek(toml))) { _ = next(toml); }
+    while (isspace(peek(toml))) { next(toml); }
 }
 
 
@@ -136,6 +135,7 @@ char* group(Toml* toml)
 
     char lsparen = next(toml);
     char* head = word(toml);
+    debug(toml -> debug, head);
  
     validate_char(']', peek(toml));    
 
@@ -159,56 +159,135 @@ char* group(Toml* toml)
  */
 Pair* entry(Toml* toml)
 {
+    debug(toml -> debug, "Entered entry!\n");
     whitespace(toml);
     char* key = word(toml);
     whitespace(toml);
     validate_char('=', peek(toml));
+    next(toml);
     whitespace(toml);
-    char* value = word(toml);   
+    char* value = word(toml); 
+    whitespace(toml); 
     return __pair__(key, value);
 }
 
 
-/*
- * find
- * ----
- * Find a specific entry in the toml file.
- *
- * parameters
- * ----------
- * Toml* toml: The toml file that is parsing.
- * char* header: The [header] to seek.
- * char* field: The field = ... to seek.
- *
- * returns
- * -------
- * Pair* dict: The key, value separated pair. 
- */
-char* find(Toml* toml, char* header, char* field)
+typedef struct Group
 {
+    char* group;
+    int length;
+    Pair** pairs;
+} Group;
+
+
+Group* __group__(char* header)
+{
+    Group* group = malloc(sizeof(Group));
+    group -> group = header;
+    group -> pairs = NULL;
+    group -> length = 0;
+    return group;
+}
+
+
+void add_pair_to_group(Group* group, Pair* pair)
+{
+    if (!(group -> pairs))
+    {
+        group -> pairs =  malloc(sizeof(Pair));
+    }
+    else
+    {
+        group -> pairs = realloc(group -> pairs, 
+            (group -> length + 1) * sizeof(Pair));
+    }
+    group -> pairs[group -> length] = pair;
+    group -> length++;    
+}
+
+
+typedef struct Config
+{
+    int length;
+    Group** groups;
+} Config;
+
+
+void add_group_to_config(Config* config, Group* group)
+{
+    if (!(config -> groups))
+    {
+        config -> groups =  malloc(sizeof(Group));
+    }
+    else
+    {
+        config -> groups = realloc(config -> groups, 
+            (config -> length + 1) * sizeof(Group));
+    }
+    config -> groups[config -> length] = group;
+    config -> length++; 
+}
+
+
+Config* parse(Toml* toml)
+{
+    Config* config = malloc(sizeof(Config));
+    debug(toml -> debug, "Entered parse!\n");
     while (!done(toml))
     {
-        if (peek(toml) == '[')
+        debug(toml -> debug, "Entered while!\n");
+        switch (peek(toml))
         {
-            char* head = group(toml);
-            if (strcmp(head, header) == 0)
+            case '[': 
             {
-                while (peek(toml) != '[')
+                debug(toml -> debug, "Entered switch!\n");
+                debug(toml -> debug, group(toml));
+                // Group* new_group = __group__(group(toml));
+                while ((peek(toml) != '[') && (!(done(toml))))
                 {
-                    Pair* dict = entry(toml);
-                    if (strcmp(dict -> key, field) == 0)
-                    {
-                        return dict -> value;
-                    }
-                } 
-            } 
-        }
-        else
-        {
-            next(toml);
+                    debug(toml -> debug, "Entered nested while!\n");
+                    printf("%i", toml -> length);
+                    Pair* new_pair = entry(toml);
+                    // add_pair_to_group(new_group, new_pair);
+                }
+                // add_group_to_config(config, new_group);
+            }
+            default:
+            {
+                debug(toml -> debug, "Entered default!\n");
+                // TODO: Implement a step(Toml* toml) that returns void and 
+                // increments the cursor. 
+                next(toml);
+            }
         }
     }
+    return config;
 }
+
+
+char* find(Toml* toml, char* header, char* field)
+{
+    Config* config = parse(toml);
+    debug(toml -> debug, "Finished Parsing");
+    for (int group = 0; group < (config -> length); group++)
+    {
+        Group* outer = (config -> groups)[group];
+        if (strcmp((outer -> group), header) == 0)
+        {   
+            for (int pair = 0; pair < (outer -> length); pair++)
+            {
+                Pair* inner = (outer -> pairs)[pair];
+                if (strcmp((inner -> key), field) == 0)
+                {
+                    return inner -> value;
+                }
+            }
+        }
+    }
+    exit(1);
+}
+
+
 
 
 /*
@@ -230,7 +309,10 @@ Toml* __toml__(char* file_name)
     Toml* toml = malloc(sizeof(Toml));
     toml -> toml = contents;
     toml -> cursor = 0;
+    // TODO: This size is wrong and it currently returns the size of a pointer.
+    toml -> length = (int) sizeof(contents) / sizeof(char);
     toml -> debug = __debug__("log.txt");
+    debug(toml -> debug, "Debugging Session Started\n");
     return toml;
 }
 
