@@ -135,7 +135,6 @@ char* group(Toml* toml)
 
     char lsparen = next(toml);
     char* head = word(toml);
-    debug(toml -> debug, head);
  
     validate_char(']', peek(toml));    
 
@@ -159,15 +158,13 @@ char* group(Toml* toml)
  */
 Pair* entry(Toml* toml)
 {
-    debug(toml -> debug, "Entered entry!\n");
-    whitespace(toml);
+    // debug(toml -> debug, "Entered entry!\n");
     char* key = word(toml);
     whitespace(toml);
     validate_char('=', peek(toml));
     next(toml);
     whitespace(toml);
     char* value = word(toml); 
-    whitespace(toml); 
     return __pair__(key, value);
 }
 
@@ -232,33 +229,27 @@ void add_group_to_config(Config* config, Group* group)
 Config* parse(Toml* toml)
 {
     Config* config = malloc(sizeof(Config));
+    Group* match;
+    Pair* pair;
     debug(toml -> debug, "Entered parse!\n");
     while (!done(toml))
     {
-        debug(toml -> debug, "Entered while!\n");
-        switch (peek(toml))
+        if (peek(toml) == '[')
         {
-            case '[': 
-            {
-                debug(toml -> debug, "Entered switch!\n");
-                debug(toml -> debug, group(toml));
-                // Group* new_group = __group__(group(toml));
-                while ((peek(toml) != '[') && (!(done(toml))))
-                {
-                    debug(toml -> debug, "Entered nested while!\n");
-                    printf("%i", toml -> length);
-                    Pair* new_pair = entry(toml);
-                    // add_pair_to_group(new_group, new_pair);
-                }
-                // add_group_to_config(config, new_group);
-            }
-            default:
-            {
-                debug(toml -> debug, "Entered default!\n");
-                // TODO: Implement a step(Toml* toml) that returns void and 
-                // increments the cursor. 
-                next(toml);
-            }
+            match = __group__(group(toml));
+            debug(toml -> debug, match -> group);
+            add_group_to_config(config, match);
+        }
+        else if (isdigit(peek(toml)) || isalpha(peek(toml)))
+        {
+            pair = entry(toml);
+            debug(toml -> debug, pair -> key);
+            debug(toml -> debug, pair -> value);
+            add_pair_to_group(match, pair);
+        }
+        else 
+        {
+            next(toml);
         }
     }
     return config;
@@ -309,8 +300,7 @@ Toml* __toml__(char* file_name)
     Toml* toml = malloc(sizeof(Toml));
     toml -> toml = contents;
     toml -> cursor = 0;
-    // TODO: This size is wrong and it currently returns the size of a pointer.
-    toml -> length = (int) sizeof(contents) / sizeof(char);
+    toml -> length = strlen(contents);
     toml -> debug = __debug__("log.txt");
     debug(toml -> debug, "Debugging Session Started\n");
     return toml;
