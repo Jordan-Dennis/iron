@@ -11,7 +11,7 @@ char peek(Toml* toml);
 char next(Toml* toml);
 void whitespace(Toml* toml);
 char* group(Toml* toml);
-char* word(Toml* toml, char exit);
+char* word(Toml* toml);
 char* find(Toml* toml, char* header, char* field);
 Toml* __toml__(char* file_name);
 

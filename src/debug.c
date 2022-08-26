@@ -1,5 +1,6 @@
-#include<stdlib.h>
 #include<stdio.h>
+#include<stdlib.h>
+#include"include/io.h"
 #include"include/debug.h"
 #include"include/errors.h"
 

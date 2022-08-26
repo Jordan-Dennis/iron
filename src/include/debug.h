@@ -9,7 +9,6 @@ typedef struct Debug
 
 Debug* __debug__(char* file_name);
 void debug(Debug* logger, char* message);
-char* read(Debug* debug);
 void wipe(Debug* debug);
 
 #endif

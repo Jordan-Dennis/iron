@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<ctype.h>
 #include<string.h>
 #include<stdlib.h>
 #include<stdbool.h>
@@ -87,15 +88,15 @@ char next(Toml* toml)
  * -------
  * char* word: The word that was parsed. 
  */
-char* word(Toml* toml, char exit)
+char* word(Toml* toml)
 {
-    char* word = calloc(1, sizeof(char));
-    while (isalpha(next(toml))) {
+    char* str = calloc(1, sizeof(char));
+    while (isalpha(peek(toml))) 
     {
-        word = realloc(word, (strlen(word) + 2) * sizeof(char));
-        strcat(word, (char[]){next(toml), 0});
+        str = realloc(str, (strlen(str) + 2) * sizeof(char));
+        strcat(str, (char[]){next(toml), 0});
     }  
-    return word;
+    return str;
 }
 
 
@@ -164,7 +165,7 @@ Pair* entry(Toml* toml)
     validate_char('=', peek(toml));
     whitespace(toml);
     char* value = word(toml);   
-    return __key_value__(key, value);
+    return __pair__(key, value);
 }
 
 
@@ -225,9 +226,9 @@ char* find(Toml* toml, char* header, char* field)
  */
 Toml* __toml__(char* file_name)
 {
-    char* toml = read(file_name);
+    char* contents = read(file_name);
     Toml* toml = malloc(sizeof(Toml));
-    toml -> toml = toml;
+    toml -> toml = contents;
     toml -> cursor = 0;
     toml -> debug = __debug__("log.txt");
     return toml;
@@ -250,7 +251,7 @@ Toml* __toml__(char* file_name)
  */
 Pair* __pair__(char* key, char* value)
 {
-    KeyValue* dict = calloc(1, sizeof(KeyValue));
+    Pair* dict = calloc(1, sizeof(Pair));
     dict -> key = key;
     dict -> value = value;
     return dict;
