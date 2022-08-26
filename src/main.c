@@ -48,7 +48,7 @@ int main(int num_args, char *args[])
 	validate_args(num_args);
 
 	// Check that the file was safely opened. 
-	Toml* task = __toml__(args[1]);
+	Config* task = __config__(args[1]);
 
 	// Reading the temperature array from the file.
 	float low_temp = atof(find(task, "temperatures", "low"));

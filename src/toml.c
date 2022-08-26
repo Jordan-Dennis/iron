@@ -9,13 +9,6 @@
 #include"include/errors.h"
 
 
-typedef struct Config
-{
-    int length;
-    Pair** pairs;
-} Config;
-
-
 /*
  * __toml__
  * --------
@@ -37,7 +30,7 @@ Toml* __toml__(char* file_name)
     toml -> cursor = 0;
     toml -> length = strlen(contents);
     toml -> debug = __debug__("log.txt");
-    debug(toml -> debug, "Debugging Session Started\n");
+    // debug(toml -> debug, "Debugging Session Started\n");
     return toml;
 }
 
@@ -64,16 +57,6 @@ Pair* __pair__(char* key, char* value, char* group)
     dict -> group = group;
     return dict;
 } 
-
-
-Config* __config__(void)
-{
-    Config* config = malloc(sizeof(Config));
-    config -> pairs = malloc(sizeof(Pair));
-    config -> length = 0;
-    return config;
-}
-
 
 
 
@@ -159,11 +142,16 @@ char next(Toml* toml)
  */
 char* word(Toml* toml)
 {
+    // debug(toml -> debug, "Entered word");
     char* str = calloc(1, sizeof(char));
-    while (isalpha(peek(toml)) || isdigit(peek(toml))) 
+    while (isalpha(peek(toml)) 
+        || isdigit(peek(toml)) 
+        || (peek(toml) == '/')
+        || (peek(toml) == '.'))
     {
         str = realloc(str, (strlen(str) + 2) * sizeof(char));
         strcat(str, (char[]){next(toml), 0});
+        // debug(toml -> debug, str);
     }
     return str;
 }
@@ -200,6 +188,7 @@ void whitespace(Toml* toml)
  */
 char* group(Toml* toml)
 {
+    // debug(toml -> debug, "Entered group");
     validate_char('[', peek(toml));
 
     char lsparen = next(toml);
@@ -239,7 +228,16 @@ Pair* entry(Toml* toml)
 }
 
 
-
+/*
+ * add_pair_to_config
+ * ------------------
+ * Add a pair to the configuration file.
+ *
+ * parameters
+ * ----------
+ * Config* config: The configuration.
+ * Pair* pair: The pair to add. 
+ */
 void add_pair_to_config(Config* config, Pair* pair)
 {
     if (!(config -> pairs))
@@ -256,23 +254,39 @@ void add_pair_to_config(Config* config, Pair* pair)
 }
 
 
+/*
+ * parse
+ * -----
+ * Parse the toml file into a string of pair entries.
+ *
+ * parameters
+ * ----------
+ * Toml* toml: The toml file to parse.
+ *
+ * returns
+ * -------
+ * Config* params: The parameters of the program. 
+ */
 Config* parse(Toml* toml)
 {
-    Config* config = __config__();
+    Config* config = malloc(sizeof(Config));
+    config -> pairs = malloc(sizeof(Pair));
+    config -> length = 0;
+
     Pair* pair;
-    debug(toml -> debug, "Entered parse!\n");
+    // debug(toml -> debug, "Entered parse!\n");
     while (!done(toml))
     {
         if (peek(toml) == '[')
         {
             toml -> current_group = group(toml);
-            debug(toml -> debug, toml -> current_group);
+            // debug(toml -> debug, toml -> current_group);
         }
         else if (isdigit(peek(toml)) || isalpha(peek(toml)))
         {
             pair = entry(toml);
-            debug(toml -> debug, pair -> key);
-            debug(toml -> debug, pair -> value);
+            // debug(toml -> debug, pair -> key);
+            // debug(toml -> debug, pair -> value);
             add_pair_to_config(config, pair);
         }
         else 
@@ -284,10 +298,23 @@ Config* parse(Toml* toml)
 }
 
 
-char* find(Toml* toml, char* header, char* field)
+/*
+ * find
+ * ----
+ * Search the parsed toml file for an entry.
+ *
+ * parameters
+ * ----------
+ * Config* config: The parsed toml file.
+ * char* header: The target group.
+ * char* field: The target field.
+ *
+ * returns
+ * -------
+ * char* out: The value at the specified location.
+ */
+char* find(Config* config, char* header, char* field)
 {
-    Config* config = parse(toml);
-    debug(toml -> debug, "Finished Parsing");
     for (int pair = 0; pair < (config -> length); pair++)
     {
         Pair* inner = (config -> pairs)[pair];
@@ -297,10 +324,29 @@ char* find(Toml* toml, char* header, char* field)
             return inner -> value;
         }
     }
+    printf("Error: Could not find toml entry!");
     exit(1);
 }
 
 
-
+/*
+ * __config__
+ * ----------
+ * Constructor for the configurations.
+ *
+ * parameters
+ * ----------
+ * char* file_name: The name of the toml file to read the configuration from.
+ *
+ * returns
+ * -------
+ * Config* config: The program configuration.
+ */
+Config* __config__(char* file_name)
+{
+    Toml* toml = __toml__(file_name);
+    Config* config = parse(toml);
+    return config;
+}
 
 

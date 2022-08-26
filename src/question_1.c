@@ -28,7 +28,7 @@
 void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
 {
     printf("Invoking toml!\n");
-    char* out = find(__toml__("config.toml"), "readables", "1a");
+    char* out = find(__config__("config.toml"), "readables", "1a");
     printf("File: %s\n", out);
     int results[2][num_spins][num_temps];
     for (int temperature = 0; temperature <= num_temps; temperature++)
@@ -128,7 +128,7 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
 void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
 {
     printf("Invoking toml!\n");
-    char* out = find(__toml__("config.toml"), "readables", "1c");
+    char* out = find(__config__("config.toml"), "readables", "1c");
     printf("File: %s\n", out);
 
     // Arrays to store the collected data on the physical state. 
