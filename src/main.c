@@ -30,7 +30,9 @@ void parse_temperatures(float temperatures[], float low, float high,
 	while (temperature <= high)
 	{
 		temperature += step;
+        printf("%i -> %f\n", index, temperature);
 		temperatures[index] = temperature;
+        index++;
 	}
 }
 
@@ -54,6 +56,10 @@ int main(int num_args, char *args[])
 	float low_temp = atof(find(task, "temperatures", "low"));
 	float high_temp = atof(find(task, "temperatures", "high"));
 	float step = atof(find(task, "temperatures", "step"));
+
+    printf("Low: %f\n", low_temp);
+    printf("High: %f\n", high_temp);
+    printf("Step: %f\n", step);
 
 	float temperatures[(int) ((high_temp - low_temp) / step)];
 	parse_temperatures(temperatures, low_temp, high_temp, step);
