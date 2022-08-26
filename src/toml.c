@@ -9,6 +9,75 @@
 #include"include/errors.h"
 
 
+typedef struct Config
+{
+    int length;
+    Pair** pairs;
+} Config;
+
+
+/*
+ * __toml__
+ * --------
+ * Read a toml file into memory.
+ *
+ * parameters
+ * ----------
+ * char* file_name: The name of the toml.
+ *
+ * returns
+ * -------
+ * Toml* toml: The parsed toml file. 
+ */
+Toml* __toml__(char* file_name)
+{
+    char* contents = read(file_name);
+    Toml* toml = malloc(sizeof(Toml));
+    toml -> toml = contents;
+    toml -> cursor = 0;
+    toml -> length = strlen(contents);
+    toml -> debug = __debug__("log.txt");
+    debug(toml -> debug, "Debugging Session Started\n");
+    return toml;
+}
+
+
+/*
+ * __pair__
+ * --------
+ * Create a key value pair. 
+ *
+ * parameters
+ * ---------- 
+ * char* key: The key = ....
+ * char* value: The ... = value.
+ *
+ * returns
+ * -------
+ * Pair* pair: The key value pair. 
+ */
+Pair* __pair__(char* key, char* value, char* group)
+{
+    Pair* dict = calloc(1, sizeof(Pair));
+    dict -> key = key;
+    dict -> value = value;
+    dict -> group = group;
+    return dict;
+} 
+
+
+Config* __config__(void)
+{
+    Config* config = malloc(sizeof(Config));
+    config -> pairs = malloc(sizeof(Pair));
+    config -> length = 0;
+    return config;
+}
+
+
+
+
+
 /*
  * done
  * ----
@@ -139,6 +208,7 @@ char* group(Toml* toml)
     validate_char(']', peek(toml));    
 
     char rparen = next(toml);
+    toml -> current_group = head;
     return head;
 }
 
@@ -165,87 +235,45 @@ Pair* entry(Toml* toml)
     next(toml);
     whitespace(toml);
     char* value = word(toml); 
-    return __pair__(key, value);
+    return __pair__(key, value, toml -> current_group);
 }
 
 
-typedef struct Group
+
+void add_pair_to_config(Config* config, Pair* pair)
 {
-    char* group;
-    int length;
-    Pair** pairs;
-} Group;
-
-
-Group* __group__(char* header)
-{
-    Group* group = malloc(sizeof(Group));
-    group -> group = header;
-    group -> pairs = NULL;
-    group -> length = 0;
-    return group;
-}
-
-
-void add_pair_to_group(Group* group, Pair* pair)
-{
-    if (!(group -> pairs))
+    if (!(config -> pairs))
     {
-        group -> pairs =  malloc(sizeof(Pair));
+        config -> pairs =  malloc(sizeof(Pair));
     }
     else
     {
-        group -> pairs = realloc(group -> pairs, 
-            (group -> length + 1) * sizeof(Pair));
+        config -> pairs = realloc(config -> pairs, 
+            (config -> length + 1) * sizeof(Pair));
     }
-    group -> pairs[group -> length] = pair;
-    group -> length++;    
-}
-
-
-typedef struct Config
-{
-    int length;
-    Group** groups;
-} Config;
-
-
-void add_group_to_config(Config* config, Group* group)
-{
-    if (!(config -> groups))
-    {
-        config -> groups =  malloc(sizeof(Group));
-    }
-    else
-    {
-        config -> groups = realloc(config -> groups, 
-            (config -> length + 1) * sizeof(Group));
-    }
-    config -> groups[config -> length] = group;
+    config -> pairs[config -> length] = pair;
     config -> length++; 
 }
 
 
 Config* parse(Toml* toml)
 {
-    Config* config = malloc(sizeof(Config));
-    Group* match;
+    Config* config = __config__();
     Pair* pair;
     debug(toml -> debug, "Entered parse!\n");
     while (!done(toml))
     {
         if (peek(toml) == '[')
         {
-            match = __group__(group(toml));
-            debug(toml -> debug, match -> group);
-            add_group_to_config(config, match);
+            toml -> current_group = group(toml);
+            debug(toml -> debug, toml -> current_group);
         }
         else if (isdigit(peek(toml)) || isalpha(peek(toml)))
         {
             pair = entry(toml);
             debug(toml -> debug, pair -> key);
             debug(toml -> debug, pair -> value);
-            add_pair_to_group(match, pair);
+            add_pair_to_config(config, pair);
         }
         else 
         {
@@ -260,19 +288,13 @@ char* find(Toml* toml, char* header, char* field)
 {
     Config* config = parse(toml);
     debug(toml -> debug, "Finished Parsing");
-    for (int group = 0; group < (config -> length); group++)
+    for (int pair = 0; pair < (config -> length); pair++)
     {
-        Group* outer = (config -> groups)[group];
-        if (strcmp((outer -> group), header) == 0)
-        {   
-            for (int pair = 0; pair < (outer -> length); pair++)
-            {
-                Pair* inner = (outer -> pairs)[pair];
-                if (strcmp((inner -> key), field) == 0)
-                {
-                    return inner -> value;
-                }
-            }
+        Pair* inner = (config -> pairs)[pair];
+        if ((strcmp((inner -> key), field) == 0) 
+            && (strcmp((inner -> group), header) == 0))
+        {
+            return inner -> value;
         }
     }
     exit(1);
@@ -281,50 +303,4 @@ char* find(Toml* toml, char* header, char* field)
 
 
 
-/*
- * __toml__
- * --------
- * Read a toml file into memory.
- *
- * parameters
- * ----------
- * char* file_name: The name of the toml.
- *
- * returns
- * -------
- * Toml* toml: The parsed toml file. 
- */
-Toml* __toml__(char* file_name)
-{
-    char* contents = read(file_name);
-    Toml* toml = malloc(sizeof(Toml));
-    toml -> toml = contents;
-    toml -> cursor = 0;
-    toml -> length = strlen(contents);
-    toml -> debug = __debug__("log.txt");
-    debug(toml -> debug, "Debugging Session Started\n");
-    return toml;
-}
 
-
-/*
- * __pair__
- * --------
- * Create a key value pair. 
- *
- * parameters
- * ---------- 
- * char* key: The key = ....
- * char* value: The ... = value.
- *
- * returns
- * -------
- * Pair* pair: The key value pair. 
- */
-Pair* __pair__(char* key, char* value)
-{
-    Pair* dict = calloc(1, sizeof(Pair));
-    dict -> key = key;
-    dict -> value = value;
-    return dict;
-}  

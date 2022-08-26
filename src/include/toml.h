@@ -6,7 +6,7 @@
 
 typedef struct Toml 
 {
-    char* toml; 
+    char *toml, *current_group; 
     int cursor, length; 
     Debug* debug;
 } Toml;
@@ -20,9 +20,9 @@ char* word(Toml* toml);
 char* find(Toml* toml, char* header, char* field);
 Toml* __toml__(char* file_name);
 
-typedef struct Pair {char* key; char* value; } Pair;
+typedef struct Pair { char *key, *value, *group; } Pair;
 
 Pair* entry(Toml* toml);
-Pair* __pair__(char* key, char* value);
+Pair* __pair__(char* key, char* value, char* group);
 
 #endif 
