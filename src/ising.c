@@ -213,8 +213,7 @@ void metropolis_step(int spins[], float temperature, int num_spins)
 {
 
     int spin = (int) (normalised_random() * num_spins);
-    int energy_change = -2 * spin_energy(spin, spins, num_spins) - 
-        4 * spins[spin];
+    int energy_change = - 4 * spin_energy(spin, spins, num_spins);
    
     if (energy_change <= 0)
     {
