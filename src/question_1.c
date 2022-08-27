@@ -1,9 +1,10 @@
+#include<math.h>
 #include<stdio.h>
 #include<string.h>
-#include<math.h>
-#include"include/ising.h"
-#include"include/question_1.h"
 #include"include/toml.h"
+#include"include/ising.h"
+#include"include/errors.h"
+#include"include/question_1.h"
 
 
 /*
@@ -127,9 +128,7 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
  */
 void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
 {
-    printf("Invoking toml!\n");
     char* out = find(__config__("config.toml"), "readables", "1c");
-    printf("File: %s\n", out);
 
     // Arrays to store the collected data on the physical state. 
     float sim_heat_capacity[num_temps];
@@ -219,5 +218,111 @@ void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
  */
 void question_1_e(int num_spins, float temperatures[], int num_temps, int reps)
 {
+    int reps_per_temp = 100;
+    int magnetisations[num_temps][reps_per_temp]; 
+    for (int temperature = 0; temperature <= num_temps; temperature++)
+    {
+        for (int rep = 0; rep < reps_per_temp; rep++)
+        {
+            int spins[num_spins];
+            random_system(spins, num_spins); 
 
+            // Running the burnin period. 
+            for (int epoch = 0; epoch <= 1000; epoch++)
+            { 
+                metropolis_step(spins, temperatures[temperature], num_spins);
+            }
+
+            // Running the simulation 
+            float rep_magnetisation = 0;
+            for (int epoch = 0; epoch <= reps; epoch++)
+            { 
+                metropolis_step(spins, temperatures[temperature], num_spins);
+                rep_magnetisation += (float) magnetisation(spins, num_spins) / reps;
+            }
+            magnetisations[temperature][rep] = rep_magnetisation;
+        }
+    }
+
+    // Opening the data file. 
+    char* out = find(__config__("config.toml"), "readables", "1e");
+    FILE* data = fopen(out, "w");
+    validate_file(data, out);
+    
+    // Printing the header row to the file. 
+    fprintf(data, "# ");
+    for (int temperature = 0; temperature < num_temps; temperature++)
+    {
+        fprintf(data, "T%f, ", temperatures[temperature]);
+    }
+    fprintf(data, "\n");
+
+    // Writing the data to the file.
+    for (int rep = 0; rep < reps_per_temp; rep++)
+    {
+        for (int temperature = 0; temperature < num_temps; temperature++)
+        {
+            fprintf(data, "%i, ", magnetisations[temperature][rep]);
+        }
+        fprintf(data, "\n");
+    }
+
+    // Closing the file
+    fclose(data);
+}
+
+
+/*
+ * ising
+ * -----
+ * Generates a gif of the one dimensional ising model. 
+ *
+ * parameters
+ * ----------
+ * int num_spins: The number of spins in the simulation.
+ * int reps: The number of repitions in the simulation gif.
+ * float temperature: The temperature to run the simulation at.
+ */
+void ising(int num_spins, int reps, float temperature)
+{
+    int spins[num_spins];
+    random_system(spins, num_spins); 
+
+    // Running the burnin period. 
+    for (int epoch = 0; epoch <= 1000; epoch++)
+    { 
+        metropolis_step(spins, temperature, num_spins);
+    }
+
+    // Running the simulation 
+    int evolution[num_spins][reps];
+    for (int epoch = 0; epoch <= reps; epoch++)
+    { 
+        metropolis_step(spins, temperature, num_spins);
+        for (int spin = 0; spin < num_spins; spin++)
+        {
+            evolution[spin][epoch] = spins[spin];
+        }
+    }
+    
+    FILE* data = fopen("pub/data/ising.csv", "w");
+    for (int spin = 0; spin < num_spins; spin++)
+    {
+        fprintf(data, "%i, %i, ", 0, spin);
+        for (int epoch = 0; epoch <= reps; epoch++)
+        { 
+            fprintf(data, "%i, ", evolution[spin][epoch]);
+        }
+        fprintf(data, "\n");
+    }
+    for (int spin = 0; spin < num_spins; spin++)
+    {
+        fprintf(data, "%i, %i, ", 1, spin);
+        for (int epoch = 0; epoch <= reps; epoch++)
+        { 
+            fprintf(data, "%i, ", evolution[spin][epoch]);
+        }
+        fprintf(data, "\n");
+    }
+    fclose(data);
 }

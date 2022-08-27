@@ -3,7 +3,6 @@
 #include<string.h>
 #include"include/question_1.h"
 #include"include/ising.h"
-#include"include/debug.h"
 #include"include/errors.h"
 #include"include/toml.h"
 #include"include/question_2.h"
@@ -30,7 +29,6 @@ void parse_temperatures(float temperatures[], float low, float high,
 	while (temperature <= high)
 	{
 		temperature += step;
-        printf("%i -> %f\n", index, temperature);
 		temperatures[index] = temperature;
         index++;
 	}
@@ -51,15 +49,24 @@ int main(int num_args, char *args[])
 
 	// Check that the file was safely opened. 
 	Config* task = __config__(args[1]);
+	
+    // Parsing the question index from the file. 
+	// TODO: Make it possible to parse a toml array of multiple indexes.
+	char* question = find(task, "question", "index");
+
+    if (strcmp(question, "ising") == 0)
+    {
+        float temperature = atof(find(task, "temperatures", "temperature"));
+        int num_spins = atoi(find(task, "spins", "number"));
+        int reps = atoi(find(task, "reps", "number"));
+        ising(num_spins, reps, temperature);
+        return 0;
+    }
 
 	// Reading the temperature array from the file.
 	float low_temp = atof(find(task, "temperatures", "low"));
 	float high_temp = atof(find(task, "temperatures", "high"));
 	float step = atof(find(task, "temperatures", "step"));
-
-    printf("Low: %f\n", low_temp);
-    printf("High: %f\n", high_temp);
-    printf("Step: %f\n", step);
 
 	float temperatures[(int) ((high_temp - low_temp) / step)];
 	parse_temperatures(temperatures, low_temp, high_temp, step);
@@ -71,9 +78,6 @@ int main(int num_args, char *args[])
 	// Reading the number of reps from the file
 	int reps = atoi(find(task, "reps", "number"));
 
-	// Parsing the question index from the file. 
-	// TODO: Make it possible to parse a toml array of multiple indexes.
-	char* question = find(task, "question", "index");
 	
 	if (strcmp(question, "1a") == 0)
 	{

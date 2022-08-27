@@ -1,0 +1,13 @@
+[reps]
+    number = 10
+
+[temperatures]
+    low = 1.
+    high = 4.
+    step = 1.
+
+[spins]
+    number = 500
+
+[question]
+    index = 1e

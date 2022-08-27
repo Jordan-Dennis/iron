@@ -8,6 +8,7 @@ int factorial(int number);
 float normalised_random(void);
 int random_spin(void);
 int energy(int spins[], int num_spins);
+int magnetisation(int spins[], int num_spins);
 float entropy(int spins[], int num_spins);
 float free_energy(int spins[], float temperature, int num_spins);
 float heat_capacity(int spins[], float temperature, int num_spins);

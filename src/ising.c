@@ -222,8 +222,8 @@ void metropolis_step(int spins[], float temperature, int num_spins)
     } 
     else
     {
-        float probability = exp(-energy_change / temperature);
-        if (probability <= normalised_random()) 
+        float probability = exp(- energy_change / temperature);
+        if (probability >= normalised_random()) 
         {
             spins[spin] = -spins[spin];
         }
@@ -256,33 +256,32 @@ void random_system(int spins[], int num_spins)
 
 
 /*
- * system_to_file
- * --------------
- * Write the current state of the system to a file. 
- *
+ * magnetisation
+ * -------------
+ * Calculate the net magnetisation of the system.
+ * 
  * parameters
  * ----------
- * char file_name[]: The file name to write the spin system to.
- * int spins[]: The current state of the system. 
- * int num_spins: The number of spins in the system. 
- * 
+ * int spins[]: The spin system.
+ * int num_spins: The number of spins in the system.
+ *
  * returns
  * -------
- * void: Writes the state to a file.
+ * int magnetisation: The net magnetisation.
  */
-void system_to_file(int spins[], char* file_name, int num_spins) 
+int magnetisation(int spins[], int num_spins)
 {
-    FILE *data = fopen(file_name, "w");
-    if (!data)
-    {
-        printf("Error: File not found!");
-        exit(1);
-    }
-    printf("Writing to file!");
+    int magnetisation = 0;
     for (int spin = 0; spin < num_spins; spin++)
     {
-        fprintf(data, "%i, %i, %i\n", 1, spin, spins[spin]);
+        if (spin > 0)
+        {
+            magnetisation++;
+        }
+        else
+        {
+            magnetisation--;
+        }
     }
-       
-    fclose(data);
+    return magnetisation;
 }

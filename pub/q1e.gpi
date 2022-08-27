@@ -1,0 +1,5 @@
+set terminal pdf size 900, 450
+set output "q1e.pdf"
+bin(x,width)=width*floor(x/width)
+
+plot "pub/data/1e.csv" using (bin($1, 1)):(1.0) smooth freq with boxes

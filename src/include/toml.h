@@ -1,8 +1,22 @@
 #ifndef TOML_H
 #define TOML_H
-#include"debug.h"
 #include<stdio.h>
 #include<stdbool.h>
+
+
+/*
+ * Debug
+ * -----
+ * A simple logging structure for debugging the toml communications.
+ *
+ * fields
+ * ------
+ * char* file_name: The name of the log file to use.
+ */ 
+typedef struct Debug
+{
+    char* file_name;
+} Debug;
 
 
 /*
@@ -61,10 +75,15 @@ typedef struct Toml
 } Toml;
 
 
+Debug* __debug__(char* file_name);
+void debug(Debug* debug, char* message);
+void wipe(Debug* debug);
+
 
 Toml* __toml__(char* file_name);
 Pair* __pair__(char* key, char* value, char* group);
 Config* __config__(char* file_name);
+
 
 int done(Toml* toml);
 char peek(Toml* toml);
@@ -74,6 +93,7 @@ void whitespace(Toml* toml);
 char* group(Toml* toml);
 Pair* entry(Toml* toml);
 Config* parse(Toml* toml);
+
 
 void add_pair_to_config(Config* config, Pair* pair);
 char* find(Config* config, char* header, char* field);
