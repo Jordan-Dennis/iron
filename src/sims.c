@@ -9,7 +9,6 @@
     float temperature = atof(find(task, "temperatures", "temperature"));
     int num_spins = atoi(find(task, "spins", "number"));
     int reps = atoi(find(task, "reps", "number"));
-    ising();
 
 	float low_temp = atof(find(task, "temperatures", "low"));
 	float high_temp = atof(find(task, "temperatures", "high"));
@@ -136,8 +135,8 @@ void first_and_last(void)
 
 
 /*
- * question_1_c
- * ------------
+ * physical_parameters
+ * -------------------
  * Compute and plot figures for energy, free energy, entropy and 
  * heat capacity and the reduced magnetisation per dipole of the 
  * 1d ising model against temperatur, T, using your simulation
@@ -147,18 +146,8 @@ void first_and_last(void)
  * Compute time averages of these quantities for the best results
  * and make sure that the system reaches thermodynamic equilibrium
  * before taking measurements. Present against the analytic solutions.
- *
- * parameters
- * ----------
- * int number_of_spins: The number of spins to simulate.
- * int temepratures[]: The temperatures to simulate. 
- * 
- * notes
- * -----
- * Writes the output to a file for GNUPlot to plot. 
  */
-void physical_parameters(int num_spins, float temperatures[], 
-    int num_temps, int reps)
+void physical_parameters(void)
 {
     char* out = find(__config__("config/config.toml"), "readables", "1c");
 
@@ -234,21 +223,12 @@ void physical_parameters(int num_spins, float temperatures[],
 
 
 /*
- * question_1_e
- * ------------
+ * histogram
+ * ---------
  * Create a histogram of the m values you obtain by running a 
  * simulation of 500 spins at 1., 2. and 3. temperatures 100 times.
- *
- * parameters
- * ----------
- * int number_of_spins: The number of spins in the simulation.
- * int temperatures: The temperatures to run the simulation at. 
- *
- * notes
- * -----
- * Writes the output to a file for gnuplot. 
  */
-void histogram(int num_spins, float temperatures[], int num_temps, int reps)
+void histogram(void)
 {
     int reps_per_temp = 100;
     int magnetisations[num_temps][reps_per_temp]; 
