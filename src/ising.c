@@ -1,24 +1,8 @@
+#include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<math.h>
 #include"include/ising.h"
-
-
-/*
- * spin_energy
- * -----------
- * A function pointer to allow the conditional assignment of the calculation 
- * of spin energy. 
- *
- * parameters
- * ----------
- * int spin: The spin to calculate the energy contribution of.
- * int spins[]: The current state of the system. 
- * int num_spins: The number of spins in the system.
- */
-// int (*spin_energy)(int spin, int spins[], int num_spins);
-
 
 
 /*

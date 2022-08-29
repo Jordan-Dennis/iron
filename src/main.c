@@ -79,11 +79,11 @@ int main(int num_args, char *args[])
             spin_energy = &one_dimensional_spin_energy;
             break;
         }
-        case 2:
-        {
-            spin_energy = &two_dimensional_spin_energy;
-            break;
-        }
+//        case 2:
+//        {
+//            spin_energy = &two_dimensional_spin_energy;
+//            break;
+//        }
         default:
         {
             printf("Error: Dimensions must be 2 or 1!");
