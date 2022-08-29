@@ -211,6 +211,26 @@ int one_dimensional_spin_energy(int spin, int spins[], int num_spins)
 }
 
 
+//TODO: Work this out
+    switch (dimension)
+    {
+        case 1:
+        {
+            spin_energy = &one_dimensional_spin_energy;
+            break;
+        }
+        case 2:
+        {
+            spin_energy = &two_dimensional_spin_energy;
+            break;
+        }
+        default:
+        {
+            printf("Error: Dimensions must be 2 or 1!");
+            exit(1);
+        }
+    }
+
 /*
  * energy
  * ----------------
