@@ -83,13 +83,8 @@ typedef struct TomlLexer
 {
     char *toml, *current_group; 
     int cursor, length; 
-    Debug* debug;
 } Toml;
 
-
-Debug* __debug__(char* file_name);
-void debug(Debug* debug, char* message);
-void wipe(Debug* debug);
 
 
 Toml* __toml__(char* file_name);
