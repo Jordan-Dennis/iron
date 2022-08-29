@@ -72,24 +72,7 @@ int main(int num_args, char *args[])
 	int reps = atoi(find(task, "reps", "number"));
     int dimension = atoi(find(task, "dimensions", "number"));
 
-    switch (dimension)
-    {
-        case 1:
-        {
-            spin_energy = &one_dimensional_spin_energy;
-            break;
-        }
-//        case 2:
-//        {
-//            spin_energy = &two_dimensional_spin_energy;
-//            break;
-//        }
-        default:
-        {
-            printf("Error: Dimensions must be 2 or 1!");
-            exit(1);
-        }
-    }
+
 
 
 	if (strcmp(question, "first_and_last") == 0)

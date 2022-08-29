@@ -139,9 +139,10 @@ int random_spin(void)
  *  3. (num * (num - 1))
  *  4. (num - 1)
  */
-int two_dimensional_spin_energy(int spin, int spins[], int num_spins)
+int two_dimensional_spin_energy(System* system, int spin)
 {
-    const int num = (int) sqrt(num_spins);
+    int *spins = system -> spins;
+    int num = (int) sqrt(system -> num_spins);
     int energy = 0;
 
     if (spin % num == 0)
@@ -177,22 +178,24 @@ int two_dimensional_spin_energy(int spin, int spins[], int num_spins)
 
 
 /*
- * spin_energy
+ * one_dimensional_spin_energy
  * -----------
  * Calculate the energy of one spin interacting with its immediate 
- * neighbours in normalised units.
+ * neighbours in normalised units for one diemsnional case of spins isolated
+ * along a line. 
  *
  * parameters
  * ----------
  * int spin: The index of the specific spin.
- * int spins[]: The array representing the ensamble of spins.
+ * System* system: The array representing the ensamble of spins.
  * 
  * returns
  * -------
  * int: The energy contribution of this specific spin.
  */
-int one_dimensional_spin_energy(int spin, int spins[], int num_spins)
+int one_dimensional_spin_energy(System* system, int spin)
 {
+    int *spins = system -> spins;
     int energy = 0;
     if (spin == 0) 
     {
@@ -211,17 +214,32 @@ int one_dimensional_spin_energy(int spin, int spins[], int num_spins)
 }
 
 
-//TODO: Work this out
-    switch (dimension)
+/*
+ * spin_energy
+ * -----------
+ * Calculate the spin energy of a spin irrespective of the dimensions.
+ *
+ * parameters
+ * ----------
+ * System* system: The spin system of which to calculate the energy.
+ *
+ * returns
+ * -------
+ * int energy: The energy of the system in natural units. 
+ */
+int spin_energy(System* system, int spin)
+{
+    int energy;
+    switch (system -> dimension)
     {
         case 1:
         {
-            spin_energy = &one_dimensional_spin_energy;
+            energy = one_dimensional_spin_energy(system, spin);
             break;
         }
         case 2:
         {
-            spin_energy = &two_dimensional_spin_energy;
+            energy = two_dimensional_spin_energy(system, spin);
             break;
         }
         default:
@@ -230,6 +248,9 @@ int one_dimensional_spin_energy(int spin, int spins[], int num_spins)
             exit(1);
         }
     }
+    return energy;
+}
+
 
 /*
  * energy
@@ -238,20 +259,18 @@ int one_dimensional_spin_energy(int spin, int spins[], int num_spins)
  * 
  * parameters
  * ----------
- * int spins[]: The spin state of the ensamble.
- * int num_spins: The number of spins in the system. 
+ * System* system: The system representing the ensamble. 
  *
  * returns
  * -------
  * int: The energy of the ensamble in units of epsilon.
  */
-int energy(int spins[], int num_spins)
+int energy(System* system)
 {
     int energy = 0;
-    for (int spin = 0; spin < num_spins; spin++) 
+    for (int spin = 0; spin < system -> number; spin++) 
     {
-        // Just the nearest neighours contribute to the energy.
-        energy += spin_energy(spin, spins, num_spins);
+        energy += spin_energy(system, spin);
     }
     return energy;
 }
@@ -264,22 +283,22 @@ int energy(int spins[], int num_spins)
  * 
  * parameters
  * ----------
- * int spins[] : An array representing the spins of the system.
- * int num_spins: The number of spins in the system.
+ * System* system: The spin ensamble to calculate the entropy of.
  *
  * returns
  * -------
  * float entropy: The entropy of the system.  
  */
-float entropy(int spins[], int num_spins) 
+float entropy(System* system) 
 {
+    int number = system -> number;
     int up_spins = 0;
-    for (int spin=0; spin < num_spins; spin++)
+    for (int spin = 0; spin < number; spin++)
     {
-        up_spins += (int)(spins[spin] > 0);
+        up_spins += (int)((system -> spins)[spin] > 0);
     }
-    int down_spins = num_spins - up_spins;
-    int multiplicity = factorial(num_spins) /\
+    int down_spins = number - up_spins;
+    int multiplicity = factorial(number) /\
         (factorial(up_spins) * factorial(down_spins));
     return log(multiplicity);
 }
@@ -292,18 +311,15 @@ float entropy(int spins[], int num_spins)
  * 
  * parameters
  * ----------
- * int spins[]: The spin esamble.
- * float temperature: The temperature of the ensamble.
- * int num_spins: The number of spins in the ensamble.
+ * System* system: The spin ensamble to calculate the free energy of. 
  * 
  * returns
  * -------
  * float free_energy: The free energy.
  */
-float free_energy(int spins[], float temperature, int num_spins)
+float free_energy(System* system)
 {
-    return (float)energy(spins, num_spins) - temperature *\
-        entropy(spins, num_spins);
+    return (float)energy(system) - (system -> temperature) * entropy(system);
 }
 
 
@@ -314,27 +330,25 @@ float free_energy(int spins[], float temperature, int num_spins)
  *
  * parameters
  * ----------
- * int spins[]: The spins ensamble.
- * float temperature: The temperature of the ensamble.
- * int num_spins: The number of spins in the ensamle.
+ * System* system: The spin ensamble to calculate the heat capacity of
  * 
  * returns
  * -------
  * float heat_capacity: The heat capacity. 
  */
-float heat_capacity(int spins[], float temperature, int num_spins)
+float heat_capacity(System* system)
 {
     int total = 0;
-    for (int spin=0; spin < num_spins; spin++)
+    for (int spin=0; spin < (system -> number); spin++)
     {
-        total += spins[spin];
+        total += (system -> spins)[spin];
     }
-    float energy_average = (float) total / (float) num_spins;
+    float energy_average = (float) total / (float) (system -> number);
     // Note that the square of all the spins is 1
     // Hence the expected value of the distance from 
     // 0 must be 1.
     float energy_variance = 1 - energy_average;
-    return energy_variance / (temperature * temperature);
+    return energy_variance / pow(system -> temperature, 2);
 }
 
 
@@ -345,30 +359,24 @@ float heat_capacity(int spins[], float temperature, int num_spins)
  *
  * parameters
  * ----------
- * int spins[]: The spin system to evolve. 
- * float temperature: The temperature of the system in natural units.
- * int num_spins: The number of spins in the system. 
- * 
- * returns
- * -------
- * void: The array modifications are done in place. 
+ * System* system: The spin ensamble to evolve.  
  */
-void metropolis_step(int spins[], float temperature, int num_spins)
+void metropolis_step(System* system)
 {
 
-    int spin = (int) (normalised_random() * num_spins);
-    int energy_change = - 4 * spin_energy(spin, spins, num_spins);
+    int spin = (int) (normalised_random() * (system -> number));
+    int energy_change = - 4 * spin_energy(system, spin);
    
     if (energy_change <= 0)
     {
-        spins[spin] = -spins[spin];
+        (system -> spins[spin]) = -(system -> spins[spin]);
     } 
     else
     {
-        float probability = exp(- energy_change / temperature);
+        float probability = exp(- energy_change / (system -> temperature));
         if (probability >= normalised_random()) 
         {
-            spins[spin] = -spins[spin];
+            (system -> spins[spin]) = -(system -> spins[spin]);
         }
     }
 }
@@ -388,12 +396,12 @@ void metropolis_step(int spins[], float temperature, int num_spins)
  * -------
  * void: The spins array is internal modified on the heap. 
  */
-void random_system(int spins[], int num_spins)
+void random_system(System* system, int number)
 {
-    for (int spin = 0; spin < num_spins; spin++) 
+    system -> spins = (int) calloc(number, sizeof int);
+    for (int spin = 0; spin < number; spin++) 
     {
-        int value = random_spin();
-        spins[spin] = value;
+        (system -> spins[spin]) = random_spin();
     }
 }
 
@@ -405,19 +413,18 @@ void random_system(int spins[], int num_spins)
  * 
  * parameters
  * ----------
- * int spins[]: The spin system.
- * int num_spins: The number of spins in the system.
+ * System* system: The spin ensamble to calculate the magnetisation of.  
  *
  * returns
  * -------
  * int magnetisation: The net magnetisation.
  */
-int magnetisation(int spins[], int num_spins)
+int magnetisation(System* system)
 {
     int magnetisation = 0;
-    for (int spin = 0; spin < num_spins; spin++)
+    for (int spin = 0; spin < (system ->  number); spin++)
     {
-        if (spin > 0)
+        if ((system -> spins[spin]) > 0)
         {
             magnetisation++;
         }

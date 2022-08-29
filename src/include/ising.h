@@ -35,8 +35,7 @@ float entropy(System* system);
 float free_energy(System* system);
 float heat_capacity(System* system);
 void metropolis_step(System* system);
-void random_system(System* system);
-
-int spin_energy(System* system);
+void random_system(System* system, int number);
+int spin_energy(System* system, int spin);
 
 #endif
