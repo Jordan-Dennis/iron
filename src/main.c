@@ -36,6 +36,21 @@ void parse_temperatures(float temperatures[], float low, float high,
 
 
 /*
+ * spin_energy
+ * -----------
+ * A function pointer to allow the conditional assignment of the calculation 
+ * of spin energy. 
+ *
+ * parameters
+ * ----------
+ * int spin: The spin to calculate the energy contribution of.
+ * int spins[]: The current state of the system. 
+ * int num_spins: The number of spins in the system.
+ */
+int *spin_energy(int spin, int spins[], int num_spins);
+
+
+/*
  * main
  * ----
  * Navigate the implementations for questions 1 - 3. Please provide the 
@@ -51,8 +66,7 @@ int main(int num_args, char *args[])
 	Config* task = __config__(args[1]);
 	
     // Parsing the question index from the file. 
-	// TODO: Make it possible to parse a toml array of multiple indexes.
-	char* question = find(task, "question", "index");
+	char* question = find(task, "task", "task");
 
     if (strcmp(question, "ising") == 0)
     {
@@ -67,18 +81,33 @@ int main(int num_args, char *args[])
 	float low_temp = atof(find(task, "temperatures", "low"));
 	float high_temp = atof(find(task, "temperatures", "high"));
 	float step = atof(find(task, "temperatures", "step"));
-
-	float temperatures[(int) ((high_temp - low_temp) / step)];
+	int num_temps = (int) ((high_temp - low_temp) / step);
+	float temperatures[num_temps];
 	parse_temperatures(temperatures, low_temp, high_temp, step);
-	int num_temps = (int) sizeof(temperatures) / sizeof(float);
-
-	// Reading the number of spins from the file.
 	int number_of_spins = atoi(find(task, "spins", "number"));
-
-	// Reading the number of reps from the file
 	int reps = atoi(find(task, "reps", "number"));
+    int dimension = atoi(find(task, "dimensions", "number"));
 
-	
+    switch (dimension)
+    {
+        case 1:
+        {
+            spin_energy = &1d_spin_energy;
+            break;
+        }
+        case 2:
+        {
+            spin_energy = &2d_spin_energy;
+            break;
+        }
+        default:
+        {
+            printf("Error: Dimensions must be 2 or 1!");
+            exit(1);
+        }
+    }
+
+
 	if (strcmp(question, "1a") == 0)
 	{
 		printf("Entering Q1a)!\n");
