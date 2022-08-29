@@ -10,4 +10,7 @@
     number = 500
 
 [question]
-    index = 1e
+    index = histogram
+
+[dimensions]
+    number = 1

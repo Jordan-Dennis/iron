@@ -10,6 +10,8 @@
 	number = 100
 
 [question]
-	index = 1a
+	index = first_and_last
 
+[dimensions]
+    number = 1
 

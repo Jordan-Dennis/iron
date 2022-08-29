@@ -10,4 +10,7 @@
     number = 100
 
 [question]
-    index = 1c
+    index = physical_parameters
+
+[dimensions]
+    number = 1

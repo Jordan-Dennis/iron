@@ -2,9 +2,9 @@
 #include<stdio.h>
 #include<string.h>
 #include"include/toml.h"
+#include"include/sims.h"
 #include"include/ising.h"
 #include"include/errors.h"
-#include"include/question_1.h"
 
 
 /*

@@ -15,5 +15,8 @@ float heat_capacity(int spins[], float temperature, int num_spins);
 void metropolis_step(int spins[], float temperature, int num_spins);
 void random_system(int spins[], int num_spins);
 void system_to_file(int spins[], char* file_name, int num_spins);
+int (*spin_energy)(int spin, int spins[], int num_spins);
+int two_dimensional_spin_energy(int spin, int spins[], int num_spins);
+int one_dimensional_spin_energy(int spin, int spins[], int num_spins);
 
 #endif

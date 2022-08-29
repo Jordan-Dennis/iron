@@ -1,11 +1,10 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"include/question_1.h"
+#include"include/toml.h"
+#include"include/sims.h"
 #include"include/ising.h"
 #include"include/errors.h"
-#include"include/toml.h"
-#include"include/question_2.h"
 
 
 /*
@@ -33,21 +32,6 @@ void parse_temperatures(float temperatures[], float low, float high,
         index++;
 	}
 }
-
-
-/*
- * spin_energy
- * -----------
- * A function pointer to allow the conditional assignment of the calculation 
- * of spin energy. 
- *
- * parameters
- * ----------
- * int spin: The spin to calculate the energy contribution of.
- * int spins[]: The current state of the system. 
- * int num_spins: The number of spins in the system.
- */
-int *spin_energy(int spin, int spins[], int num_spins);
 
 
 /*
@@ -92,12 +76,12 @@ int main(int num_args, char *args[])
     {
         case 1:
         {
-            spin_energy = &1d_spin_energy;
+            spin_energy = &one_dimensional_spin_energy;
             break;
         }
         case 2:
         {
-            spin_energy = &2d_spin_energy;
+            spin_energy = &two_dimensional_spin_energy;
             break;
         }
         default:
@@ -108,20 +92,17 @@ int main(int num_args, char *args[])
     }
 
 
-	if (strcmp(question, "1a") == 0)
+	if (strcmp(question, "first_and_last") == 0)
 	{
-		printf("Entering Q1a)!\n");
-		question_1_a(number_of_spins, temperatures, num_temps, reps);
+		first_and_last(number_of_spins, temperatures, num_temps, reps);
 	}
-	else if (strcmp(question, "1c") == 0)
+	else if (strcmp(question, "physical_parameters") == 0)
 	{
-		printf("Entering Q1c)!\n");
-		question_1_c(number_of_spins, temperatures, num_temps, reps);
+		physical_parameters(number_of_spins, temperatures, num_temps, reps);
 	}
-	else if (strcmp(question, "1e") == 0)
+	else if (strcmp(question, "histogram") == 0)
 	{
-		printf("Entering Q1e)!\n");
-		question_1_e(number_of_spins, temperatures, num_temps, reps);
+		histogram(number_of_spins, temperatures, num_temps, reps);
 	}
 	else
 	{

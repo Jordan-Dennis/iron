@@ -6,6 +6,22 @@
 
 
 /*
+ * spin_energy
+ * -----------
+ * A function pointer to allow the conditional assignment of the calculation 
+ * of spin energy. 
+ *
+ * parameters
+ * ----------
+ * int spin: The spin to calculate the energy contribution of.
+ * int spins[]: The current state of the system. 
+ * int num_spins: The number of spins in the system.
+ */
+// int (*spin_energy)(int spin, int spins[], int num_spins);
+
+
+
+/*
  * factorial
  * ---------
  * Calculate the factorial of a number.
@@ -139,49 +155,37 @@ int random_spin(void)
  *  3. (num * (num - 1))
  *  4. (num - 1)
  */
-int 2d_spin_energy(int spin, int spins[], int num_spins)
+int two_dimensional_spin_energy(int spin, int spins[], int num_spins)
 {
-    int num = (int) sqrt(num_spins);
+    const int num = (int) sqrt(num_spins);
     int energy = 0;
 
-    switch (spin % num)
+    if (spin % num == 0)
     {
-        case 0: 
-        {
-            energy += spins[spin] * (spins[spin + 1] + spins[spin + num - 1]);
-            break;
-        }
-        case num - 1: 
-        {
-            energy += spins[spin] * (spins[spin - 1] + spins[spin - num + 1]);
-            break;
-        }
-        default:
-        {
-            energy += spins[spin] * (spins[spin + num] + spins[spin - num]);
-            break;
-        }
+        energy += spins[spin] * (spins[spin + 1] + spins[spin + num - 1]);
+    }
+    else if (spin % num == num - 1)
+    {
+        energy += spins[spin] * (spins[spin - 1] + spins[spin - num + 1]);
+    }
+    else
+    {
+        energy += spins[spin] * (spins[spin + num] + spins[spin - num]);
     }
 
-    switch ((int) spin / num)
+    if ((int) spin / num == 0)
     {
-        case 0:
-        {
-            energy += spins[spin] * (spins[spin + num] + 
-                spins[spin + num * (num - 1)]);
-            break;
-        }
-        case num - 1:
-        {
-            energy += spins[spin] * (spins[spin - num] + 
-                spins[spin - num * (num - 1)]) 
-            break;
-        }
-        default:
-        {
-            energy += spins[spin] * (spins[spin - num] + spins[spin + num]);
-            break;
-        }
+        energy += spins[spin] * (spins[spin + num] + 
+            spins[spin + num * (num - 1)]);
+    }
+    else if ((int) spin / num == num - 1)
+    {
+        energy += spins[spin] * (spins[spin - num] + 
+            spins[spin - num * (num - 1)]);
+    }
+    else
+    {
+        energy += spins[spin] * (spins[spin - num] + spins[spin + num]);
     }
 
     return energy;
@@ -203,27 +207,22 @@ int 2d_spin_energy(int spin, int spins[], int num_spins)
  * -------
  * int: The energy contribution of this specific spin.
  */
-int 1d_spin_energy(int spin, int spins[], int num_spins)
+int one_dimensional_spin_energy(int spin, int spins[], int num_spins)
 {
     int energy = 0;
-    switch (spin) 
+    if (spin == 0) 
     {
-        case 0: 
-        {
-            energy += spins[0] * (spins[num_spins] + spins[1]);
-            break;
-        }
-        case num_spins - 1:
-        {
-            energy += spins[num_spins - 1] * (spins[0] + spins[spin - 1]);
-            break;
-        }
-        default:
-        {
-            energy += spins[spin] * (spins[spin - 1] + spins[spin + 1]);
-            break;
-        }
+        energy += spins[0] * (spins[num_spins] + spins[1]);
     }
+    else if (spin == num_spins - 1)
+    {
+        energy += spins[num_spins - 1] * (spins[0] + spins[spin - 1]);
+    }
+    else
+    {
+        energy += spins[spin] * (spins[spin - 1] + spins[spin + 1]);
+    }
+    
     return energy;
 }
 
