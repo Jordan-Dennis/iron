@@ -19,6 +19,13 @@ typedef struct Debug
 } Debug;
 
 
+// TODO: For this to work there will need to be multiple different types of
+// Pair so that calue can have multiple different pointer types. 
+// I will also interpret the data as I go. That is to say that instead of 
+// having a char it will get cast to an int or float. 
+// Mwahahahaha I can have a void pointer that points to an arbitrary point
+// in memory and I can use this to create my perfect Toml reading device. 
+
 /*
  * Pair
  * ----
@@ -32,7 +39,8 @@ typedef struct Debug
  */
 typedef struct Pair 
 { 
-    char *key, *value, *group; 
+    char *key, *group;
+    void *value; 
 } Pair;
 
 
@@ -54,6 +62,10 @@ typedef struct Config
 } Config;
 
 
+// The next question is if I should lex the damn thing or just continue in 
+// the fashion that I started with. 
+
+
 /*
  * Toml
  * ----
@@ -67,7 +79,7 @@ typedef struct Config
  * int cursor: The current position of the lexer in the file.
  * Debug* debug: A debugger for error catching. 
  */
-typedef struct Toml 
+typedef struct TomlLexer
 {
     char *toml, *current_group; 
     int cursor, length; 
@@ -83,6 +95,10 @@ void wipe(Debug* debug);
 Toml* __toml__(char* file_name);
 Pair* __pair__(char* key, char* value, char* group);
 Config* __config__(char* file_name);
+
+
+// So I want to add functionality to do an arbitrary level of nesting for the 
+// group. How can I do this? group -> global/group/subgroup
 
 
 int done(Toml* toml);
