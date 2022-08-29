@@ -6,28 +6,59 @@
 #include"include/ising.h"
 #include"include/errors.h"
 
+    float temperature = atof(find(task, "temperatures", "temperature"));
+    int num_spins = atoi(find(task, "spins", "number"));
+    int reps = atoi(find(task, "reps", "number"));
+    ising();
+
+	float low_temp = atof(find(task, "temperatures", "low"));
+	float high_temp = atof(find(task, "temperatures", "high"));
+	float step = atof(find(task, "temperatures", "step"));
+	int num_temps = (int) ((high_temp - low_temp) / step);
+	float temperatures[num_temps];
+	parse_temperatures(temperatures, low_temp, high_temp, step);
+	int number_of_spins = atoi(find(task, "spins", "number"));
+	int reps = atoi(find(task, "reps", "number"));
+    int dimension = atoi(find(task, "dimensions", "number"));
+
 
 /*
- * question_1_a
- * ------------
+ * parse_temperatures
+ * ------------------
+ * A helper function for parsing the arguments to the question 1 code. 
+ *
+ * parameters
+ * ----------
+ * float temperatures[]: The array to store the temperatures in.
+ * float low: The lowest temperature to simulate.
+ * float high: The highest temperature to simulate. 
+ * float step: The increment for the temperature. 
+ */
+void parse_temperatures(float temperatures[], float low, float high, 
+	float step)
+{ 
+	temperatures[0] = low;
+	float temperature = low;
+	int index = 1;
+	while (temperature <= high)
+	{
+		temperature += step;
+		temperatures[index] = temperature;
+        index++;
+	}
+}
+
+
+/*
+ * first_and_last 
+ * --------------
  * A one dimensional ising model with periodic boundaries using the 
  * metropolis algorithm. Provide the initial and the final outputs 
  * from the simulation for at least three different temperatures.
  * What do you notice about the size of the chunks of color at 
  * low temperatures compared to high temperatures. 
- *
- * parameters
- * ----------
- * int number_of_spins: The number of spins to simulate.
- * int[] temperatures: The temperatures to run the simualtion at.
- *
- * notes
- * -----
- * Writes the outputs of the first and final states to external files 
- * for use with GNUPlot. 
  */
-void first_and_last(int num_spins, float temperatures[], 
-    int num_temps, int reps)
+void first_and_last(void)
 {
     char* out = find(__config__("config/config.toml"), "readables", "1a");
     int results[2][num_spins][num_temps];

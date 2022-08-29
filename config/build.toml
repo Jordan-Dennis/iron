@@ -9,7 +9,7 @@
 [spins]
     number = 500
 
-[question]
+[task]
     index = histogram
 
 [dimensions]
