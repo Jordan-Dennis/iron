@@ -71,12 +71,43 @@
 int spin_energy(int spin, int spins[], int num_spins)
 {
     int num = sqrt(num_spins);
-    int energy;
-    if (spin % num == 0)
+    int energy = 0;
+
+    switch (spin % num)
     {
-        energy = spins[spin] * (spins[spin + 1] + 
-            spins[spin + num - 1] + spins[spin + num] + spins[spin - num]);
+        case 0: 
+        {
+            energy += spins[spin] * (spins[spin + 1] + spins[spin + num - 1]);
+        }
+        case num - 1: 
+        {
+            energy += spins[spin] * (spins[spin - 1] + spins[spin - num + 1]);
+        }
+        default:
+        {
+            energy += spins[spin] * (spins[spin + num] + spins[spin - num]);
+        }
     }
+
+    switch ((int) spin / num)
+    {
+        case 0:
+        {
+            energy += spins[spin] * (spins[spin + num] + 
+                spins[spin + num * (num - 1)]);
+        }
+        case num - 1:
+        {
+            energy += spins[spin] * (spins[spin - num] + 
+                spins[spin - num * (num - 1)]) 
+        }
+        default:
+        {
+            energy += spins[spin] * (spins[spin - num] + spins[spin + num]);
+        }
+    }
+
+    return energy;
 }
 
 

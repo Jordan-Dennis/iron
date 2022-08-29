@@ -26,12 +26,12 @@
  * Writes the outputs of the first and final states to external files 
  * for use with GNUPlot. 
  */
-void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
+void first_and_last(int num_spins, float temperatures[], 
+    int num_temps, int reps)
 {
-    printf("Invoking toml!\n");
-    char* out = find(__config__("config.toml"), "readables", "1a");
-    printf("File: %s\n", out);
+    char* out = find(__config__("config/config.toml"), "readables", "1a");
     int results[2][num_spins][num_temps];
+
     for (int temperature = 0; temperature <= num_temps; temperature++)
     {
         printf("Temperature: %f\n", temperatures[temperature]);
@@ -126,9 +126,10 @@ void question_1_a(int num_spins, float temperatures[], int num_temps, int reps)
  * -----
  * Writes the output to a file for GNUPlot to plot. 
  */
-void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
+void physical_parameters(int num_spins, float temperatures[], 
+    int num_temps, int reps)
 {
-    char* out = find(__config__("config.toml"), "readables", "1c");
+    char* out = find(__config__("config/config.toml"), "readables", "1c");
 
     // Arrays to store the collected data on the physical state. 
     float sim_heat_capacity[num_temps];
@@ -216,7 +217,7 @@ void question_1_c(int num_spins, float temperatures[], int num_temps, int reps)
  * -----
  * Writes the output to a file for gnuplot. 
  */
-void question_1_e(int num_spins, float temperatures[], int num_temps, int reps)
+void histogram(int num_spins, float temperatures[], int num_temps, int reps)
 {
     int reps_per_temp = 100;
     int magnetisations[num_temps][reps_per_temp]; 
@@ -245,7 +246,7 @@ void question_1_e(int num_spins, float temperatures[], int num_temps, int reps)
     }
 
     // Opening the data file. 
-    char* out = find(__config__("config.toml"), "readables", "1e");
+    char* out = find(__config__("config/config.toml"), "readables", "1e");
     FILE* data = fopen(out, "w");
     validate_file(data, out);
     
