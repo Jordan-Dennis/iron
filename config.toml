@@ -14,3 +14,6 @@
 
 [dimensions]
     number = 1
+
+[out]
+    address = pub/data/1c.csv 
