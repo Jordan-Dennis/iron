@@ -6,19 +6,12 @@
 #include"include/ising.h"
 #include"include/errors.h"
 
-    float temperature = atof(find(task, "temperatures", "temperature"));
-    int num_spins = atoi(find(task, "spins", "number"));
-    int reps = atoi(find(task, "reps", "number"));
 
-	float low_temp = atof(find(task, "temperatures", "low"));
-	float high_temp = atof(find(task, "temperatures", "high"));
-	float step = atof(find(task, "temperatures", "step"));
-	int num_temps = (int) ((high_temp - low_temp) / step);
-	float temperatures[num_temps];
-	parse_temperatures(temperatures, low_temp, high_temp, step);
-	int number_of_spins = atoi(find(task, "spins", "number"));
-	int reps = atoi(find(task, "reps", "number"));
-    int dimension = atoi(find(task, "dimensions", "number"));
+typedef struct Temperatures
+{
+    int length;
+    float* temps;
+} Temperatures;
 
 
 /*
@@ -33,11 +26,23 @@
  * float high: The highest temperature to simulate. 
  * float step: The increment for the temperature. 
  */
-void parse_temperatures(float temperatures[], float low, float high, 
-	float step)
+void parse_temperatures(Config* config)
 { 
-	temperatures[0] = low;
-	float temperature = low;
+    // TODO: I decided to pass the config so that the high low and step 
+    // automatically dropped out of scope.
+	Temperatures* temperatures = malloc(sizeof Temperatures);
+    
+    // TODO: Finish the castings here and then complete this function.
+    float low = atof(find(config, "temperatures", "low"));
+    float high = find(config, "temperatures", "high");
+    float step = find(config, "temperatures", "step");
+    float length = (int) ((high - low) / step);
+	
+    temperatures -> length = length;
+
+    float* temps =  calloc(length, sizeof float);
+    temps[0] = low;
+    float temperature = low;
 	int index = 1;
 	while (temperature <= high)
 	{
@@ -46,7 +51,7 @@ void parse_temperatures(float temperatures[], float low, float high,
         index++;
 	}
 }
-
+// TODO: Should I implement the temperatures as well as a struct? 
 
 /*
  * first_and_last 
@@ -59,15 +64,21 @@ void parse_temperatures(float temperatures[], float low, float high,
  */
 void first_and_last(void)
 {
-    char* out = find(__config__("config/config.toml"), "readables", "1a");
+    Config* config = __config__("config.toml");
+    char* out = find(config, "out", "address");
+    int num_spins = find(config, "spins", "number");
+    int reps = find(config, "reps", "number");
+    int dims = find(config, "dimensions", "number");
+    
+    float *temperatures = range(low, high, step);
+
     int results[2][num_spins][num_temps];
 
     for (int temperature = 0; temperature <= num_temps; temperature++)
     {
-        printf("Temperature: %f\n", temperatures[temperature]);
         int spins[num_spins];
         random_system(spins, num_spins); 
-        // system_to_file(spins, out, num_spins);
+
         // Saving the initial configuration of this temeprature in the 
         // memory.
         for (int spin = 0; spin < num_spins; spin++)
@@ -86,12 +97,8 @@ void first_and_last(void)
         {
             results[1][spin][temperature] = spins[spin];
         }
-        // system_to_file(spins, out, num_spins);
     }
 
-    //TODO: Look into migrating this upward into the existing loops to 
-    // simplify the logic of the code. 
-    // Opening the file. 
     FILE* data = fopen(out, "w");
     if (!data)
     {
