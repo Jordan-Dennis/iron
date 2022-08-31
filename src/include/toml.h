@@ -4,21 +4,6 @@
 #include<stdbool.h>
 
 
-/*
- * Debug
- * -----
- * A simple logging structure for debugging the toml communications.
- *
- * fields
- * ------
- * char* file_name: The name of the log file to use.
- */ 
-typedef struct Debug
-{
-    char* file_name;
-} Debug;
-
-
 // TODO: For this to work there will need to be multiple different types of
 // Pair so that calue can have multiple different pointer types. 
 // I will also interpret the data as I go. That is to say that instead of 
@@ -79,7 +64,7 @@ typedef struct Config
  * int cursor: The current position of the lexer in the file.
  * Debug* debug: A debugger for error catching. 
  */
-typedef struct TomlLexer
+typedef struct Toml
 {
     char *toml, *current_group; 
     int cursor, length; 
@@ -87,7 +72,7 @@ typedef struct TomlLexer
 
 
 
-Toml* __toml__(char* file_name);
+Toml* __toml__(char* file_name); // TODO: Add global as group at start
 Pair* __pair__(char* key, char* value, char* group);
 Config* __config__(char* file_name);
 
@@ -100,6 +85,8 @@ int done(Toml* toml);
 char peek(Toml* toml);
 char next(Toml* toml);
 char* word(Toml* toml);
+// void* array(Toml* toml); // TODO: 
+// void comment(Toml* toml); // TODO:
 void whitespace(Toml* toml);
 char* group(Toml* toml);
 Pair* entry(Toml* toml);

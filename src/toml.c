@@ -167,7 +167,6 @@ char next(Toml* toml)
  */
 char* word(Toml* toml)
 {
-    // debug(toml -> debug, "Entered word");
     char* str = calloc(1, sizeof(char));
     while (isalpha(peek(toml)) 
         || isdigit(peek(toml)) 
@@ -176,7 +175,6 @@ char* word(Toml* toml)
     {
         str = realloc(str, (strlen(str) + 2) * sizeof(char));
         strcat(str, (char[]){next(toml), 0});
-        // debug(toml -> debug, str);
     }
     return str;
 }
