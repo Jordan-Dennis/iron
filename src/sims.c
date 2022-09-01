@@ -7,6 +7,8 @@
 #include"include/errors.h"
 
 
+// TODO: Document
+// TODO: Maybe generalise so that I am working with vector or Vector?
 typedef struct Temperatures
 {
     int length;
@@ -168,10 +170,20 @@ void first_and_last(Config* config)
 
 typedef struct State 
 {
+    // TODO: See commit 8d12a936cc59652b25c1b631ec4be0aeb3d015ec
+    // All need to be pointers to heap allocated memory. 
     int length; 
-    float free_energy[];
-    float  
-}
+    float* energy;
+    float* entropy;
+    float* free_energy;
+    float* heat_capacity;
+} State;
+
+
+// TODO: Change this horibble dunder syntax
+State* state_init();
+void state_record();
+void state_free();
 
 
 /*
