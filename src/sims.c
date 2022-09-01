@@ -26,7 +26,7 @@ typedef struct Temperatures
  * float high: The highest temperature to simulate. 
  * float step: The increment for the temperature. 
  */
-void parse_temperatures(Config* config)
+Temperatures* parse_temperatures(Config* config)
 { 
     // TODO: I decided to pass the config so that the high low and step 
     // automatically dropped out of scope.
@@ -34,24 +34,50 @@ void parse_temperatures(Config* config)
     
     // TODO: Finish the castings here and then complete this function.
     float low = atof(find(config, "temperatures", "low"));
-    float high = find(config, "temperatures", "high");
-    float step = find(config, "temperatures", "step");
+    float high = atof(find(config, "temperatures", "high"));
+    float step = atof(find(config, "temperatures", "step"));
     float length = (int) ((high - low) / step);
 	
     temperatures -> length = length;
+    temperatures -> temps = calloc(length, sizeof float);
 
-    float* temps =  calloc(length, sizeof float);
-    temps[0] = low;
-    float temperature = low;
-	int index = 1;
-	while (temperature <= high)
-	{
-		temperature += step;
-		temperatures[index] = temperature;
-        index++;
+	for (int at_temp = 1; at_temp <= length; at_temp++)
+    {
+        (temperatures -> temps)[temperature] = low + step * at_temp;
 	}
+
+    return temperatures;
 }
-// TODO: Should I implement the temperatures as well as a struct? 
+
+
+/*
+ * parse_system
+ * ------------
+ * Convienience function for retrieving the system from the configuration file.
+ *
+ * parameters
+ * ----------
+ * Config* config: The parsed configuration file to scan for values.
+ *
+ * returns 
+ * -------
+ * System* system: The system with a random spin state and no allocated 
+ *                 temperature.
+ */
+System* parse_system(Config* config)
+{
+    int spin_number = atoi(find(config, "spins", "number"));
+    int repititions = atoi(find(config, "reps", "number"));
+    int dimensions = atoi(find(config, "dimensions", "number")); 
+
+    System* system = (System*) malloc(sizeof System);
+    system -> number = spin_number;
+    system -> dimension = dimensions;
+    random_system(system);
+
+    return system;
+}
+
 
 /*
  * first_and_last 
@@ -62,49 +88,49 @@ void parse_temperatures(Config* config)
  * What do you notice about the size of the chunks of color at 
  * low temperatures compared to high temperatures. 
  */
-void first_and_last(void)
+void first_and_last(Config* config)
 {
-    Config* config = __config__("config.toml");
+    // TODO: All of this parsing should get done by the toml interpretter 
     char* out = find(config, "out", "address");
-    int num_spins = find(config, "spins", "number");
-    int reps = find(config, "reps", "number");
-    int dims = find(config, "dimensions", "number");
-    
-    float *temperatures = range(low, high, step);
+    System* system = parse_system(config);
+    Temperatures* temperatures = parse_temperatures(config);
 
-    int results[2][num_spins][num_temps];
+    // Free config because I have finished with it. 
+    free(config);
 
-    for (int temperature = 0; temperature <= num_temps; temperature++)
+    // Storing the data.
+    int results[2][system -> number][temperatures -> length];
+    for (int temp = 0; temp <= (temp -> length); temp++)
     {
-        int spins[num_spins];
-        random_system(spins, num_spins); 
-
+        // Updating the system temperature
+        (system -> temperature) = (temperatures -> temps)[temp];
+        
         // Saving the initial configuration of this temeprature in the 
         // memory.
         for (int spin = 0; spin < num_spins; spin++)
         {
-            results[0][spin][temperature] = spins[spin];
+            results[0][spin][temp] = spins[spin];
         }
 
         // Running the metropolis algorithm over the system. 
         for (int epoch = 0; epoch <= reps; epoch++)
         { 
-            metropolis_step(spins, temperatures[temperature], num_spins);
+            metropolis_step(system);
         }
 
         // Saving the final state of the system to memory   
         for (int spin = 0; spin < num_spins; spin++)
         {
-            results[1][spin][temperature] = spins[spin];
+            results[1][spin][temp] = spins[spin];
         }
+
+        // Generating random spin system for next temperature
+        random_system(system);
     }
+    free(system);
 
     FILE* data = fopen(out, "w");
-    if (!data)
-    {
-        printf("Error: Could not open file!\n");
-        exit(1);
-    }
+    validate_file(data, out);
 
     // Writing a header row to the file. 
     fprintf(data, "# S/F, spin");
@@ -137,7 +163,6 @@ void first_and_last(void)
         }
         fprintf(data, "\n");
     }
-
 }
 
 
@@ -154,9 +179,11 @@ void first_and_last(void)
  * and make sure that the system reaches thermodynamic equilibrium
  * before taking measurements. Present against the analytic solutions.
  */
-void physical_parameters(void)
+void physical_parameters(Config* config)
 {
-    char* out = find(__config__("config/config.toml"), "readables", "1c");
+    char* out = find(config, "out", "address");
+    System* system = parse_system(config);
+    Temperatures* temperatures = parse_temperatures(config);
 
     // Arrays to store the collected data on the physical state. 
     float sim_heat_capacity[num_temps];

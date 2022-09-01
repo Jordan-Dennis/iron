@@ -389,19 +389,18 @@ void metropolis_step(System* system)
  * 
  * parameters
  * ----------
- * int spins[]: An empty array to house the spins. 
- * int num_spins: The number of spins in the system. 
+ * System* system: The in memory representation of the spins system. 
  * 
  * returns 
  * -------
  * void: The spins array is internal modified on the heap. 
  */
-void random_system(System* system, int number)
+void random_system(System* system)
 {
     system -> spins = (int) calloc(number, sizeof int);
-    for (int spin = 0; spin < number; spin++) 
+    for (int spin = 0; spin < (system -> number); spin++) 
     {
-        (system -> spins[spin]) = random_spin();
+        (system -> spins)[spin] = random_spin();
     }
 }
 

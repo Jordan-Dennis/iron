@@ -29,7 +29,8 @@ void validate_args(int num_args)
 	}
 }
 
-
+// TODO: Consider recasting this as a safe opening function rather than an 
+// error generating message.
 /* 
  * validate_file
  * -------------
