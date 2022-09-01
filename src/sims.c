@@ -166,6 +166,14 @@ void first_and_last(Config* config)
 }
 
 
+typedef struct State 
+{
+    int length; 
+    float free_energy[];
+    float  
+}
+
+
 /*
  * physical_parameters
  * -------------------
@@ -186,21 +194,23 @@ void physical_parameters(Config* config)
     Temperatures* temperatures = parse_temperatures(config);
 
     // Arrays to store the collected data on the physical state. 
-    float sim_heat_capacity[num_temps];
-    float sim_energy[num_temps];
-    float sim_free_energy[num_temps];
-    float sim_entropy[num_temps];
+    float sim_heat_capacity[temperatures -> length];
+    float sim_energy[temperatures -> length];
+    float sim_free_energy[temperatures -> length];
+    float sim_entropy[temperatures -> length];
 
     // Simulating the system. 
-    for (int temperature = 0; temperature <= num_temps; temperature++)
+    for (int temperature = 0; 
+        temperature <= (temperatures -> length); 
+        temperature++)
     {
-        int spins[num_spins];
-        random_system(spins, num_spins); 
+        // Setting the system temperature.
+        (system -> temperature) = (temperatures -> temps)[temperature];
 
         // Running the burnin period. 
         for (int epoch = 0; epoch <= 1000; epoch++)
         { 
-            metropolis_step(spins, temperatures[temperature], num_spins);
+            metropolis_step(system);
         }
 
         // Collecting the data'
@@ -209,7 +219,7 @@ void physical_parameters(Config* config)
 		// on these arrays. Damn, I keep adding linear complexity. 
         for (int epoch = 0; epoch <= reps; epoch++)
         { 
-            metropolis_step(spins, temperatures[temperature], num_spins);
+            metropolis_step(system);
 
             sim_heat_capacity[temperature] = 
 				heat_capacity(spins, temperature, num_spins);
@@ -229,6 +239,7 @@ void physical_parameters(Config* config)
         sim_entropy[temperature] = sim_entropy[temperature] / reps;
 
 		// TODO: Add the variance calculation. 
+        random_system(system); 
     }
 
 	// Writing the data to the file
