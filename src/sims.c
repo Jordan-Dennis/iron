@@ -168,6 +168,28 @@ void first_and_last(Config* config)
 }
 
 
+float mean(float* array, int length) 
+{
+    float mean;
+    for (int entry = 0; entry < length; entry++)
+    {
+        mean += array[entry] / length;
+    }
+    return mean;
+}
+
+
+float variance(float* array, float mean, int length)
+{
+    float variance;
+    for (int entry = 0; entry < length; entry++)
+    {
+        variance += (array[entry] - mean)*(array[entry] - mean) / (length - 1);
+    }
+    return variance;
+}
+
+
 /*
  * physical_parameters
  * -------------------
@@ -188,7 +210,11 @@ void physical_parameters(Config* config)
     Temperatures* temperatures = parse_temperatures(config);
 
     // Arrays to store the collected data on the physical state. 
-
+    float energies_and_error[temperatures -> length];
+    float entropies_and_error[temperatures -> length];
+    float free_energies_and_error[temperatures -> length];
+    float heat_capacities_and_error[temperatures -> length];
+    
     // Simulating the system. 
     for (int temperature = 0; 
         temperature <= (temperatures -> length); 
@@ -207,32 +233,38 @@ void physical_parameters(Config* config)
 		// TODO: I think that I will have new arrays here to simply store
 		// the information and then I will invoke a mean and variance function 
 		// on these arrays. Damn, I keep adding linear complexity. 
-        float _energy[reps];
-        float _entropy[reps];
-        float _free_energy[reps];
-        float _heat_capacity[reps]; 
+        float simulation_energies[reps];
+        float simulation_entropies[reps];
+        float simulation_free_energies[reps];
+        float simulation_heat_capacities[reps]; 
         
         for (int epoch = 0; epoch <= reps; epoch++)
         { 
             metropolis_step(system);
-            _energy[epoch] = energy(system);
-            _entropy[epoch] = entropy(system);
-            _free_energy[epoch] = free_energy(system);
-            _heat_capacity[epoch] = heat_capacity(system);
+            simulation_energies[epoch] = energy(system);
+            simulation_entropies[epoch] = entropy(system);
+            simulation_free_energies[epoch] = free_energy(system);
+            simulation_heat_capacities[epoch] = heat_capacity(system);
         }
         
-        float mean_energy;
-        float mean_entropy;
-        float mean_entropy;
-        float mean_entropy;
-        for (int epoch = 0; epoch <= reps; epoch++)
-        {
+        float mean_energy = mean(simulation_energies, reps);
+        float mean_entropy = mean(simulation_entropies, reps);
+        float mean_free_energy = mean(simulation_free_energies, reps);
+        float mean_heat_capacity = mean(simulation_heat_capacities, reps);
+        float var_energy = variance(simulation_energies, mean_energy, reps);
+        float var_entropy = variance(simulation_entropies, mean_entropy, reps);
+        float var_free_energies = variance(simulation_energies, mean_free_energy, reps);
+        float var_heat_capacities = variance(simulation_heat_capacities, mean_heat_capacity, reps);
 
-        }
-        _energy
-        state_record(system, reps);
-
-		// TODO: Add the variance calculation. 
+        energies_and_error[temperature][1] = var_energy;
+        energies_and_error[temperature][0] = mean_energy;
+        entropies_and_error[temperature][1] = var_entropy;
+        entropies_and_error[temperature][0] = mean_entropy;
+        free_energies_and_error[temperature][1] = var_free_energy;
+        free_energies_and_error[temperature][0] = mean_free_energy;
+        heat_capacities_and_error[temperature][1] = var_heat_capacity;
+        heat_capacities_and_error[temperature][0] = mean_heat_capacity;
+        
         random_system(system); 
     }
 
