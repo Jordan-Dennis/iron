@@ -365,7 +365,7 @@ void metropolis_step(System* system)
 {
 
     int spin = (int) (normalised_random() * (system -> number));
-    int energy_change = - 4 * spin_energy(system, spin);
+    int energy_change = - 2 * spin_energy(system, spin);
    
     if (energy_change <= 0)
     {

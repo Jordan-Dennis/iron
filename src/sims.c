@@ -173,6 +173,7 @@ typedef struct State
     // TODO: See commit 8d12a936cc59652b25c1b631ec4be0aeb3d015ec
     // All need to be pointers to heap allocated memory. 
     int length; 
+    int cursor;
     float* energy;
     float* entropy;
     float* free_energy;
@@ -181,9 +182,50 @@ typedef struct State
 
 
 // TODO: Change this horibble dunder syntax
-State* state_init();
-void state_record();
-void state_free();
+State* __state__(int temperatures)
+{
+    State* state = malloc(sizeof State);
+    state -> cursor = 0;
+    state -> length = temperatures;
+    state -> energy = calloc(temperatures, float);
+    state -> entropy = calloc(temperatures, float);
+    state -> free_energy = calloc(temperatures, float);
+    state -> heat_capacity = calloc(temperatures, float); 
+    return state;
+}
+
+
+/*
+ * TODO: This method will not work because I need to calculate the variance. 
+ * 
+ *
+ *
+ *
+ *
+ */
+void state_record(System* system, int repeats)
+{
+    if ((state -> cursor) >= (state -> length))  
+    {
+        printf("Error: The State cannot hold this many temperatures");
+        exit(1);
+    }
+    state -> energy[state -> cursor] = energy(system) / repeats;
+    state -> entropy[state -> cursor] = entropy(system) / repeats;
+    state -> free_energy[state -> cursor] = free_energy(system) / repeats;
+    state -> heat_capacity[state -> cursor] = heat_capacity(system) / repeats;
+    state -> cursor++;
+}
+
+
+void state_free(State* state)
+{
+    free(state -> energy);
+    free(state -> entropy);
+    free(state -> free_energy);
+    free(state -> heat_capacity);
+    free(state);
+}
 
 
 /*
@@ -206,10 +248,7 @@ void physical_parameters(Config* config)
     Temperatures* temperatures = parse_temperatures(config);
 
     // Arrays to store the collected data on the physical state. 
-    float sim_heat_capacity[temperatures -> length];
-    float sim_energy[temperatures -> length];
-    float sim_free_energy[temperatures -> length];
-    float sim_entropy[temperatures -> length];
+    State* state = __state__(temperatures -> length);
 
     // Simulating the system. 
     for (int temperature = 0; 
@@ -229,26 +268,30 @@ void physical_parameters(Config* config)
 		// TODO: I think that I will have new arrays here to simply store
 		// the information and then I will invoke a mean and variance function 
 		// on these arrays. Damn, I keep adding linear complexity. 
+        float _energy[reps];
+        float _entropy[reps];
+        float _free_energy[reps];
+        float _heat_capacity[reps]; 
+        
         for (int epoch = 0; epoch <= reps; epoch++)
         { 
             metropolis_step(system);
-
-            sim_heat_capacity[temperature] = 
-				heat_capacity(spins, temperature, num_spins);
-
-            sim_energy[temperature] = energy(spins, num_spins);
-
-            sim_free_energy[temperature] = 
-				free_energy(spins, temperature, num_spins);
-
-            sim_entropy[temperature] = entropy(spins, num_spins);
+            _energy[epoch] = energy(system);
+            _entropy[epoch] = entropy(system);
+            _free_energy[epoch] = free_energy(system);
+            _heat_capacity[epoch] = heat_capacity(system);
         }
         
-        // Averaging over the simulation. 
-        sim_heat_capacity[temperature] = sim_heat_capacity[temperature] / reps;
-        sim_free_energy[temperature] = sim_free_energy[temperature] / reps;
-        sim_energy[temperature] = sim_energy[temperature] / reps;
-        sim_entropy[temperature] = sim_entropy[temperature] / reps;
+        float mean_energy;
+        float mean_entropy;
+        float mean_entropy;
+        float mean_entropy;
+        for (int epoch = 0; epoch <= reps; epoch++)
+        {
+
+        }
+        _energy
+        state_record(system, reps);
 
 		// TODO: Add the variance calculation. 
         random_system(system); 
