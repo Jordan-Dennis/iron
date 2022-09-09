@@ -5,6 +5,7 @@
 #include"include/sims.h"
 #include"include/ising.h"
 #include"include/errors.h"
+#include"include/statistics.h"
 
 
 // TODO: Document
@@ -167,27 +168,6 @@ void first_and_last(Config* config)
     }
 }
 
-
-float mean(float* array, int length) 
-{
-    float mean;
-    for (int entry = 0; entry < length; entry++)
-    {
-        mean += array[entry] / length;
-    }
-    return mean;
-}
-
-
-float variance(float* array, float mean, int length)
-{
-    float variance;
-    for (int entry = 0; entry < length; entry++)
-    {
-        variance += (array[entry] - mean)*(array[entry] - mean) / (length - 1);
-    }
-    return variance;
-}
 
 
 /*
