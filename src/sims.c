@@ -168,66 +168,6 @@ void first_and_last(Config* config)
 }
 
 
-typedef struct State 
-{
-    // TODO: See commit 8d12a936cc59652b25c1b631ec4be0aeb3d015ec
-    // All need to be pointers to heap allocated memory. 
-    int length; 
-    int cursor;
-    float* energy;
-    float* entropy;
-    float* free_energy;
-    float* heat_capacity;
-} State;
-
-
-// TODO: Change this horibble dunder syntax
-State* __state__(int temperatures)
-{
-    State* state = malloc(sizeof State);
-    state -> cursor = 0;
-    state -> length = temperatures;
-    state -> energy = calloc(temperatures, float);
-    state -> entropy = calloc(temperatures, float);
-    state -> free_energy = calloc(temperatures, float);
-    state -> heat_capacity = calloc(temperatures, float); 
-    return state;
-}
-
-
-/*
- * TODO: This method will not work because I need to calculate the variance. 
- * 
- *
- *
- *
- *
- */
-void state_record(System* system, int repeats)
-{
-    if ((state -> cursor) >= (state -> length))  
-    {
-        printf("Error: The State cannot hold this many temperatures");
-        exit(1);
-    }
-    state -> energy[state -> cursor] = energy(system) / repeats;
-    state -> entropy[state -> cursor] = entropy(system) / repeats;
-    state -> free_energy[state -> cursor] = free_energy(system) / repeats;
-    state -> heat_capacity[state -> cursor] = heat_capacity(system) / repeats;
-    state -> cursor++;
-}
-
-
-void state_free(State* state)
-{
-    free(state -> energy);
-    free(state -> entropy);
-    free(state -> free_energy);
-    free(state -> heat_capacity);
-    free(state);
-}
-
-
 /*
  * physical_parameters
  * -------------------
@@ -248,7 +188,6 @@ void physical_parameters(Config* config)
     Temperatures* temperatures = parse_temperatures(config);
 
     // Arrays to store the collected data on the physical state. 
-    State* state = __state__(temperatures -> length);
 
     // Simulating the system. 
     for (int temperature = 0; 
