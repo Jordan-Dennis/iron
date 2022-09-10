@@ -194,18 +194,7 @@ int one_dimensional_spin_energy(System* system, int spin)
 {
     int *spins = system -> spins;
     int num = system -> number;
-    int energy;
-    
-    if (spin == num - 1)
-    {
-        energy = spins[num - 1] * spins[0];
-    }
-    else
-    {
-        energy = spins[spin] * spins[spin + 1];
-    }
-    
-    return energy;
+    return spins[spin] * (spins[(spin + 1) % num] + spins[(spin - 1) % num]);
 }
 
 
@@ -266,7 +255,7 @@ int energy(System* system)
 
     for (int spin = 0; spin < system -> number; spin++) 
     {
-        energy += spin_energy(system, spin);
+        energy += spin_energy(system, spin) / 2;
     }
 
     return energy;
@@ -371,7 +360,7 @@ void metropolis_step(System* system)
     else
     {
         float probability = exp(- energy_change / (system -> temperature));
-        if (probability >= normalised_random()) 
+        if (probability > normalised_random()) 
         {
             (system -> spins[spin]) = -(system -> spins[spin]);
         }
