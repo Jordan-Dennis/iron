@@ -250,22 +250,26 @@ void physical_parameters(Config* config)
 
 	// Writing the data to the file
 	FILE* data = fopen(out, "w");
-	if (!data)
-	{
-		printf("Error: Could not open file!\n");
-		exit(1);
-	}
+    validate_file(data, out);
 
 	// Writing the header row to the data. 
-	fprintf(data, "# Temperature, Heat Capacity, Free Energy," 
-		"Entropy, Energy\n");
+	fprintf(data, "# Temperature, Temperature Error, ");
+    fprintf(data, "Heat Capacity, Heat Capacity Error, ");
+    fprintf(data, "Free Energy, Free Energy Error, "); 
+    fprintf(data, "Energy, Energy Error, "); 
+    fprintf(data, "Entropy, Entropy Error\n"); 
 
-	for (int temperature = 0; temperature < num_temps; temperature++)
+    // TODO: from here
+	for (int temp = 0; temp < num_temps; temp++)
 	{
-		fprintf(data, "%f, %f, %f, %f, %f\n", 
-			temperatures[temperature], sim_heat_capacity[temperature],
-			sim_free_energy[temperature], sim_energy[temperature],
-			sim_entropy[temperature]);
+		fprintf(data, "%f, ", energies_and_error[temp][0]);
+		fprintf(data, "%f, ", energies_and_error[temp][1]);
+		fprintf(data, "%f, ", entropies_and_error[temp][0]);
+		fprintf(data, "%f, ", entropies_and_error[temp][1]);
+		fprintf(data, "%f, ", free_energies_and_error[temp][0]);
+		fprintf(data, "%f, ", free_energies_and_error[temp][1]);
+        fprintf(data, "%f, ", heat_capacities_and_error[temp][0]);
+        fprintf(data, "%f\n", heat_capacities_and_error[temp][1]);
 	}
 	
 	// Closing the file
@@ -279,31 +283,40 @@ void physical_parameters(Config* config)
  * Create a histogram of the m values you obtain by running a 
  * simulation of 500 spins at 1., 2. and 3. temperatures 100 times.
  */
-void histogram(void)
+void histogram(Config* config)
 {
-    int reps_per_temp = 100;
-    int magnetisations[num_temps][reps_per_temp]; 
-    for (int temperature = 0; temperature <= num_temps; temperature++)
+    System* system = parse_system(config);
+    Temperatures* temperatures = parse_temperatures(config);
+    
+    int reps_per_temp = atoi(find(config, "temperatures", "reps"));
+    int magnetisations[temperatures -> length][reps_per_temp]; 
+
+    for (int temperature = 0; temperature <= (temperatures -> length); temperature++)
     {
+        (system -> temperature) = (temperatures -> temps)[temperature];
         for (int rep = 0; rep < reps_per_temp; rep++)
         {
-            int spins[num_spins];
-            random_system(spins, num_spins); 
-
             // Running the burnin period. 
             for (int epoch = 0; epoch <= 1000; epoch++)
             { 
-                metropolis_step(spins, temperatures[temperature], num_spins);
+                metropolis_step(system);
             }
 
             // Running the simulation 
-            float rep_magnetisation = 0;
+            float simulation_magnetisation[reps];
+
             for (int epoch = 0; epoch <= reps; epoch++)
             { 
                 metropolis_step(spins, temperatures[temperature], num_spins);
-                rep_magnetisation += (float) magnetisation(spins, num_spins) / reps;
+                simulation_magnetisation[epoch] = (float) magnetisation(system);
             }
-            magnetisations[temperature][rep] = rep_magnetisation;
+
+            float mean_magnetisation = mean(simulation_magnetisation, reps);
+
+            magnetisations[temperature][rep] = mean_magnetisation;
+
+            // Randomising for the next iteration.
+            random_system(system); 
         }
     }
 
@@ -346,46 +359,49 @@ void histogram(void)
  * int reps: The number of repitions in the simulation gif.
  * float temperature: The temperature to run the simulation at.
  */
-void ising(int num_spins, int reps, float temperature)
-{
-    int spins[num_spins];
-    random_system(spins, num_spins); 
-
-    // Running the burnin period. 
-    for (int epoch = 0; epoch <= 1000; epoch++)
-    { 
-        metropolis_step(spins, temperature, num_spins);
-    }
-
-    // Running the simulation 
-    int evolution[num_spins][reps];
-    for (int epoch = 0; epoch <= reps; epoch++)
-    { 
-        metropolis_step(spins, temperature, num_spins);
-        for (int spin = 0; spin < num_spins; spin++)
-        {
-            evolution[spin][epoch] = spins[spin];
-        }
-    }
-    
-    FILE* data = fopen("pub/data/ising.csv", "w");
-    for (int spin = 0; spin < num_spins; spin++)
-    {
-        fprintf(data, "%i, %i, ", 0, spin);
-        for (int epoch = 0; epoch <= reps; epoch++)
-        { 
-            fprintf(data, "%i, ", evolution[spin][epoch]);
-        }
-        fprintf(data, "\n");
-    }
-    for (int spin = 0; spin < num_spins; spin++)
-    {
-        fprintf(data, "%i, %i, ", 1, spin);
-        for (int epoch = 0; epoch <= reps; epoch++)
-        { 
-            fprintf(data, "%i, ", evolution[spin][epoch]);
-        }
-        fprintf(data, "\n");
-    }
-    fclose(data);
-}
+//void ising(int num_spins, int reps, float temperature)
+//{
+//    int spins[num_spins];
+//    random_system(spins, num_spins); 
+//
+//    // Running the burnin period. 
+//    for (int epoch = 0; epoch <= 1000; epoch++)
+//    { 
+//        metropolis_step(spins, temperature, num_spins);
+//    }
+//
+//    // Running the simulation 
+//    int evolution[num_spins][reps];
+//    for (int epoch = 0; epoch <= reps; epoch++)
+//    { 
+//        metropolis_step(spins, temperature, num_spins);
+//        for (int spin = 0; spin < num_spins; spin++)
+//        {
+//            evolution[spin][epoch] = spins[spin];
+//        }
+//    }
+//    
+//    FILE* data = fopen("pub/data/ising.csv", "w");
+//
+//    for (int spin = 0; spin < num_spins; spin++)
+//    {
+//        fprintf(data, "%i, %i, ", 0, spin);
+//        for (int epoch = 0; epoch <= reps; epoch++)
+//        { 
+//            fprintf(data, "%i, ", evolution[spin][epoch]);
+//        }
+//        fprintf(data, "\n");
+//    }
+//
+//    for (int spin = 0; spin < num_spins; spin++)
+//    {
+//        fprintf(data, "%i, %i, ", 1, spin);
+//        for (int epoch = 0; epoch <= reps; epoch++)
+//        { 
+//            fprintf(data, "%i, ", evolution[spin][epoch]);
+//        }
+//        fprintf(data, "\n");
+//    }
+//
+//    fclose(data);
+//}
