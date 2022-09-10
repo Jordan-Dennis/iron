@@ -15,26 +15,27 @@
  * you wish to run the simulation at. 
  */
 int main(int num_args, char *args[])
-{	
+{
 	validate_args(num_args);// Check a config was provided. 
-	Config* task = __config__(args[1]);
-	char* question = find(task, "task", "index");
+	Config* config = __config__(args[1]);
+	char* question = find(config, "task", "index");
 
     if (strcmp(question, "ising") == 0)
     {
-        ising();
+        // ising(config);
     }
 	if (strcmp(question, "first_and_last") == 0)
 	{
-		first_and_last();
+        printf("Reached entry");
+		first_and_last(config);
 	}
 	else if (strcmp(question, "physical_parameters") == 0)
 	{
-		physical_parameters();
+		physical_parameters(config);
 	}
 	else if (strcmp(question, "histogram") == 0)
 	{
-		histogram();
+		histogram(config);
 	}
 	else
 	{

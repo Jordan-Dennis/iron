@@ -1,5 +1,5 @@
 [reps]
-    number = 10
+    number = 1000
 
 [temperatures]
     low = 1.
@@ -10,7 +10,7 @@
     number = 500
 
 [task]
-    index = histogram
+    index = first_and_last 
 
 [dimensions]
     number = 1

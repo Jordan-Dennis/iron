@@ -20,7 +20,7 @@ typedef struct System
     int number;
     int dimension;
     float temperature; // ?? Do I want this to be here
-    int spins[];
+    int *spins;
 } System;
 
 
@@ -35,7 +35,7 @@ float entropy(System* system);
 float free_energy(System* system);
 float heat_capacity(System* system);
 void metropolis_step(System* system);
-void random_system(System* system, int number);
+void random_system(System* system);
 int spin_energy(System* system, int spin);
 
 #endif

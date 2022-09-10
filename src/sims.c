@@ -1,6 +1,7 @@
 #include<math.h>
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 #include"include/toml.h"
 #include"include/sims.h"
 #include"include/ising.h"
@@ -33,7 +34,7 @@ Temperatures* parse_temperatures(Config* config)
 { 
     // TODO: I decided to pass the config so that the high low and step 
     // automatically dropped out of scope.
-	Temperatures* temperatures = malloc(sizeof Temperatures);
+	Temperatures* temperatures = malloc(sizeof(Temperatures));
     
     // TODO: Finish the castings here and then complete this function.
     float low = atof(find(config, "temperatures", "low"));
@@ -42,11 +43,11 @@ Temperatures* parse_temperatures(Config* config)
     float length = (int) ((high - low) / step);
 	
     temperatures -> length = length;
-    temperatures -> temps = calloc(length, sizeof float);
+    temperatures -> temps = calloc(length, sizeof(float));
 
-	for (int at_temp = 1; at_temp <= length; at_temp++)
+	for (int temperature = 1; temperature <= length; temperature++)
     {
-        (temperatures -> temps)[temperature] = low + step * at_temp;
+        (temperatures -> temps)[temperature] = low + step * temperature;
 	}
 
     return temperatures;
@@ -73,7 +74,7 @@ System* parse_system(Config* config)
     int repititions = atoi(find(config, "reps", "number"));
     int dimensions = atoi(find(config, "dimensions", "number")); 
 
-    System* system = (System*) malloc(sizeof System);
+    System* system = (System*) malloc(sizeof(System));
     system -> number = spin_number;
     system -> dimension = dimensions;
     random_system(system);
@@ -94,8 +95,9 @@ System* parse_system(Config* config)
 void first_and_last(Config* config)
 {
     // TODO: All of this parsing should get done by the toml interpretter 
-    char* out = find(config, "out", "address");
     System* system = parse_system(config);
+    char* out = find(config, "out", "address");
+    int reps = atoi(find(config, "reps", "number"));
     Temperatures* temperatures = parse_temperatures(config);
 
     // Free config because I have finished with it. 
@@ -103,16 +105,17 @@ void first_and_last(Config* config)
 
     // Storing the data.
     int results[2][system -> number][temperatures -> length];
-    for (int temp = 0; temp <= (temp -> length); temp++)
+
+    for (int temp = 0; temp <= (temperatures -> length); temp++)
     {
         // Updating the system temperature
         (system -> temperature) = (temperatures -> temps)[temp];
         
         // Saving the initial configuration of this temeprature in the 
         // memory.
-        for (int spin = 0; spin < num_spins; spin++)
+        for (int spin = 0; spin < (system -> number); spin++)
         {
-            results[0][spin][temp] = spins[spin];
+            results[0][spin][temp] = (system -> spins)[spin];
         }
 
         // Running the metropolis algorithm over the system. 
@@ -122,33 +125,34 @@ void first_and_last(Config* config)
         }
 
         // Saving the final state of the system to memory   
-        for (int spin = 0; spin < num_spins; spin++)
+        for (int spin = 0; spin < (system -> number); spin++)
         {
-            results[1][spin][temp] = spins[spin];
+            results[1][spin][temp] = (system -> spins)[spin];
         }
 
         // Generating random spin system for next temperature
         random_system(system);
     }
-    free(system);
 
     FILE* data = fopen(out, "w");
     validate_file(data, out);
 
     // Writing a header row to the file. 
     fprintf(data, "# S/F, spin");
-    for (int temperature = 0; temperature < num_temps; temperature++)
+
+    for (int temperature = 0; temperature < (temperatures -> length); temperature++)
     {
         fprintf(data, "T%i, ", temperature);
     }
+
     fprintf(data, "\n");
 
     // Writing the initial state data to the file.
-    for (int spin = 0; spin < num_spins; spin++) // Columns
+    for (int spin = 0; spin < (system -> number); spin++) // Columns
     {
         // Writing each row.
         fprintf(data, "%i, %i, ", 0, spin);
-        for (int temperature = 0; temperature < num_temps; temperature++)
+        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
         {
             fprintf(data, "%i, ", results[0][spin][temperature]);
         }
@@ -156,16 +160,18 @@ void first_and_last(Config* config)
     }
 
     // Writing the final state data to the file. 
-    for (int spin = 0; spin < num_spins; spin++) // Columns
+    for (int spin = 0; spin < (system -> number); spin++) // Columns
     {
         // Writing each row.
         fprintf(data, "%i, %i, ", 1, spin);
-        for (int temperature = 0; temperature < num_temps; temperature++)
+        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
         {
             fprintf(data, "%i, ", results[1][spin][temperature]);
         }
         fprintf(data, "\n");
     }
+    
+    free(system);
 }
 
 
@@ -186,14 +192,15 @@ void first_and_last(Config* config)
 void physical_parameters(Config* config)
 {
     char* out = find(config, "out", "address");
+    int reps = atoi(find(config, "reps", "number"));
     System* system = parse_system(config);
     Temperatures* temperatures = parse_temperatures(config);
 
     // Arrays to store the collected data on the physical state. 
-    float energies_and_error[temperatures -> length];
-    float entropies_and_error[temperatures -> length];
-    float free_energies_and_error[temperatures -> length];
-    float heat_capacities_and_error[temperatures -> length];
+    float energies_and_error[temperatures -> length][2];
+    float entropies_and_error[temperatures -> length][2];
+    float free_energies_and_error[temperatures -> length][2];
+    float heat_capacities_and_error[temperatures -> length][2];
     
     // Simulating the system. 
     for (int temperature = 0; 
@@ -233,8 +240,8 @@ void physical_parameters(Config* config)
         float mean_heat_capacity = mean(simulation_heat_capacities, reps);
         float var_energy = variance(simulation_energies, mean_energy, reps);
         float var_entropy = variance(simulation_entropies, mean_entropy, reps);
-        float var_free_energies = variance(simulation_energies, mean_free_energy, reps);
-        float var_heat_capacities = variance(simulation_heat_capacities, mean_heat_capacity, reps);
+        float var_free_energy = variance(simulation_energies, mean_free_energy, reps);
+        float var_heat_capacity = variance(simulation_heat_capacities, mean_heat_capacity, reps);
 
         energies_and_error[temperature][1] = var_energy;
         energies_and_error[temperature][0] = mean_energy;
@@ -260,7 +267,7 @@ void physical_parameters(Config* config)
     fprintf(data, "Entropy, Entropy Error\n"); 
 
     // TODO: from here
-	for (int temp = 0; temp < num_temps; temp++)
+	for (int temp = 0; temp < (temperatures -> length); temp++)
 	{
 		fprintf(data, "%f, ", energies_and_error[temp][0]);
 		fprintf(data, "%f, ", energies_and_error[temp][1]);
@@ -286,9 +293,11 @@ void physical_parameters(Config* config)
 void histogram(Config* config)
 {
     System* system = parse_system(config);
+    char* out = find(config, "out", "address");
+    int reps = atoi(find(config, "reps", "number"));
     Temperatures* temperatures = parse_temperatures(config);
-    
     int reps_per_temp = atoi(find(config, "temperatures", "reps"));
+
     int magnetisations[temperatures -> length][reps_per_temp]; 
 
     for (int temperature = 0; temperature <= (temperatures -> length); temperature++)
@@ -307,7 +316,7 @@ void histogram(Config* config)
 
             for (int epoch = 0; epoch <= reps; epoch++)
             { 
-                metropolis_step(spins, temperatures[temperature], num_spins);
+                metropolis_step(system);
                 simulation_magnetisation[epoch] = (float) magnetisation(system);
             }
 
@@ -321,22 +330,21 @@ void histogram(Config* config)
     }
 
     // Opening the data file. 
-    char* out = find(__config__("config/config.toml"), "readables", "1e");
     FILE* data = fopen(out, "w");
     validate_file(data, out);
     
     // Printing the header row to the file. 
     fprintf(data, "# ");
-    for (int temperature = 0; temperature < num_temps; temperature++)
+    for (int temperature = 0; temperature < (temperatures -> length); temperature++)
     {
-        fprintf(data, "T%f, ", temperatures[temperature]);
+        fprintf(data, "T%f, ", (temperatures -> temps)[temperature]);
     }
     fprintf(data, "\n");
 
     // Writing the data to the file.
     for (int rep = 0; rep < reps_per_temp; rep++)
     {
-        for (int temperature = 0; temperature < num_temps; temperature++)
+        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
         {
             fprintf(data, "%i, ", magnetisations[temperature][rep]);
         }

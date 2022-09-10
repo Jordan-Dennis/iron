@@ -60,9 +60,6 @@ int random_spin(void)
  * 
  * parameters
  * ----------
- * int spin: The index of the specific spin.
- * int spins[]: The array representing the ensamble of spins.
- * int num_spins: The number of spins in the representation.
  * 
  * returns
  * -------
@@ -142,7 +139,7 @@ int random_spin(void)
 int two_dimensional_spin_energy(System* system, int spin)
 {
     int *spins = system -> spins;
-    int num = (int) sqrt(system -> num_spins);
+    int num = (int) sqrt(system -> number);
     int energy = 0;
 
     if (spin % num == 0)
@@ -196,14 +193,15 @@ int two_dimensional_spin_energy(System* system, int spin)
 int one_dimensional_spin_energy(System* system, int spin)
 {
     int *spins = system -> spins;
+    int num = system -> number;
     int energy = 0;
     if (spin == 0) 
     {
-        energy += spins[0] * (spins[num_spins] + spins[1]);
+        energy += spins[0] * (spins[num] + spins[1]);
     }
-    else if (spin == num_spins - 1)
+    else if (spin == num - 1)
     {
-        energy += spins[num_spins - 1] * (spins[0] + spins[spin - 1]);
+        energy += spins[num - 1] * (spins[0] + spins[spin - 1]);
     }
     else
     {
@@ -397,7 +395,7 @@ void metropolis_step(System* system)
  */
 void random_system(System* system)
 {
-    system -> spins = (int) calloc(number, sizeof int);
+    system -> spins = calloc((system -> number), sizeof(int));
     for (int spin = 0; spin < (system -> number); spin++) 
     {
         (system -> spins)[spin] = random_spin();

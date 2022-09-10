@@ -171,7 +171,8 @@ char* word(Toml* toml)
     while (isalpha(peek(toml)) 
         || isdigit(peek(toml)) 
         || (peek(toml) == '/')
-        || (peek(toml) == '.'))
+        || (peek(toml) == '.')
+        || (peek(toml) == '_'))
     {
         str = realloc(str, (strlen(str) + 2) * sizeof(char));
         strcat(str, (char[]){next(toml), 0});
@@ -343,7 +344,7 @@ char* find(Config* config, char* header, char* field)
             return inner -> value;
         }
     }
-    printf("Error: Could not find toml entry!");
+    printf("Error: Could not find toml entry: [%s]: %s!", header, field);
     exit(1);
 }
 
