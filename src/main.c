@@ -26,7 +26,6 @@ int main(int num_args, char *args[])
     }
 	if (strcmp(question, "first_and_last") == 0)
 	{
-        printf("Reached entry");
 		first_and_last(config);
 	}
 	else if (strcmp(question, "physical_parameters") == 0)

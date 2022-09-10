@@ -1,16 +1,16 @@
 [reps]
-    number = 1000
+    number = 10000
 
 [temperatures]
-    low = 1.
+    low = 0.
     high = 4.
-    step = 1.
+    step = .1
 
 [spins]
-    number = 500
+    number = 100
 
 [task]
-    index = first_and_last 
+    index = physical_parameters 
 
 [dimensions]
     number = 1

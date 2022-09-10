@@ -268,7 +268,7 @@ int energy(System* system)
     int energy = 0;
     for (int spin = 0; spin < system -> number; spin++) 
     {
-        energy += spin_energy(system, spin);
+        energy += spin_energy(system, spin) / 2;
     }
     return energy;
 }
