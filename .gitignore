@@ -1,5 +1,6 @@
 *.log
 *.swp
+pub/data/*.csv
 pub/*.log
 pub/*.aux
 pub/*.pdf
