@@ -243,6 +243,8 @@ void physical_parameters(Config* config)
         float var_free_energy = variance(simulation_energies, mean_free_energy, reps);
         float var_heat_capacity = variance(simulation_heat_capacities, mean_heat_capacity, reps);
 
+        printf("Energy Var: %f\n", var_energy);
+
         energies_and_error[temperature][1] = sqrt(var_energy);
         energies_and_error[temperature][0] = mean_energy;
         entropies_and_error[temperature][1] = sqrt(var_entropy);
@@ -251,7 +253,7 @@ void physical_parameters(Config* config)
         free_energies_and_error[temperature][0] = mean_free_energy;
         heat_capacities_and_error[temperature][1] = sqrt(var_heat_capacity);
         heat_capacities_and_error[temperature][0] = mean_heat_capacity;
-       
+      
         random_system(system); 
     }
 
@@ -261,10 +263,10 @@ void physical_parameters(Config* config)
 
 	// Writing the header row to the data. 
 	fprintf(data, "# Temperature, ");
-    fprintf(data, "Heat Capacity, Heat Capacity Error, ");
-    fprintf(data, "Free Energy, Free Energy Error, "); 
     fprintf(data, "Energy, Energy Error, "); 
-    fprintf(data, "Entropy, Entropy Error\n"); 
+    fprintf(data, "Entropy, Entropy Error, "); 
+    fprintf(data, "Free Energy, Free Energy Error, "); 
+    fprintf(data, "Heat Capacity, Heat Capacity Error\n");
 
     // TODO: from here
 	for (int temp = 0; temp < (temperatures -> length); temp++)

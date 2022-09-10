@@ -27,4 +27,4 @@ set key noautotitle
 #unset multiplot
 set title "Energy"
 set label "$U(\\tau)$"
-plot "pub/data/1c.csv" using 1:6:7 with errorbars pointsize 1 pointtype 7, -100 * tanh(1 / x)
+plot "pub/data/1c.csv" using 1:2:3 with errorbars pointsize 1 pointtype 7, -100 * tanh(1 / x)

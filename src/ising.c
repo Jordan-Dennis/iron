@@ -194,18 +194,15 @@ int one_dimensional_spin_energy(System* system, int spin)
 {
     int *spins = system -> spins;
     int num = system -> number;
-    int energy = 0;
-    if (spin == 0) 
+    int energy;
+    
+    if (spin == num - 1)
     {
-        energy += spins[0] * (spins[num] + spins[1]);
-    }
-    else if (spin == num - 1)
-    {
-        energy += spins[num - 1] * (spins[0] + spins[spin - 1]);
+        energy = spins[num - 1] * spins[0];
     }
     else
     {
-        energy += spins[spin] * (spins[spin - 1] + spins[spin + 1]);
+        energy = spins[spin] * spins[spin + 1];
     }
     
     return energy;
@@ -266,10 +263,12 @@ int spin_energy(System* system, int spin)
 int energy(System* system)
 {
     int energy = 0;
+
     for (int spin = 0; spin < system -> number; spin++) 
     {
-        energy += spin_energy(system, spin) / 2;
+        energy += spin_energy(system, spin);
     }
+
     return energy;
 }
 

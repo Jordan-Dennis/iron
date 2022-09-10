@@ -47,7 +47,7 @@ float variance(float* array, float mean, int length)
     float variance;
     for (int entry = 0; entry < length; entry++)
     {
-        variance += (array[entry] - mean)*(array[entry] - mean) / (length - 1);
+        variance += (float) (array[entry] - mean) * (array[entry] - mean);
     }
-    return variance;
+    return variance / (length - 1);
 }

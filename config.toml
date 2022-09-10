@@ -1,8 +1,8 @@
 [reps]
-    number = 10000
+    number = 100000
 
 [temperatures]
-    low = 0.
+    low = .1
     high = 4.
     step = .1
 
