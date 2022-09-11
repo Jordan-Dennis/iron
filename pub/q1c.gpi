@@ -12,13 +12,13 @@ set multiplot layout 2, 2 title "Physical Quantities"
     plot "pub/data/1c.csv" using 1:4:5 with errorbars pointsize 1 pointtype 7, \
         (1 / x) * (1 - tanh(1 / x)) + log(1 + exp(- 2 / x))
 
-    set title "Free Energy"
-    set label "F" at 2, .5
-    plot "pub/data/1c.csv" using 1:6:7 with errorbars pointsize 1 pointtype 7, \
-        (- 1 - x * log(1 + exp(- 2 / x)))
+#    set title "Free Energy"
+#    set label "F" at 2, .5
+#    plot "pub/data/1c.csv" using 1:6:7 with errorbars pointsize 1 pointtype 7, \
+#        (- 1 - x * log(1 + exp(- 2 / x)))
 
     set title "Heat Capacity"
     set label "C_{v}" at 2, .5   
-    plot "pub/data/1c.csv" using 1:8:9 with errorbars pointsize 1 pointtype 7, \
-        (100 / (x * cosh(1 / x)) ** 2)
+    plot "pub/data/1c.csv" using 1:6 pointsize 1 pointtype 7, \
+        (1 / (x * cosh(1 / x)) ** 2)
 unset multiplot

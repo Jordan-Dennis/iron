@@ -7,22 +7,6 @@
 
 
 /*
- * factorial
- * ---------
- * Calculate the factorial of a number.
- *
- * parameters
- * ----------
- * int : The number to calculate the factorial of. Must be greater 
- * than 0.
- */
-int factorial(int number)
-{
-    return (number == 0 || number == 1) ? 1 : factorial(number - 1); 
-}
-
-
-/*
  * random
  * ------
  * Generate a random number over the range [0, 1].
@@ -256,7 +240,7 @@ float energy(System* system)
 
     for (int spin = 0; spin < system -> number; spin++) 
     {
-        energy += spin_energy(system, spin);
+        energy -= spin_energy(system, spin);
     }
 
     return (float) energy / (float) 2;
@@ -279,15 +263,18 @@ float energy(System* system)
 float entropy(System* system) 
 {
     int number = system -> number;
+    int* spins = (system -> spins); 
     int up_spins = 0;
+
     for (int spin = 0; spin < number; spin++)
     {
-        up_spins += (int)((system -> spins)[spin] > 0);
+        up_spins += (spins[spin] > 0 && spins[(spin + 1) % number] > 0);
     }
+
     int down_spins = number - up_spins;
-    int multiplicity = factorial(number) /\
-        (factorial(up_spins) * factorial(down_spins));
-    return log(multiplicity);
+
+    return number * log(number) - up_spins * log(up_spins) 
+        - down_spins * log(down_spins);
 }
 
 
@@ -336,8 +323,6 @@ float heat_capacity(System* system)
     float energy_mean = mean(energies, number);
     float energy_variance = variance(energies, energy_mean, number); 
     float heat_capacity = energy_variance / pow(system -> temperature, 2);
-    printf("Energy Mean: %f\n", energy_mean);
-    printf("Energy Variance: %f\n", energy_variance);
     return heat_capacity;
 }
 
@@ -355,7 +340,7 @@ void metropolis_step(System* system)
 {
 
     int spin = (int) (normalised_random() * (system -> number));
-    int energy_change = - 2 * spin_energy(system, spin);
+    int energy_change = 2 * spin_energy(system, spin);
    
     if (energy_change < 0)
     {
