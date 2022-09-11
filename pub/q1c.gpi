@@ -1,6 +1,6 @@
-#set terminal pdf size 900, 450
-#set output "pub/q1c.pdf"
-set terminal wxt persist
+set terminal pdf size 8, 4
+set output "pub/figures/q1c.pdf"
+#set terminal wxt persist
 set key noautotitle
 set multiplot layout 2, 2 title "Physical Quantities"
     set title "Energy"

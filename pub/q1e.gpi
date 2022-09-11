@@ -1,5 +1,10 @@
-set terminal pdf size 900, 450
+#set terminal pdf size 900, 450
+set terminal wxt persist
 set output "q1e.pdf"
 bin(x,width)=width*floor(x/width)
 
-plot "pub/data/1e.csv" using (bin($1, 1)):(1.0) smooth freq with boxes
+set multiplot layout 2,3
+    plot "pub/data/1e.csv" using (bin($1, 0.01)):(1.0) smooth freq with boxes fill solid 
+    plot "pub/data/1e.csv" using (bin($2, 0.01)):(1.0) smooth freq with boxes fill solid 
+    plot "pub/data/1e.csv" using (bin($3, 0.01)):(1.0) smooth freq with boxes fill solid 
+unset multiplot

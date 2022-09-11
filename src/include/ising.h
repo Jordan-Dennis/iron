@@ -30,7 +30,7 @@ int random_spin(void);
 
 
 float energy(System* system);
-int magnetisation(System* system);
+float magnetisation(System* system);
 float entropy(System* system);
 float free_energy(System* system);
 float heat_capacity(System* system);

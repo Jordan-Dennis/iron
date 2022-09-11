@@ -222,45 +222,37 @@ void physical_parameters(Config* config)
 		// TODO: I think that I will have new arrays here to simply store
 		// the information and then I will invoke a mean and variance function 
 		// on these arrays. Damn, I keep adding linear complexity. 
-//        float simulation_energies[reps];
+        float simulation_energies[reps];
         float simulation_entropies[reps];
         float simulation_free_energies[reps];
-//        float simulation_heat_capacities[reps]; 
         
-//        printf("Temperature: %f\n", system -> temperature);
-        
-        float sum_of_energies = 0;
-        float sum_of_square_energies = 0;
- 
         for (int epoch = 0; epoch < reps; epoch++)
         { 
             metropolis_step(system);
             float epoch_energy = energy(system);
             float epoch_entropy = entropy(system);
 
-            sum_of_energies += epoch_energy;
-            sum_of_square_energies += epoch_energy * epoch_energy;
+            simulation_energies[epoch] = epoch_energy;
             simulation_entropies[epoch] = epoch_entropy;
             simulation_free_energies[epoch] = epoch_energy - temp * epoch_entropy;
         }
 
-     
+        float mean_energy = mean(simulation_energies, reps);
         float mean_entropy = mean(simulation_entropies, reps);
         float mean_free_energy = mean(simulation_free_energies, reps);
 
-        float mean_energy = sum_of_energies / reps / 100;
-        float energy_variance = (sum_of_square_energies / reps / 100 - sum_of_energies * sum_of_energies / reps / reps / 100);
-        float mean_heat_capacity = energy_variance / temp / temp;
+        float var_energy = variance(simulation_energies, mean_energy, reps);
         float var_entropy = variance(simulation_entropies, mean_entropy, reps);
         float var_free_energy = variance(simulation_free_energies, mean_free_energy, reps);
+        float mean_heat_capacity = var_energy / temp / temp;
 
-        energies_and_error[temperature][1] = sqrt(energy_variance);
-        energies_and_error[temperature][0] = mean_energy;
+        energies_and_error[temperature][1] = sqrt(var_energy) / 100;
+        energies_and_error[temperature][0] = mean_energy / 100;
         entropies_and_error[temperature][1] = sqrt(var_entropy) / 100;
         entropies_and_error[temperature][0] = mean_entropy / 100;
         free_energies_and_error[temperature][1] = sqrt(var_free_energy) / 100;
         free_energies_and_error[temperature][0] = mean_free_energy / 100;
-        heat_capacities_and_error[temperature] = mean_heat_capacity;
+        heat_capacities_and_error[temperature] = mean_heat_capacity / 100;
       
         random_system(system); 
     }
@@ -307,9 +299,9 @@ void histogram(Config* config)
     Temperatures* temperatures = parse_temperatures(config);
     int reps_per_temp = atoi(find(config, "temperatures", "reps"));
 
-    int magnetisations[temperatures -> length][reps_per_temp]; 
+    float magnetisations[temperatures -> length][reps_per_temp]; 
 
-    for (int temperature = 0; temperature <= (temperatures -> length); temperature++)
+    for (int temperature = 0; temperature < (temperatures -> length); temperature++)
     {
         (system -> temperature) = (temperatures -> temps)[temperature];
         for (int rep = 0; rep < reps_per_temp; rep++)
@@ -323,14 +315,13 @@ void histogram(Config* config)
             // Running the simulation 
             float simulation_magnetisation[reps];
 
-            for (int epoch = 0; epoch <= reps; epoch++)
+            for (int epoch = 0; epoch < reps; epoch++)
             { 
                 metropolis_step(system);
-                simulation_magnetisation[epoch] = (float) magnetisation(system);
+                simulation_magnetisation[epoch] = magnetisation(system);
             }
 
             float mean_magnetisation = mean(simulation_magnetisation, reps);
-
             magnetisations[temperature][rep] = mean_magnetisation;
 
             // Randomising for the next iteration.
@@ -355,7 +346,7 @@ void histogram(Config* config)
     {
         for (int temperature = 0; temperature < (temperatures -> length); temperature++)
         {
-            fprintf(data, "%i, ", magnetisations[temperature][rep]);
+            fprintf(data, "%f, ", magnetisations[temperature][rep]);
         }
         fprintf(data, "\n");
     }

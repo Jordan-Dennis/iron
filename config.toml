@@ -1,19 +1,20 @@
 [reps]
-    number = 100000
+    number = 1000
 
 [temperatures]
-    low = .5
-    high = 3.
-    step = .1
+    low = .1
+    high = 4.
+    step = 1.
+    reps = 1000
 
 [spins]
-    number = 100
+    number = 500
 
 [task]
-    index = physical_parameters 
+    index = histogram
 
 [dimensions]
     number = 1
 
 [out]
-    address = pub/data/1c.csv 
+    address = pub/data/1e.csv 

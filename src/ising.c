@@ -297,19 +297,12 @@ void random_system(System* system)
  * -------
  * int magnetisation: The net magnetisation.
  */
-int magnetisation(System* system)
+float magnetisation(System* system)
 {
-    int magnetisation = 0;
-    for (int spin = 0; spin < (system ->  number); spin++)
+    float magnetisation = 0;
+    for (int spin = 0; spin < (system -> number); spin++)
     {
-        if ((system -> spins[spin]) > 0)
-        {
-            magnetisation++;
-        }
-        else
-        {
-            magnetisation--;
-        }
+        magnetisation += (system -> spins)[spin];
     }
-    return magnetisation;
+    return magnetisation / (system -> number);
 }
