@@ -296,37 +296,44 @@ void histogram(Config* config)
     System* system = parse_system(config);
     char* out = find(config, "out", "address");
     int reps = atoi(find(config, "reps", "number"));
+    int second_number = atoi(find(config, "spins", "second_number"));
     Temperatures* temperatures = parse_temperatures(config);
     int reps_per_temp = atoi(find(config, "temperatures", "reps"));
 
-    float magnetisations[temperatures -> length][reps_per_temp]; 
+    float magnetisations[temperatures -> length][reps_per_temp][2]; 
 
-    for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+    for (int number = 0; number < 2; number++)
     {
-        (system -> temperature) = (temperatures -> temps)[temperature];
-        for (int rep = 0; rep < reps_per_temp; rep++)
+        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
         {
-            // Running the burnin period. 
-            for (int epoch = 0; epoch <= 1000; epoch++)
-            { 
-                metropolis_step(system);
+            (system -> temperature) = (temperatures -> temps)[temperature];
+            for (int rep = 0; rep < reps_per_temp; rep++)
+            {
+                // Running the burnin period. 
+                for (int epoch = 0; epoch <= 1000; epoch++)
+                { 
+                    metropolis_step(system);
+                }
+
+                // Running the simulation 
+                float simulation_magnetisation[reps];
+
+                for (int epoch = 0; epoch < reps; epoch++)
+                { 
+                    metropolis_step(system);
+                    simulation_magnetisation[epoch] = magnetisation(system);
+                }
+
+                float mean_magnetisation = mean(simulation_magnetisation, reps);
+                magnetisations[temperature][rep][number] = mean_magnetisation;
+
+                // Randomising for the next iteration.
+                random_system(system); 
             }
-
-            // Running the simulation 
-            float simulation_magnetisation[reps];
-
-            for (int epoch = 0; epoch < reps; epoch++)
-            { 
-                metropolis_step(system);
-                simulation_magnetisation[epoch] = magnetisation(system);
-            }
-
-            float mean_magnetisation = mean(simulation_magnetisation, reps);
-            magnetisations[temperature][rep] = mean_magnetisation;
-
-            // Randomising for the next iteration.
-            random_system(system); 
         }
+
+        system -> number = second_number;
+        random_system(system);
     }
 
     // Opening the data file. 
@@ -342,11 +349,17 @@ void histogram(Config* config)
     fprintf(data, "\n");
 
     // Writing the data to the file.
+    // TODO: I really need my toml manager to be able to handle arrays.
     for (int rep = 0; rep < reps_per_temp; rep++)
     {
-        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+        for (int number = 0; number < 2; number++)
         {
-            fprintf(data, "%f, ", magnetisations[temperature][rep]);
+            for (int temperature = 0; 
+                temperature < (temperatures -> length); 
+                temperature++)
+            {
+                fprintf(data, "%f, ", magnetisations[temperature][rep][number]);
+            }
         }
         fprintf(data, "\n");
     }

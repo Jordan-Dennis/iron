@@ -1,10 +1,20 @@
-#set terminal pdf size 900, 450
-set terminal wxt persist
-set output "q1e.pdf"
+set terminal pdf size 8, 4
+#set terminal wxt persist
+set output "pub/figures/q1e.pdf"
 bin(x,width)=width*floor(x/width)
 
+set key noautotitle
 set multiplot layout 2,3
-    plot "pub/data/1e.csv" using (bin($1, 0.01)):(1.0) smooth freq with boxes fill solid 
-    plot "pub/data/1e.csv" using (bin($2, 0.01)):(1.0) smooth freq with boxes fill solid 
-    plot "pub/data/1e.csv" using (bin($3, 0.01)):(1.0) smooth freq with boxes fill solid 
+    set title "N = 500, T = 1."
+    plot "pub/data/1e.csv" using (bin($1, 0.05)):(1.0) smooth freq with boxes fill solid 
+    set title "N = 500, T = 2."
+    plot "pub/data/1e.csv" using (bin($2, 0.05)):(1.0) smooth freq with boxes fill solid 
+    set title "N = 500, T = 3."
+    plot "pub/data/1e.csv" using (bin($3, 0.05)):(1.0) smooth freq with boxes fill solid 
+    set title "N = 100, T = 1."
+    plot "pub/data/1e.csv" using (bin($4, 0.05)):(1.0) smooth freq with boxes fill solid 
+    set title "N = 100, T = 2."
+    plot "pub/data/1e.csv" using (bin($5, 0.05)):(1.0) smooth freq with boxes fill solid 
+    set title "N = 100, T = 3."
+    plot "pub/data/1e.csv" using (bin($6, 0.05)):(1.0) smooth freq with boxes fill solid 
 unset multiplot
