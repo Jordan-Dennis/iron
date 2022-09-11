@@ -55,29 +55,29 @@ int two_dimensional_spin_energy(System* system, int spin)
     int *spins = system -> spins;
     int num = (int) sqrt(system -> number);
     int energy = 0;
+    int column = spin % num;
+    int row = (int) spin / num;
 
-    if (spin % num == 0)
+    if (column == 0)
     {
         energy += spins[spin] * (spins[spin + 1] + spins[spin + num - 1]);
     }
-    else if (spin % num == num - 1)
+    else if (column == (num - 1))
     {
         energy += spins[spin] * (spins[spin - 1] + spins[spin - num + 1]);
     }
     else
     {
-        energy += spins[spin] * (spins[spin + num] + spins[spin - num]);
+        energy += spins[spin] * (spins[spin + 1] + spins[spin - 1]);
     }
 
-    if ((int) spin / num == 0)
+    if (row == 0)
     {
-        energy += spins[spin] * (spins[spin + num] + 
-            spins[spin + num * (num - 1)]);
+        energy += spins[spin] * (spins[spin + num] + spins[spin + num * (num - 1)]);
     }
-    else if ((int) spin / num == num - 1)
+    else if (row == (num - 1))
     {
-        energy += spins[spin] * (spins[spin - num] + 
-            spins[spin - num * (num - 1)]);
+        energy += spins[spin] * (spins[spin - num] + spins[spin - num * (num - 1)]);
     }
     else
     {

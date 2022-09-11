@@ -4,16 +4,16 @@
 [temperatures]
     low = .1
     high = 4.
-    step = 1.
+    step = .1
 
 [spins]
     number = 10000
 
 [task]
-    index = first_and_last
+    index = physical_parameters
 
 [dimensions]
     number = 2
 
 [out]
-    address = pub/data/2a.csv 
+    address = pub/data/2c.csv 

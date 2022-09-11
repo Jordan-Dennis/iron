@@ -148,29 +148,73 @@ void first_and_last(Config* config)
     fprintf(data, "\n");
 
     // Writing the initial state data to the file.
-    for (int spin = 0; spin < (system -> number); spin++) // Columns
+    if (system -> dimension == 1)
     {
-        // Writing each row.
-        fprintf(data, "%i, %i, ", 0, spin);
-        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+        for (int spin = 0; spin < (system -> number); spin++) // Columns
         {
-            fprintf(data, "%i, ", results[0][spin][temperature]);
+            // Writing each row.
+            fprintf(data, "%i, %i, ", 0, spin);
+            for (int temperature = 0; 
+                temperature < (temperatures -> length); 
+                temperature++)
+            {
+                fprintf(data, "%i, ", results[0][spin][temperature]);
+            }
+            fprintf(data, "\n");
         }
-        fprintf(data, "\n");
-    }
 
-    // Writing the final state data to the file. 
-    for (int spin = 0; spin < (system -> number); spin++) // Columns
-    {
-        // Writing each row.
-        fprintf(data, "%i, %i, ", 1, spin);
-        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+        // Writing the final state data to the file. 
+        for (int spin = 0; spin < (system -> number); spin++) // Columns
         {
-            fprintf(data, "%i, ", results[1][spin][temperature]);
+            // Writing each row.
+            fprintf(data, "%i, %i, ", 1, spin);
+            for (int temperature = 0; 
+                temperature < (temperatures -> length); 
+                temperature++)
+            {
+                fprintf(data, "%i, ", results[1][spin][temperature]);
+            }
+            fprintf(data, "\n");
         }
-        fprintf(data, "\n");
     }
-    
+    else 
+    {
+        int number = sqrt(system -> number);
+        for (int x = 0; x < number; x++)
+        {
+            for (int y = 0; y < number; y++)
+            {
+                fprintf(data, "%i, %i, ", x, y);
+
+                for (int temperature = 0;
+                    temperature < (temperatures -> length);
+                    temperature++)
+                {
+                    fprintf(data, "%i, ", results[0][(x * number) + y][temperature]);
+                }
+                
+                fprintf(data, "\n");
+            }
+        }
+
+        for (int x = 0; x < number; x++)
+        {
+            for (int y = 0; y < number; y++)
+            {
+                fprintf(data, "%i, %i, ", x, y);
+
+                for (int temperature = 0;
+                    temperature < (temperatures -> length);
+                    temperature++)
+                {
+                    fprintf(data, "%i, ", results[1][(x * number) + y][temperature]);
+                }
+                
+                fprintf(data, "\n");
+            }
+        }
+
+    }
     free(system);
 }
 
@@ -246,13 +290,15 @@ void physical_parameters(Config* config)
         float var_free_energy = variance(simulation_free_energies, mean_free_energy, reps);
         float mean_heat_capacity = var_energy / temp / temp;
 
-        energies_and_error[temperature][1] = sqrt(var_energy) / 100;
-        energies_and_error[temperature][0] = mean_energy / 100;
-        entropies_and_error[temperature][1] = sqrt(var_entropy) / 100;
-        entropies_and_error[temperature][0] = mean_entropy / 100;
-        free_energies_and_error[temperature][1] = sqrt(var_free_energy) / 100;
-        free_energies_and_error[temperature][0] = mean_free_energy / 100;
-        heat_capacities_and_error[temperature] = mean_heat_capacity / 100;
+        int number = system -> number;
+
+        energies_and_error[temperature][1] = sqrt(var_energy) / number;
+        energies_and_error[temperature][0] = mean_energy / number;
+        entropies_and_error[temperature][1] = sqrt(var_entropy) / number;
+        entropies_and_error[temperature][0] = mean_entropy / number;
+        free_energies_and_error[temperature][1] = sqrt(var_free_energy) / number;
+        free_energies_and_error[temperature][0] = mean_free_energy / number;
+        heat_capacities_and_error[temperature] = mean_heat_capacity / number;
       
         random_system(system); 
     }
