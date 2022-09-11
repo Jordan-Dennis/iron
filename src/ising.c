@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include"include/ising.h"
+#include"include/statistics.h"
 
 
 /*
@@ -249,16 +250,16 @@ int spin_energy(System* system, int spin)
  * -------
  * int: The energy of the ensamble in units of epsilon.
  */
-int energy(System* system)
+float energy(System* system)
 {
     int energy = 0;
 
     for (int spin = 0; spin < system -> number; spin++) 
     {
-        energy += spin_energy(system, spin) / 2;
+        energy += spin_energy(system, spin);
     }
 
-    return energy;
+    return (float) energy / (float) 2;
 }
 
 
@@ -305,7 +306,7 @@ float entropy(System* system)
  */
 float free_energy(System* system)
 {
-    return (float)energy(system) - (system -> temperature) * entropy(system);
+    return energy(system) - (system -> temperature) * entropy(system);
 }
 
 
@@ -324,17 +325,20 @@ float free_energy(System* system)
  */
 float heat_capacity(System* system)
 {
-    int total = 0;
-    for (int spin=0; spin < (system -> number); spin++)
+    int number = system -> number;
+    float energies[number];
+
+    for (int spin = 0; spin < (number); spin++)
     {
-        total += (system -> spins)[spin];
+        energies[spin] = spin_energy(system, spin);
     }
-    float energy_average = (float) total / (float) (system -> number);
-    // Note that the square of all the spins is 1
-    // Hence the expected value of the distance from 
-    // 0 must be 1.
-    float energy_variance = 1 - energy_average;
-    return energy_variance / pow(system -> temperature, 2);
+
+    float energy_mean = mean(energies, number);
+    float energy_variance = variance(energies, energy_mean, number); 
+    float heat_capacity = energy_variance / pow(system -> temperature, 2);
+    printf("Energy Mean: %f\n", energy_mean);
+    printf("Energy Variance: %f\n", energy_variance);
+    return heat_capacity;
 }
 
 
@@ -353,7 +357,7 @@ void metropolis_step(System* system)
     int spin = (int) (normalised_random() * (system -> number));
     int energy_change = - 2 * spin_energy(system, spin);
    
-    if (energy_change <= 0)
+    if (energy_change < 0)
     {
         (system -> spins[spin]) = -(system -> spins[spin]);
     } 

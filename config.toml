@@ -1,5 +1,5 @@
 [reps]
-    number = 100000
+    number = 100
 
 [temperatures]
     low = .1

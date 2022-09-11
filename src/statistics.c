@@ -1,3 +1,5 @@
+#include<math.h>
+#include<stdio.h>
 #include"include/statistics.h"
 
 /*
@@ -14,14 +16,16 @@
  * -------
  * float* mean: The geometric mean of the sample. 
  */
-float mean(float* array, int length) 
+float mean(float array[], int length) 
 {
-    float mean;
+    float mean = 0;
     for (int entry = 0; entry < length; entry++)
     {
-        mean += array[entry] / length;
+        mean += array[entry];
+        // printf("%f, ", array[entry]);
     }
-    return mean;
+    // printf("\n");
+    return mean / length;
 }
 
 
@@ -44,10 +48,10 @@ float mean(float* array, int length)
  */
 float variance(float* array, float mean, int length)
 {
-    float variance;
+    float variance = 0;
     for (int entry = 0; entry < length; entry++)
     {
-        variance += (float) (array[entry] - mean) * (array[entry] - mean);
+        variance += pow((array[entry] - mean), 2);
     }
     return variance / (length - 1);
 }

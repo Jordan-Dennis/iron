@@ -29,7 +29,7 @@ float normalised_random(void);
 int random_spin(void);
 
 
-int energy(System* system);
+float energy(System* system);
 int magnetisation(System* system);
 float entropy(System* system);
 float free_energy(System* system);

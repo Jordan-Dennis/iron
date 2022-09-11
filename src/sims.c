@@ -45,7 +45,7 @@ Temperatures* parse_temperatures(Config* config)
     temperatures -> length = length;
     temperatures -> temps = calloc(length, sizeof(float));
 
-	for (int temperature = 1; temperature <= length; temperature++)
+	for (int temperature = 0; temperature <= length; temperature++)
     {
         (temperatures -> temps)[temperature] = low + step * temperature;
 	}
@@ -225,25 +225,47 @@ void physical_parameters(Config* config)
         float simulation_free_energies[reps];
         float simulation_heat_capacities[reps]; 
         
-        for (int epoch = 0; epoch <= reps; epoch++)
+//        printf("Temperature: %f\n", system -> temperature);
+    
+        for (int epoch = 0; epoch < reps; epoch++)
         { 
             metropolis_step(system);
             simulation_energies[epoch] = energy(system);
             simulation_entropies[epoch] = entropy(system);
             simulation_free_energies[epoch] = free_energy(system);
             simulation_heat_capacities[epoch] = heat_capacity(system);
+//            printf("External Heat Capacity: %f\n", heat_capacity(system));
         }
+
+//        printf("Heat capacities in array:");
+//        for (int epoch = 0; epoch < reps; epoch++)
+//        {
+//            printf("%f, ", simulation_heat_capacities[epoch]);
+//        }
+//        printf("\n");
+//        printf("Mean Energy: %f\n", mean(simulation_energies, reps));   
+//        printf("Mean Entropy: %f\n", mean(simulation_entropies, reps));   
+//        printf("Mean Free Energy: %f\n", mean(simulation_free_energies, reps));   
+//        printf("Mean Heat Capacity: %f\n", mean(simulation_heat_capacities, reps));   
         
+//        float mean_heat_capacity = mean(simulation_heat_capacities, reps);
+//        printf("Mean Heat Capacity: %f\n", mean_heat_capacity);
+     
         float mean_energy = mean(simulation_energies, reps);
+//        printf("Mean Energy: %f\n", mean_energy);
         float mean_entropy = mean(simulation_entropies, reps);
+//        printf("Mean Entropy: %f\n", mean_entropy);
         float mean_free_energy = mean(simulation_free_energies, reps);
+//        printf("Mean Free Energy: %f\n", mean_free_energy);
         float mean_heat_capacity = mean(simulation_heat_capacities, reps);
+//        printf("Mean Heat Capacity: %f\n", mean_heat_capacity);
+
         float var_energy = variance(simulation_energies, mean_energy, reps);
         float var_entropy = variance(simulation_entropies, mean_entropy, reps);
-        float var_free_energy = variance(simulation_energies, mean_free_energy, reps);
+        float var_free_energy = variance(simulation_free_energies, mean_free_energy, reps);
         float var_heat_capacity = variance(simulation_heat_capacities, mean_heat_capacity, reps);
 
-        printf("Energy Var: %f\n", var_energy);
+//        printf("Heat Capacity: %f, %f\n\n\n", mean_heat_capacity, var_heat_capacity);
 
         energies_and_error[temperature][1] = sqrt(var_energy);
         energies_and_error[temperature][0] = mean_energy;
