@@ -115,6 +115,8 @@ for temp, temperature in enumerate(temperatures):
     _energy_var = np.std(energy)
     _entropy = np.mean(entropy)
     _entropy_var = np.std(entropy)
+
+    print(_energy)
    
     energies[temp, 0] = _energy / number
     energies[temp, 1] = _energy_var / number
@@ -125,34 +127,38 @@ for temp, temperature in enumerate(temperatures):
     magnetisations[temp, 0] = np.abs(np.mean(magnetisation)) / number
     magnetisations[temp, 1] = np.std(np.abs(magnetisation)) / number
     heat_capacities[temp, 0] = (_energy_var ** 2) / number / temperature ** 2
-    heat_capacities[temp, 1] = (np.std(energy ** 2) - 2 * _energy_var) / number / temperature ** 2
-#  plot the calculated values   
-#----------------------------------------------------------------------
+    heat_capacities[temp, 1] = (np.std(energy ** 2) / number - 2 * _energy_var) / number / temperature ** 2
+
 
 f = plt.figure(figsize=(18, 10))
-
-sp =  f.add_subplot(2, 2, 1)
-plt.errorbar(temperatures, energies[:, 0], energies[:, 1], s=50, marker='o')
+plt.subplot(2, 3, 1)
+plt.errorbar(temperatures, energies[:, 0], energies[:, 1], marker='o')
 plt.xlabel("Temperature (T)", fontsize=20)
 plt.ylabel("Energy", fontsize=20)         
 plt.axis('tight')
 
-sp =  f.add_subplot(2, 2, 2)
-plt.scatter(temperatures, magnetisations[:, 0], magnetisations[:, 1], s=50, marker='o')
+plt.subplot(2, 3, 2)
+plt.errorbar(temperatures, magnetisations[:, 0], magnetisations[:, 1], marker='o')
 plt.xlabel("Temperature (T)", fontsize=20) 
 plt.ylabel("Magnetization", fontsize=20)   
 plt.axis('tight')
 
-sp =  f.add_subplot(2, 2, 3)
-plt.scatter(temperatures, heat_capacities[:, 0], heat_capacities[:, 1], s=50, marker='o')
+plt.subplot(2, 3, 3)
+plt.errorbar(temperatures, heat_capacities[:, 0], heat_capacities[:, 1], marker='o')
 plt.xlabel("Temperature (T)", fontsize=20)  
 plt.ylabel("Specific Heat", fontsize=20)   
 plt.axis('tight') 
 
-sp =  f.add_subplot(2, 2, 4)
-plt.scatter(temperatures, entropies[:, 0], entropies[:, 1], s=50, marker='o')
+plt.subplot(2, 3, 4)
+plt.errorbar(temperatures, entropies[:, 0], entropies[:, 1], marker='o')
 plt.xlabel("Temperature (T)", fontsize=20)
 plt.ylabel("Entropy", fontsize=20)
+plt.axis('tight')
+
+plt.subplot(2, 3, 5)
+plt.errorbar(temperatures, free_energies[:, 0], free_energies[:, 1], marker='o')
+plt.xlabel("Temperature (T)", fontsize=20)
+plt.ylabel("Free Entropy", fontsize=20)
 plt.axis('tight')
 plt.savefig("pub/figures/q2c.pdf")
 plt.show()
