@@ -89,7 +89,7 @@ typedef struct Ising2D {
  * -------
  * Ising2D* model: A random spin state of the desired size. 
  */
-Ising2D* init_2d_ising_system(int length)
+Ising2D* init_ising_2d(int length)
 {
     int **ensemble = (int**) calloc(length, sizeof(int*));  
     for (int col = 0; col < length; col++)
@@ -111,12 +111,29 @@ Ising2D* init_2d_ising_system(int length)
 }
 
 
+int energy_ising_2d(const Ising2D* system)
+{
+    int length = system -> length;
+    int **ensemble = system -> ensemble;
+    int energy = 0;
+
+    for (int row; row < length; row++)
+    {
+        for (int col; col < length; col++)
+        {
+            energy -= ensemble[row, col] * (
+                ensemble[(row + 1) % length, col] +
+                ensemble[(row - 1) % length, col] +
+                ensemble[row, (col + 1) % length] +
+                ensemble[row, (col - 1) % length])
+        }
+    }
+
+    return energy;
+}
+
+
 int main(void)
 {
 
-
-    neighbours = spins[(row + 1) % rows, column] 
-    neighbours += spins[row, (column + 1) % columns] 
-    neighbours += spins[(row - 1) % rows, column] 
-    neighbours += spins[row, (column - 1) % columns]
 }
