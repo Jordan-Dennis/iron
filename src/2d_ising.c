@@ -39,6 +39,27 @@ int random_spin(void)
 
 
 /*
+ * random_index
+ * ------------
+ * Generate a random index in the correct range.
+ * 
+ * parameters
+ * ----------
+ * int length: The length of the array that is getting indexed. 
+ *
+ * returns
+ * -------
+ * int rand_ind: A random index in the range [0, length]
+ */
+int random_index(int length)
+{
+    float norm_rand = normalised_random();
+    float range_rand = norm_rand * length + 0.5;
+    return (int) range_rand;
+}
+
+
+/*
  * Ising2D
  * -------
  * Represents the two-dimensional simulation of the ising model. 
@@ -92,15 +113,10 @@ Ising2D* init_2d_ising_system(int length)
 
 int main(void)
 {
-    int length = 10;
-    Ising2D* system = init_2d_ising_system(length);
 
-    for (int row = 0; row < length; row++)
-    {
-        for (int col = 0; col < length; col++)
-        {
-            printf("%i,", system -> ensemble[row][col]);
-        }
-        printf("\n");
-    }
+
+    neighbours = spins[(row + 1) % rows, column] 
+    neighbours += spins[row, (column + 1) % columns] 
+    neighbours += spins[(row - 1) % rows, column] 
+    neighbours += spins[row, (column - 1) % columns]
 }
