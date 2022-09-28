@@ -6,12 +6,6 @@
 #include"include/statistics.h"
 
 
-typedef struct 2DIsingSystem {
-    int length;
-    int spins[][];
-} 2DIsingSystem; 
-
-
 /*
  * random
  * ------
@@ -43,7 +37,45 @@ int random_spin(void)
     return (int) ((translated_random > 0) - (translated_random < 0));
 }
 
+typedef struct Ising2D {
+    int length;
+    int **ensemble;
+} Ising2D; 
 
 
+Ising2D* init_2d_ising_system(int length)
+{
+    int **ensemble = (int**) calloc(length, sizeof(int*));  
+    for (int col = 0; col < length; col++)
+    {
+        ensemble[col] = (int*) calloc(length, sizeof(int));
+    } 
+
+    for (int row = 0; row < length; row++)
+    {
+        for (int col = 0; col < length; col++)
+        {
+            ensemble[row][col] = random_spin();
+        }
+    }
+
+    Ising2D* system = (Ising2D*) calloc(1, sizeof(Ising2D));
+    system -> length = length;
+    system -> ensemble = ensemble;
+}
 
 
+int main(void)
+{
+    int length = 10;
+    Ising2D* system = init_2d_ising_system(length);
+
+    for (int row = 0; row < length; row++)
+    {
+        for (int col = 0; col < length; col++)
+        {
+            printf("%i,", system -> ensemble[row][col]);
+        }
+        printf("\n");
+    }
+}
