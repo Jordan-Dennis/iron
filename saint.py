@@ -86,79 +86,109 @@ warm_up = 10**2       #  number of MC sweeps for equilibration
 steps = 10**4  #  number of MC sweeps for calculation
 
 
-temperatures = np.linspace(1.53, 3.28, 32); 
-energies = np.zeros((temperatures.size, 2), dtype=float)
-entropies = np.zeros((temperatures.size, 2), dtype=float)
-free_energies = np.zeros((temperatures.size, 2), dtype=float)
-magnetisations = np.zeros((temperatures.size, 2), dtype=float)
-heat_capacities = np.zeros((temperatures.size, 2), dtype=float)
+temperatures = np.linspace(1.53, 3.28, 30); 
+energies = np.zeros((3, temperatures.size, 2), dtype=float)
+entropies = np.zeros((3, temperatures.size, 2), dtype=float)
+free_energies = np.zeros((3, temperatures.size, 2), dtype=float)
+magnetisations = np.zeros((3, temperatures.size, 2), dtype=float)
+heat_capacities = np.zeros((3, temperatures.size, 2), dtype=float)
 
-for temp, temperature in enumerate(temperatures):
-    spins = initial_state(number)         # initialise
+q2a = plt.figure(figsize=(9, 6))
 
-    energy = np.zeros((steps,), dtype=float)
-    entropy = np.zeros((steps,), dtype=float)
-    magnetisation = np.zeros((steps,), dtype=float)
+for index, size in enumerate([10, 20, 100]):
+    for temp, temperature in enumerate(temperatures):
+        spins = initial_state(number)         # initialise
 
-    for _ in range(warm_up):         # equilibrate
-        mcmove(spins, temperature)           # Monte Carlo moves
+        if temp % 10 == 0 and size == 100:
+            plt.subplot(2, 3, 2 * (temp // 10) + 1)
+            plt.axis("tight")
+            plt.imshow(spins)
+            plt.title(f"T = {temperature} Initial")
 
-    for i in range(steps):
-        mcmove(spins, temperature)           
+        energy = np.zeros((steps,), dtype=float)
+        entropy = np.zeros((steps,), dtype=float)
+        magnetisation = np.zeros((steps,), dtype=float)
 
-        energy[i] = calc_energy(spins)
-        entropy[i] = calc_entropy(spins)
-        magnetisation[i] = calc_magnetisation(spins)
+        for _ in range(warm_up):         # equilibrate
+            mcmove(spins, temperature)           # Monte Carlo moves
 
-    # divide by number of sites and iteractions to obtain intensive values 
-    _energy = np.mean(energy)
-    _energy_var = np.std(energy)
-    _entropy = np.mean(entropy)
-    _entropy_var = np.std(entropy)
+        if temp % 10 == 0 and size == 100:
+            plt.subplot(2, 3, 2 * (temp // 10) + 2)
+            plt.axis("tight")
+            plt.imshow(spins)
+            plt.title(f"T = {temperature} Final")
 
-    print(_energy)
-   
-    energies[temp, 0] = _energy / number
-    energies[temp, 1] = _energy_var / number
-    entropies[temp, 0] = _entropy / number
-    entropies[temp, 1] = _entropy_var / number
-    free_energies[temp, 0] = (_energy - temperature * _entropy) / number
-    free_energies[temp, 1] = (_energy_var - temperature * _entropy_var) / number
-    magnetisations[temp, 0] = np.abs(np.mean(magnetisation)) / number
-    magnetisations[temp, 1] = np.std(np.abs(magnetisation)) / number
-    heat_capacities[temp, 0] = (_energy_var ** 2) / number / temperature ** 2
-    heat_capacities[temp, 1] = (np.std(energy ** 2) / number - 2 * _energy_var) / number / temperature ** 2
+        for i in range(steps):
+            mcmove(spins, temperature)           
+            
+            energy[i] = calc_energy(spins)
+            entropy[i] = calc_entropy(spins)
+            magnetisation[i] = calc_magnetisation(spins)
 
+        # divide by number of sites and iteractions to obtain intensive values 
+        _energy = np.mean(energy)
+        _energy_var = np.std(energy)
+        _entropy = np.mean(entropy)
+        _entropy_var = np.std(entropy)
+
+        energies[index, temp, 0] = _energy / number ** 2
+        energies[index, temp, 1] = _energy_var / number ** 2
+        entropies[index, temp, 0] = _entropy / number ** 2
+        entropies[index, temp, 1] = _entropy_var / number ** 2
+        free_energies[index, temp, 0] = (_energy - temperature * _entropy) / number ** 2
+        free_energies[index, temp, 1] = (_energy_var - temperature * _entropy_var) / number ** 2
+        magnetisations[index, temp, 0] = np.abs(np.mean(magnetisation)) / number ** 2
+        magnetisations[index, temp, 1] = np.std(np.abs(magnetisation)) / number ** 2
+        heat_capacities[index, temp, 0] = (_energy_var ** 2) / number / temperature ** 2
+        heat_capacities[index, temp, 1] = (np.std(energy ** 2) + 2 * _energy_var) / number ** 3 / temperature ** 2
+
+plt.savefig("pub/figures/q2a.pdf")
+plt.show()
 
 f = plt.figure(figsize=(18, 10))
-plt.subplot(2, 3, 1)
-plt.errorbar(temperatures, energies[:, 0], energies[:, 1], marker='o')
-plt.xlabel("Temperature (T)", fontsize=20)
-plt.ylabel("Energy", fontsize=20)         
-plt.axis('tight')
 
-plt.subplot(2, 3, 2)
-plt.errorbar(temperatures, magnetisations[:, 0], magnetisations[:, 1], marker='o')
-plt.xlabel("Temperature (T)", fontsize=20) 
-plt.ylabel("Magnetization", fontsize=20)   
-plt.axis('tight')
+for size in range(3):
+    plt.subplot(5, 3, size + 1)
+    plt.errorbar(temperatures, energies[size, :, 0], energies[size, :, 1], marker='o')
+    plt.xlabel("Temperature (T)", fontsize=20)
+    plt.ylabel("Energy", fontsize=20)         
+    plt.axis('tight')
 
-plt.subplot(2, 3, 3)
-plt.errorbar(temperatures, heat_capacities[:, 0], heat_capacities[:, 1], marker='o')
-plt.xlabel("Temperature (T)", fontsize=20)  
-plt.ylabel("Specific Heat", fontsize=20)   
-plt.axis('tight') 
+    plt.subplot(5, 3, size + 4)
+    plt.errorbar(temperatures, magnetisations[size, :, 0], magnetisations[size, :, 1], marker='o')
+    plt.xlabel("Temperature (T)", fontsize=20) 
+    plt.ylabel("Magnetization", fontsize=20)   
+    plt.axis('tight')
 
-plt.subplot(2, 3, 4)
-plt.errorbar(temperatures, entropies[:, 0], entropies[:, 1], marker='o')
-plt.xlabel("Temperature (T)", fontsize=20)
-plt.ylabel("Entropy", fontsize=20)
-plt.axis('tight')
+    plt.subplot(5, 3, size + 7)
+    plt.errorbar(temperatures, heat_capacities[size, :, 0], heat_capacities[size, :, 1], marker='o')
+    plt.xlabel("Temperature (T)", fontsize=20)  
+    plt.ylabel("Specific Heat", fontsize=20)   
+    plt.axis('tight') 
 
-plt.subplot(2, 3, 5)
-plt.errorbar(temperatures, free_energies[:, 0], free_energies[:, 1], marker='o')
-plt.xlabel("Temperature (T)", fontsize=20)
-plt.ylabel("Free Entropy", fontsize=20)
-plt.axis('tight')
+    plt.subplot(5, 3, size + 10)
+    plt.errorbar(temperatures, entropies[size, :, 0], entropies[size, :, 1], marker='o')
+    plt.xlabel("Temperature (T)", fontsize=20)
+    plt.ylabel("Entropy", fontsize=20)
+    plt.axis('tight')
+
+    plt.subplot(5, 3, size + 13)
+    plt.errorbar(temperatures, free_energies[size, :, 0], free_energies[size, :, 1], marker='o')
+    plt.xlabel("Temperature (T)", fontsize=20)
+    plt.ylabel("Free Entropy", fontsize=20)
+    plt.axis('tight')
 plt.savefig("pub/figures/q2c.pdf")
+plt.show()
+
+sizes = [10, 20, 100]
+
+plt.figure(figsize=(9, 9))
+for size in range(3):
+    for temp, temperature in enumerate([0, 10, 20]):
+        plt.subplot(2, 3, size + temp + 1)
+        plt.hist(magnetisations[size, temperature, 0])
+        plt.title("T = {temperatures[temperature]}, N = {sizes[size]}")
+        plt.axis("tight")
+
+plt.savefig("pub/figures/q2e.pdf")
 plt.show()
