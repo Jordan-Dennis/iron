@@ -37,12 +37,37 @@ int random_spin(void)
     return (int) ((translated_random > 0) - (translated_random < 0));
 }
 
+
+/*
+ * Ising2D
+ * -------
+ * Represents the two-dimensional simulation of the ising model. 
+ * These models are assumed to be square.
+ *
+ * parameters
+ * ----------
+ * int length: The number of spins in a single row/col.
+ * int **ensemble: The matrix of spins. 
+ */
 typedef struct Ising2D {
     int length;
     int **ensemble;
 } Ising2D; 
 
 
+/*
+ * init_2d_ising_system
+ * --------------------
+ * Construct a two dimensional model of the ising system.
+ *
+ * parameters
+ * ----------
+ * int length: The number of spins desired along one edge of the model.
+ *
+ * returns
+ * -------
+ * Ising2D* model: A random spin state of the desired size. 
+ */
 Ising2D* init_2d_ising_system(int length)
 {
     int **ensemble = (int**) calloc(length, sizeof(int*));  
