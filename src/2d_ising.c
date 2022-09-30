@@ -53,7 +53,7 @@ int random_spin(void)
 int random_index(int length)
 {
     float norm_rand = normalised_random();
-    float range_rand = norm_rand * length + 0.5;
+    float range_rand = norm_rand * length;
     return (int) range_rand;
 }
 
@@ -137,6 +137,21 @@ int modulo(int dividend, int divisor)
 }
 
 
+/*
+ * spin_energy_ising_2d
+ * --------------------
+ * Calculate the energy of a specific spin in the system. 
+ *
+ * parameters
+ * ----------
+ * const Ising2D *system: The system of spins.
+ * int row: The row coordinate of the spin.
+ * int col: The column coordinate of the spin. 
+ *
+ * returns
+ * -------
+ * The energy contribution of this specific spin. 
+ */
 float spin_energy_ising_2d(const Ising2D *system, int row, int col)
 {
     int **ensemble = system -> ensemble;
@@ -176,11 +191,22 @@ float energy_ising_2d(const Ising2D *system)
         }
     }
 
-    return energy;
+    return energy / 2.;
 }
 
 
-float flip_spin_ising_2d(Ising2D *system, int row, int col)
+/*
+ * flip_spin_ising_2d
+ * ------------------
+ * Reverse the direction of a specific spin within the system.
+ *
+ * parameters
+ * ----------
+ * Ising2D *system: The system to be modified.
+ * int row: The row coordinate of the spin getting flipped.
+ * int col: The column coordinate of the spin getting flipped.
+ */
+void flip_spin_ising_2d(Ising2D *system, int row, int col)
 {
     system -> ensemble[row][col] *= -1;
 }
@@ -251,12 +277,15 @@ void metropolis_step(Ising2D *system)
 
 int main(void)
 {
-    int length = 5;
-    Ising2D *system = init_ising_2d(5, 1.);
+    int length = 100;
+    Ising2D *system = init_ising_2d(length, 10.);
 
     printf("Energy: %f\n", energy_ising_2d(system));
     print_ising_2d(system);
-    metropolis_step(system);
+    for (int epoch = 0; epoch < 1000 * length; epoch++)
+    {
+        metropolis_step(system);
+    }
     printf("Energy: %f\n", energy_ising_2d(system));
     print_ising_2d(system);
 }
