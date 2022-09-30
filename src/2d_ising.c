@@ -2,39 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"include/statistics.h"
-
-
-/*
- * random
- * ------
- * Generate a random number over the range [0, 1].
- *
- * returns
- * -------
- * float: random number.
- */
-float normalised_random(void)
-{ 
-    return (float) rand() / (float) RAND_MAX;
-}
-
-
-/* 
- * random_sign
- * -----------
- * Generate + or - 1 randomly.
- *
- * returns
- * -------
- * int: +1 or -1 randomly.
- */ 
-int random_spin(void) 
-{
-    float normed_random = normalised_random();
-    float translated_random = normed_random - .5;
-    return (int) ((translated_random > 0) - (translated_random < 0));
-}
+#include"include/utils.h"
 
 
 /*
@@ -248,9 +216,8 @@ void print_ising_2d(Ising2D *system)
  * ----------
  * System* system: The spin ensamble to evolve.  
  */
-void metropolis_step(Ising2D *system)
+void metropolis_step_ising_2d(Ising2D *system)
 {
-
     int row = random_index(system -> length);
     int col = random_index(system -> length);
     int energy_change = 2 * spin_energy_ising_2d(system, row, col);
@@ -273,6 +240,11 @@ void metropolis_step(Ising2D *system)
 // from a file so that I can make deterministic tests against the python 
 // code? Perhaps I think for now though I forge ahead with the same 
 // statergy that I had before.
+
+// Should I change the plotting to python? Well, let's see. There is 
+// Going to be more power using matplotlib but it will be slower. 
+// Will have to manually handle the file reading. I think so, let's 
+// switch to using python for the ongoing project from here. 
 
 
 int main(void)
