@@ -111,6 +111,20 @@ Ising2D* init_ising_2d(int length)
 }
 
 
+/*
+ * modulo
+ * ------
+ * A number theory based version of the % operator
+ *
+ * parameters
+ * ----------
+ * int dividend: The n in n % m 
+ * int divisor: The m in n % m
+ *
+ * returns
+ * -------
+ * int nmodm: The number theory modulo.
+ */
 int modulo(int dividend, int divisor)
 {
     if (divisor == 0)
@@ -161,6 +175,16 @@ float energy_ising_2d(const Ising2D *system)
 }
 
 
+/*
+ * print_ising_2d
+ * --------------
+ * A convinience function for debugging. Prints the system compactly 
+ * into the terminal on a uniform grid.
+ *
+ * parameters
+ * ----------
+ * Ising2D *system: The system to display.
+ */
 void print_ising_2d(Ising2D *system)
 {
     int length = system -> length;
