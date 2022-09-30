@@ -111,6 +111,16 @@ Ising2D* init_ising_2d(int length)
 }
 
 
+int modulo(int dividend, int divisor)
+{
+    if (divisor == 0)
+    {
+        return 0;
+    }
+    return ((dividend % divisor) + divisor) % divisor;
+}
+
+
 /*
  * energy_ising_2d
  * ---------------
@@ -125,25 +135,46 @@ Ising2D* init_ising_2d(int length)
  * -------
  * int energy: The energy.
  */
-int energy_ising_2d(const Ising2D *system)
+float energy_ising_2d(const Ising2D *system)
 {
+    printf("Entered the energy lair\n");
     int length = system -> length;
     int **ensemble = system -> ensemble;
-    int energy = 0;
+    float energy = 0;
+    printf("Commencing the for loop\n");
 
-    for (int row; row < length; row++)
+    for (int row = 0; row < length; row++)
     {
-        for (int col; col < length; col++)
+        printf("Row: %i\n", row);
+        for (int col = 0; col < length; col++)
         {
-            energy -= ensemble[row, col] * (
-                ensemble[(row + 1) % length][col] +
-                ensemble[(row - 1) % length][col] +
-                ensemble[row][(col + 1) % length] +
-                ensemble[row][(col - 1) % length])
+            printf("Col: %i\n", col);
+            energy -= ensemble[row][col] * (
+                ensemble[modulo(row + 1, length)][col] +
+                ensemble[modulo(row - 1, length)][col] +
+                ensemble[row][modulo(col + 1, length)] +
+                ensemble[row][modulo(col - 1, length)]);
         }
     }
 
     return energy;
+}
+
+
+void print_ising_2d(Ising2D *system)
+{
+    int length = system -> length;
+    int **ensemble = system -> ensemble;
+    
+    printf("2D Ising System:\n");
+    for (int row = 0; row < length; row++)
+    {
+        for (int col = 0; col < length; col++)
+        {
+            printf("%i", ensemble[row][col] > 0);
+        }
+        printf("\n");
+    }
 }
 
 
@@ -155,5 +186,9 @@ int energy_ising_2d(const Ising2D *system)
 
 int main(void)
 {
-    Ising2D* 
+    int length = 5;
+    Ising2D *system = init_ising_2d(5);
+    float system_energy = energy_ising_2d(system);
+    printf("Energy: %f\n", system_energy);
+    print_ising_2d(system);
 }
