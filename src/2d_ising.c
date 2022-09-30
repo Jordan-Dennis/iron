@@ -2,7 +2,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"include/ising.h"
 #include"include/statistics.h"
 
 
@@ -71,8 +70,9 @@ int random_index(int length)
  * int **ensemble: The matrix of spins. 
  */
 typedef struct Ising2D {
-    int length;
-    int **ensemble;
+    int     length;
+    float   temperature;
+    int     **ensemble;
 } Ising2D; 
 
 
@@ -89,7 +89,7 @@ typedef struct Ising2D {
  * -------
  * Ising2D* model: A random spin state of the desired size. 
  */
-Ising2D* init_ising_2d(int length)
+Ising2D* init_ising_2d(int length, float temperature)
 {
     int **ensemble = (int**) calloc(length, sizeof(int*));  
     for (int col = 0; col < length; col++)
@@ -107,7 +107,9 @@ Ising2D* init_ising_2d(int length)
 
     Ising2D* system = (Ising2D*) calloc(1, sizeof(Ising2D));
     system -> length = length;
+    system -> temperature = temperature;
     system -> ensemble = ensemble;
+    return system;
 }
 
 
@@ -135,6 +137,18 @@ int modulo(int dividend, int divisor)
 }
 
 
+float spin_energy_ising_2d(const Ising2D *system, int row, int col)
+{
+    int **ensemble = system -> ensemble;
+    int length = system -> length;
+    return ensemble[row][col] * (
+        ensemble[modulo(row + 1, length)][col] +
+        ensemble[modulo(row - 1, length)][col] +
+        ensemble[row][modulo(col + 1, length)] +
+        ensemble[row][modulo(col - 1, length)]);
+}
+
+
 /*
  * energy_ising_2d
  * ---------------
@@ -151,27 +165,24 @@ int modulo(int dividend, int divisor)
  */
 float energy_ising_2d(const Ising2D *system)
 {
-    printf("Entered the energy lair\n");
     int length = system -> length;
-    int **ensemble = system -> ensemble;
     float energy = 0;
-    printf("Commencing the for loop\n");
 
     for (int row = 0; row < length; row++)
     {
-        printf("Row: %i\n", row);
         for (int col = 0; col < length; col++)
         {
-            printf("Col: %i\n", col);
-            energy -= ensemble[row][col] * (
-                ensemble[modulo(row + 1, length)][col] +
-                ensemble[modulo(row - 1, length)][col] +
-                ensemble[row][modulo(col + 1, length)] +
-                ensemble[row][modulo(col - 1, length)]);
+            energy -= spin_energy_ising_2d(system, row, col);
         }
     }
 
     return energy;
+}
+
+
+float flip_spin_ising_2d(Ising2D *system, int row, int col)
+{
+    system -> ensemble[row][col] *= -1;
 }
 
 
@@ -202,6 +213,36 @@ void print_ising_2d(Ising2D *system)
 }
 
 
+/*
+ * metropolis_step
+ * ---------------
+ * Evolve the spin state according to a metropolis algorithm. 
+ *
+ * parameters
+ * ----------
+ * System* system: The spin ensamble to evolve.  
+ */
+void metropolis_step(Ising2D *system)
+{
+
+    int row = random_index(system -> length);
+    int col = random_index(system -> length);
+    int energy_change = 2 * spin_energy_ising_2d(system, row, col);
+   
+    if (energy_change < 0)
+    {
+        flip_spin_ising_2d(system, row, col);
+    } 
+    else
+    {
+        float probability = exp(- energy_change / (system -> temperature));
+        if (probability > normalised_random()) 
+        {
+            flip_spin_ising_2d(system, row, col);
+        }
+    }
+}
+
 // OK so ... the question is should I allo myself to read the system 
 // from a file so that I can make deterministic tests against the python 
 // code? Perhaps I think for now though I forge ahead with the same 
@@ -211,8 +252,11 @@ void print_ising_2d(Ising2D *system)
 int main(void)
 {
     int length = 5;
-    Ising2D *system = init_ising_2d(5);
-    float system_energy = energy_ising_2d(system);
-    printf("Energy: %f\n", system_energy);
+    Ising2D *system = init_ising_2d(5, 1.);
+
+    printf("Energy: %f\n", energy_ising_2d(system));
+    print_ising_2d(system);
+    metropolis_step(system);
+    printf("Energy: %f\n", energy_ising_2d(system));
     print_ising_2d(system);
 }
