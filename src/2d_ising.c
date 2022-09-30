@@ -111,7 +111,21 @@ Ising2D* init_ising_2d(int length)
 }
 
 
-int energy_ising_2d(const Ising2D* system)
+/*
+ * energy_ising_2d
+ * ---------------
+ * Calculate the energy of the 2D ising simulation with periodic boundary 
+ * conditions. 
+ *
+ * parameters
+ * ----------
+ * const Ising2D *system: The 2D ising system.
+ *
+ * returns
+ * -------
+ * int energy: The energy.
+ */
+int energy_ising_2d(const Ising2D *system)
 {
     int length = system -> length;
     int **ensemble = system -> ensemble;
@@ -122,10 +136,10 @@ int energy_ising_2d(const Ising2D* system)
         for (int col; col < length; col++)
         {
             energy -= ensemble[row, col] * (
-                ensemble[(row + 1) % length, col] +
-                ensemble[(row - 1) % length, col] +
-                ensemble[row, (col + 1) % length] +
-                ensemble[row, (col - 1) % length])
+                ensemble[(row + 1) % length][col] +
+                ensemble[(row - 1) % length][col] +
+                ensemble[row][(col + 1) % length] +
+                ensemble[row][(col - 1) % length])
         }
     }
 
@@ -133,7 +147,13 @@ int energy_ising_2d(const Ising2D* system)
 }
 
 
+// OK so ... the question is should I allo myself to read the system 
+// from a file so that I can make deterministic tests against the python 
+// code? Perhaps I think for now though I forge ahead with the same 
+// statergy that I had before.
+
+
 int main(void)
 {
-
+    Ising2D* 
 }
