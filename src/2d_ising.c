@@ -43,30 +43,6 @@ Ising2D* init_ising_2d(int length, float temperature)
 
 
 /*
- * modulo
- * ------
- * A number theory based version of the % operator
- *
- * parameters
- * ----------
- * int dividend: The n in n % m 
- * int divisor: The m in n % m
- *
- * returns
- * -------
- * int nmodm: The number theory modulo.
- */
-int modulo(int dividend, int divisor)
-{
-    if (divisor == 0)
-    {
-        return 0;
-    }
-    return ((dividend % divisor) + divisor) % divisor;
-}
-
-
-/*
  * spin_energy_ising_2d
  * --------------------
  * Calculate the energy of a specific spin in the system. 
@@ -195,30 +171,4 @@ void metropolis_step_ising_2d(Ising2D *system)
             flip_spin_ising_2d(system, row, col);
         }
     }
-}
-
-// OK so ... the question is should I allo myself to read the system 
-// from a file so that I can make deterministic tests against the python 
-// code? Perhaps I think for now though I forge ahead with the same 
-// statergy that I had before.
-
-// Should I change the plotting to python? Well, let's see. There is 
-// Going to be more power using matplotlib but it will be slower. 
-// Will have to manually handle the file reading. I think so, let's 
-// switch to using python for the ongoing project from here. 
-
-
-int main(void)
-{
-    int length = 100;
-    Ising2D *system = init_ising_2d(length, 10.);
-
-    printf("Energy: %f\n", energy_ising_2d(system));
-    print_ising_2d(system);
-    for (int epoch = 0; epoch < 1000 * length; epoch++)
-    {
-        metropolis_step_ising_2d(system);
-    }
-    printf("Energy: %f\n", energy_ising_2d(system));
-    print_ising_2d(system);
 }

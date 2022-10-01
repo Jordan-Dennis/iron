@@ -18,13 +18,13 @@ typedef struct Ising1D
     int length;
     float temperature;
     int *ensemble;
-}
+} Ising1D;
 
 Ising1D* init_ising_1d(int length, float temperature);
 int spin_energy_ising_1d(Ising1D *system, int spin);
 void metropolis_step_ising_1d(Ising1D *system);
-void flip_spin_ising_1d(Ising1D *system);
-void print_ising_1d(Ising1d *system);
+void flip_spin_ising_1d(Ising1D *system, int spin);
+void print_ising_1d(Ising1D *system);
 float energy_ising_1d(Ising1D *system);
 float magnetisation_ising_1d(Ising1D *system);
 float entropy_ising_1d(Ising1D *system);

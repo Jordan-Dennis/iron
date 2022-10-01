@@ -20,7 +20,7 @@ typedef struct Ising2D {
 } Ising2D;
 
  
-Ising2D *init_ising_1d(int length, float temperature);
+Ising2D *init_ising_2d(int length, float temperature);
 void metropolis_step_ising_2d(Ising2D *system);
 void flip_spin_ising_2d(Ising2D *system, int row, int col);
 void print_ising_2d(Ising2D *system);

@@ -110,3 +110,28 @@ float variance(float* array, float mean, int length)
     }
     return variance / (length - 1);
 }
+
+
+/*
+ * modulo
+ * ------
+ * A number theory based version of the % operator
+ *
+ * parameters
+ * ----------
+ * int dividend: The n in n % m 
+ * int divisor: The m in n % m
+ *
+ * returns
+ * -------
+ * int nmodm: The number theory modulo.
+ */
+int modulo(int dividend, int divisor)
+{
+    if (divisor == 0)
+    {
+        return 0;
+    }
+    return ((dividend % divisor) + divisor) % divisor;
+}
+

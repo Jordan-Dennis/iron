@@ -55,7 +55,7 @@ Ising1D* init_ising_1d(int length, float temperature)
 int spin_energy_ising_1d(Ising1D* system, int spin)
 {
     int *ensemble = system -> ensemble;
-    int length = system -> number;
+    int length = system -> length;
     return ensemble[spin] * (
         ensemble[modulo(spin + 1, length)] + 
         ensemble[modulo(spin - 1, length)]);
@@ -79,9 +79,9 @@ float energy_ising_1d(Ising1D* system)
 {
     int energy = 0;
 
-    for (int spin = 0; spin < system -> number; spin++) 
+    for (int spin = 0; spin < system -> length; spin++) 
     {
-        energy -= spin_energy(system, spin);
+        energy -= spin_energy_ising_1d(system, spin);
     }
 
     return (float) energy / (float) 2;
@@ -145,6 +145,22 @@ float free_energy_ising_1d(Ising1D* system)
 
 
 /*
+ * flip_spin_ising_1d
+ * ------------------
+ * Flip a spin in the system.
+ *
+ * parameters
+ * ----------
+ * Ising1D *system: The system within which to flip.
+ * int spin: The index of the spin to flip.
+ */
+void flip_spin_ising_1d(Ising1D *system, int spin)
+{
+    system -> ensemble[spin] *= -1;
+}
+
+
+/*
  * metropolis_step
  * ---------------
  * Evolve the spin state according to a metropolis algorithm. 
@@ -153,7 +169,7 @@ float free_energy_ising_1d(Ising1D* system)
  * ----------
  * Ising1D* system: The spin ensamble to evolve.  
  */
-void metropolis_step(Ising1D* system)
+void metropolis_step_ising_1d(Ising1D* system)
 {
     int spin = random_index(system -> length);
     int energy_change = 2 * spin_energy_ising_1d(system, spin);
@@ -211,7 +227,7 @@ float magnetisation_ising_1d(Ising1D* system)
 void print_ising_1d(Ising1D* system)
 {
     int length = system -> length;
-    int *ensemble = system -> length;
+    int *ensemble = system -> ensemble;
     
     printf("1D Ising System:\n");
     for (int spin = 0; spin < length; spin++)
