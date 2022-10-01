@@ -1,0 +1,5 @@
+number_of_spins = 100
+save_file = pub/data/1d_test.csv
+lowest_temperature = 1.0
+highest_temperature = 4.0
+temperature_step = 1.0

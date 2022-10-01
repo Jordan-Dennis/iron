@@ -239,7 +239,7 @@ void print_ising_1d(Ising1D *system)
 }
 
 
-void save_ising_1d(Ising1D *system, FILE *file)
+void save_ising_1d(const Ising1D *system, FILE *file)
 {
     int length = system -> length;
     int *ensemble = system -> ensemble;
@@ -268,40 +268,30 @@ void save_ising_1d(Ising1D *system, FILE *file)
 void first_and_last(Config *config)
 {
     int num_spins = atoi(find(config, "number_of_spins"));
-    char *save_file = find(config, "save_file");
+    char *save_file_name = find(config, "save_file");
     float start = atof(find(config, "lowest_temperature"));
-    float stop = atof(find(config, "highest_temperture"));
+    float stop = atof(find(config, "highest_temperature"));
     float step = atof(find(config, "temperature_step"));
 
     free(config);
 
-    int num_temps = (int) ((stop - start) / length);
-    int saved_spin_configurations[2][length][num_temps];
+    int num_temps = (int) ((stop - start) / step);
+    FILE *save_file = fopen(save_file_name, "w");
 
     for (int temp = start, ind = 0; temp < stop; temp += step, ind++)
     {
         Ising1D* system = init_ising_1d(num_spins, temp);
-        
-        for (int spin = 0; spin < (system -> number); spin++)
-        {
-            results[0][spin][i] = (system -> spins)[spin];
-        }
+
+        save_ising_1d(system, save_file);
 
         // Running the metropolis algorithm over the system. 
-        for (int epoch = 0; epoch <= reps; epoch++)
+        for (int epoch = 0; epoch <= num_spins * 1e3; epoch++)
         { 
-            metropolis_step(system);
+            metropolis_step_ising_1d(system);
         }
 
-        // Saving the final state of the system to memory   
-        for (int spin = 0; spin < (system -> number); spin++)
-        {
-            results[1][spin][temp] = (system -> spins)[spin];
-        }
-
-        // Generating random spin system for next temperature
-        random_system(system);
-    } 
+        save_ising_1d(system, save_file);
+    }
 }
 
 

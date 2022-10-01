@@ -4,13 +4,6 @@
 #include<stdbool.h>
 
 
-// TODO: For this to work there will need to be multiple different types of
-// Pair so that calue can have multiple different pointer types. 
-// I will also interpret the data as I go. That is to say that instead of 
-// having a char it will get cast to an int or float. 
-// Mwahahahaha I can have a void pointer that points to an arbitrary point
-// in memory and I can use this to create my perfect Toml reading device. 
-
 /*
  * Pair
  * ----
@@ -85,5 +78,5 @@ Pair* entry(Toml* toml);
 Config* parse(Toml* toml);
 
 void add_pair_to_config(Config* config, Pair* pair);
-char* find(Config* config, char* key);
+char *find(Config* config, char* key);
 #endif 
