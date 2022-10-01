@@ -1,6 +1,7 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include"include/toml.h"
 #include"include/utils.h"
 #include"include/1d_ising.h"
 
@@ -224,7 +225,7 @@ float magnetisation_ising_1d(Ising1D* system)
  * ----------
  * Ising1D *system: The system to print.
  */
-void print_ising_1d(Ising1D* system)
+void print_ising_1d(Ising1D *system)
 {
     int length = system -> length;
     int *ensemble = system -> ensemble;
@@ -236,3 +237,73 @@ void print_ising_1d(Ising1D* system)
     }
     printf("\n");
 }
+
+
+void save_ising_1d(Ising1D *system, FILE *file)
+{
+    int length = system -> length;
+    int *ensemble = system -> ensemble;
+    float temperature = system -> temperature;
+
+    fprintf(file, "# Temperature: %f\n", temperature);
+
+    for (int spin = 0; spin < (length - 1); spin++) 
+    {
+        fprintf(file, "%i,", ensemble[spin]);
+    }
+
+    fprintf(file, "%i\n", ensemble[length - 1]);
+}
+
+
+/*
+ * first_and_last 
+ * --------------
+ * A one dimensional ising model with periodic boundaries using the 
+ * metropolis algorithm. Provide the initial and the final outputs 
+ * from the simulation for at least three different temperatures.
+ * What do you notice about the size of the chunks of color at 
+ * low temperatures compared to high temperatures. 
+ */
+void first_and_last(Config *config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperture"));
+    float step = atof(find(config, "temperature_step"));
+
+    free(config);
+
+    int num_temps = (int) ((stop - start) / length);
+    int saved_spin_configurations[2][length][num_temps];
+
+    for (int temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        Ising1D* system = init_ising_1d(num_spins, temp);
+        
+        for (int spin = 0; spin < (system -> number); spin++)
+        {
+            results[0][spin][i] = (system -> spins)[spin];
+        }
+
+        // Running the metropolis algorithm over the system. 
+        for (int epoch = 0; epoch <= reps; epoch++)
+        { 
+            metropolis_step(system);
+        }
+
+        // Saving the final state of the system to memory   
+        for (int spin = 0; spin < (system -> number); spin++)
+        {
+            results[1][spin][temp] = (system -> spins)[spin];
+        }
+
+        // Generating random spin system for next temperature
+        random_system(system);
+    } 
+}
+
+
+
+

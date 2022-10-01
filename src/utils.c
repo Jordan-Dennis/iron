@@ -134,4 +134,3 @@ int modulo(int dividend, int divisor)
     }
     return ((dividend % divisor) + divisor) % divisor;
 }
-
