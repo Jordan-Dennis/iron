@@ -1,28 +1,9 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
-#include"include/ising.h"
-#include"include/statistics.h"
+#include"include/utils.h"
+#include"include/1d_ising.h"
 
-
-/*
- * Ising1D
- * -------
- * Represents an ising model in 1 dimension.
- *
- * parameters
- * ----------
- * int length: The number of spins in the system.
- * float temperature: The temperature of the system in natural units.
- * int *system: The orientation of the spins in the system. 
- */
-typedef struct Ising1D 
-{
-    int length;
-    float temperature;
-    int *ensemble;
-}
 
 
 /*
@@ -122,21 +103,21 @@ float energy_ising_1d(Ising1D* system)
  */
 float entropy_ising_1d(Ising1D* system) 
 {
-    int number = system -> number;
-    int* ensemble = (system -> ensemble); 
+    int length = system -> length;
+    int* ensemble = system -> ensemble; 
     int up_spins = 0;
 
-    for (int spin = 0; spin < number; spin++)
+    for (int spin = 0; spin < length; spin++)
     {
-        if (ensemble[spin] == (ensemble[(spin + 1) % number]))
+        if (ensemble[spin] == (ensemble[modulo(spin + 1, length)]))
         {
             up_spins++;
         }
     }
 
-    int down_spins = number - up_spins;
+    int down_spins = length - up_spins;
 
-    float entropy = number * log(number) - up_spins * log(up_spins) 
+    float entropy = length * log(length) - up_spins * log(up_spins) 
         - down_spins * log(down_spins);
     
     return entropy;
@@ -215,4 +196,27 @@ float magnetisation_ising_1d(Ising1D* system)
         magnetisation += (system -> ensemble)[spin];
     }
     return magnetisation / length;
+}
+
+
+/*
+ * print_ising_1d
+ * --------------
+ * A useful debugging utility for developing the model.
+ * 
+ * parameters
+ * ----------
+ * Ising1D *system: The system to print.
+ */
+void print_ising_1d(Ising1D* system)
+{
+    int length = system -> length;
+    int *ensemble = system -> length;
+    
+    printf("1D Ising System:\n");
+    for (int spin = 0; spin < length; spin++)
+    {
+        printf("%i", ensemble[spin] > 0); 
+    }
+    printf("\n");
 }

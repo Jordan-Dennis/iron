@@ -1,6 +1,7 @@
 #include<math.h>
 #include<stdio.h>
-#include"include/statistics.h"
+#include<stdlib.h>
+#include"include/utils.h"
 
 
 /*
@@ -32,6 +33,27 @@ int random_spin(void)
     float normed_random = normalised_random();
     float translated_random = normed_random - .5;
     return (int) ((translated_random > 0) - (translated_random < 0));
+}
+
+
+/*
+ * random_index
+ * ------------
+ * Generate a random index in the correct range.
+ * 
+ * parameters
+ * ----------
+ * int length: The length of the array that is getting indexed. 
+ *
+ * returns
+ * -------
+ * int rand_ind: A random index in the range [0, length]
+ */
+int random_index(int length)
+{
+    float norm_rand = normalised_random();
+    float range_rand = norm_rand * length;
+    return (int) range_rand;
 }
 
 

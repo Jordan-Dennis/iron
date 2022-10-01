@@ -1,47 +1,8 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
 #include"include/utils.h"
-
-
-/*
- * random_index
- * ------------
- * Generate a random index in the correct range.
- * 
- * parameters
- * ----------
- * int length: The length of the array that is getting indexed. 
- *
- * returns
- * -------
- * int rand_ind: A random index in the range [0, length]
- */
-int random_index(int length)
-{
-    float norm_rand = normalised_random();
-    float range_rand = norm_rand * length;
-    return (int) range_rand;
-}
-
-
-/*
- * Ising2D
- * -------
- * Represents the two-dimensional simulation of the ising model. 
- * These models are assumed to be square.
- *
- * parameters
- * ----------
- * int length: The number of spins in a single row/col.
- * int **ensemble: The matrix of spins. 
- */
-typedef struct Ising2D {
-    int     length;
-    float   temperature;
-    int     **ensemble;
-} Ising2D; 
+#include"include/2d_ising.h"
 
 
 /*
@@ -256,7 +217,7 @@ int main(void)
     print_ising_2d(system);
     for (int epoch = 0; epoch < 1000 * length; epoch++)
     {
-        metropolis_step(system);
+        metropolis_step_ising_2d(system);
     }
     printf("Energy: %f\n", energy_ising_2d(system));
     print_ising_2d(system);
