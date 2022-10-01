@@ -9,7 +9,11 @@ ising_2d_test: src/2d_ising.c src/utils.c src/tests/2d_ising.c
 	$(CC) -o $(OUT_DIR)/$@ $? $(CFLAGS)
 
 ising_3d_test: src/3d_ising.c src/utils.c
-	$(CC) -o $(OUT_DIR0/$@ $? $(CFLAGS)
+	$(CC) -o $(OUT_DIR)/$@ $? $(CFLAGS)
+
+toml_test: src/toml.c src/tests/toml.c
+	$(CC) -o $(OUT_DIR)/$@ $? $(CFLAGS)
+    
 
 ising: src/*.c
 	$(CC) -o $(OUT_DIR)/$@ $? $(CFLAGS)
