@@ -44,6 +44,26 @@ def plot_physical_parameters(file_name: str, save_name: str) -> None:
     plt.savefig(save_name)
     plt.show()
 
-plot_physical_parameters(
+def plot_magnetisation_histogram(file_name: str, save_name: str) -> None:
+    with open(file_name) as frequencies:
+        next(frequencies)
+        data = np.array([
+            [float(entry) for entry in line.strip().split(",")] 
+            for line in frequencies])
+
+    plt.figure(figsize=(12, 8))
+    for temp in range(3):
+        plt.subplot(2, 3, temp + 1)
+        plt.title(f"$N = 100, T={temp + 1}K$")
+        plt.hist(data[:, temp])
+
+        plt.subplot(2, 3, temp + 4)
+        plt.title(f"$N = 500, T={temp + 1}K$")
+        plt.hist(data[:, temp + 3])
+
+    plt.savefig(save_name)
+    plt.show()
+
+plot_magnetisation_histogram(
     "pub/data/1d_test.csv", 
-    "pub/figures/1d_physical_parameters.pdf")   
+    "pub/figures/1d_magneitsation_histograms.pdf")   

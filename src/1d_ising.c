@@ -439,11 +439,11 @@ void physical_parameters(Config* config)
 void histogram(Config* config)
 {
     int num_spins[2] = {100, 500};
+    int reps_per_temp = atoi(find(config, "reps_per_temp"));
     char *save_file_name = find(config, "save_file");
     float start = atof(find(config, "lowest_temperature"));
     float stop = atof(find(config, "highest_temperature"));
     float step = atof(find(config, "temperature_step"));
-    float reps_per_temp = atoi(find(config, "reps_per_temp"));
    
     int length = (int) ((stop - start) / step); 
     float magnetisations[length][reps_per_temp][2]; 
@@ -459,7 +459,7 @@ void histogram(Config* config)
 
             for (int rep = 0; rep < reps_per_temp; rep++)
             {
-                int num_epochs = 1e3 * num_spins[number]
+                int num_epochs = 1e3 * num_spins[number];
 
                 // Running the burnin period. 
                 for (int epoch = 0; epoch <= num_epochs; epoch++)
@@ -473,7 +473,7 @@ void histogram(Config* config)
                 for (int epoch = 0; epoch < num_epochs; epoch++)
                 { 
                     metropolis_step_ising_1d(system);
-                    sim_magnetisation[epoch] = magnetisation(system);
+                    sim_magnetisation[epoch] = magnetisation_ising_1d(system);
                 }
 
                 float mean_magnetisation = mean(sim_magnetisation, num_epochs);
@@ -507,10 +507,16 @@ void histogram(Config* config)
         {
             for (int temp = 0; temp < length; temp++)
             {
-                fprintf(data, "%f, ", magnetisations[temp][rep][number]);
+                char* fstring = "%f,";
+
+                if ((temp == length - 1) && (number == 1))
+                {
+                    fstring = "%f\n";
+                }
+
+                fprintf(data, fstring, magnetisations[temp][rep][number]);
             }
         }
-        fprintf(data, "\n");
     }
 
     // Closing the file
