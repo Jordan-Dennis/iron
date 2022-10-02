@@ -293,7 +293,10 @@ void first_and_last(Config *config)
     int num_temps = (int) ((stop - start) / step);
     FILE *save_file = fopen(save_file_name, "w");
 
-    for (float temp = start, ind = 0; temp < stop; temp += step, ind++)
+    int ind;
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
     {
         Ising1D* system = init_ising_1d(num_spins, temp);
 
@@ -332,87 +335,86 @@ void physical_parameters(Config* config)
     float stop = atof(find(config, "highest_temperature"));
     float step = atof(find(config, "temperature_step"));
 
-    int length = (int) ((stop - start) / step);
+    int num_temps = (int) ((stop - start) / step);
+    int num_epochs = 1e3 * num_spins;
 
-    float energies_and_error[length][2];
-    float entropies_and_error[length][2];
-    float free_energies_and_error[length][2];
-    float heat_capacities_and_error[length];
+    float energies_and_error[num_temps][2];
+    float entropies_and_error[num_temps][2];
+    float free_energies_and_error[num_temps][2];
+    float heat_capacities_and_error[num_temps];
     
-    // Simulating the system. 
-    for (int temp = start, ind = 0; temp < stop; temp += step, ind++)
+    int ind;    
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
     {
-        Ising1D *system = init_ising_1d( temp);
+        Ising1D *system = init_ising_1d(num_spins, temp);
     
         // Running the burnin period. 
-        for (int epoch = 0; epoch <= 1000; epoch++)
+        for (int epoch = 0; epoch <= num_epochs; epoch++)
         { 
-            metropolis_step(system);
+            metropolis_step_ising_1d(system);
         }
 
-        // Collecting the data'
-		// TODO: I think that I will have new arrays here to simply store
-		// the information and then I will invoke a mean and variance function 
-		// on these arrays. Damn, I keep adding linear complexity. 
-        float simulation_energies[reps];
-        float simulation_entropies[reps];
-        float simulation_free_energies[reps];
+        float sim_energies[num_epochs];
+        float sim_entropies[num_epochs];
+        float sim_free_energies[num_epochs];
         
-        for (int epoch = 0; epoch < reps; epoch++)
+        for (int epoch = 0; epoch < num_epochs; epoch++)
         { 
-            metropolis_step(system);
-            float epoch_energy = energy(system);
-            float epoch_entropy = entropy(system);
+            metropolis_step_ising_1d(system);
+            float energy = energy_ising_1d(system);
+            float entropy = entropy_ising_1d(system);
 
-            simulation_energies[epoch] = epoch_energy;
-            simulation_entropies[epoch] = epoch_entropy;
-            simulation_free_energies[epoch] = epoch_energy - temp * epoch_entropy;
+            sim_energies[epoch] = energy;
+            sim_entropies[epoch] = entropy;
+            sim_free_energies[epoch] = energy - temp * entropy;
         }
 
-        float mean_energy = mean(simulation_energies, reps);
-        float mean_entropy = mean(simulation_entropies, reps);
-        float mean_free_energy = mean(simulation_free_energies, reps);
+        float mean_energy = mean(sim_energies, num_epochs);
+        float mean_entropy = mean(sim_entropies, num_epochs);
+        float mean_free_energy = mean(sim_free_energies, num_epochs);
 
-        float var_energy = variance(simulation_energies, mean_energy, reps);
-        float var_entropy = variance(simulation_entropies, mean_entropy, reps);
-        float var_free_energy = variance(simulation_free_energies, mean_free_energy, reps);
+        float var_energy = variance(sim_energies, mean_energy, num_epochs);
+        float var_entropy = variance(sim_entropies, mean_entropy, num_epochs);
+        float var_free_energy = variance(sim_free_energies, mean_free_energy, num_epochs);
         float mean_heat_capacity = var_energy / temp / temp;
 
-        int number = system -> number;
-
-        energies_and_error[temperature][1] = sqrt(var_energy) / number;
-        energies_and_error[temperature][0] = mean_energy / number;
-        entropies_and_error[temperature][1] = sqrt(var_entropy) / number;
-        entropies_and_error[temperature][0] = mean_entropy / number;
-        free_energies_and_error[temperature][1] = sqrt(var_free_energy) / number;
-        free_energies_and_error[temperature][0] = mean_free_energy / number;
-        heat_capacities_and_error[temperature] = mean_heat_capacity / number;
-      
-        random_system(system); 
+        energies_and_error[ind][1] = sqrt(var_energy) / num_spins;
+        energies_and_error[ind][0] = mean_energy / num_spins;
+        entropies_and_error[ind][1] = sqrt(var_entropy) / num_spins;
+        entropies_and_error[ind][0] = mean_entropy / num_spins;
+        free_energies_and_error[ind][1] = sqrt(var_free_energy) / num_spins;
+        free_energies_and_error[ind][0] = mean_free_energy / num_spins;
+        heat_capacities_and_error[ind] = mean_heat_capacity / num_spins;
     }
 
 	// Writing the data to the file
-	FILE* data = fopen(out, "w");
-    validate_file(data, out);
+	FILE* data = fopen(save_file_name, "w");
+
+    if (data == NULL)
+    {
+        printf("Error: Could not open '%s'", save_file_name);
+        exit(1);
+    }
 
 	// Writing the header row to the data. 
-	fprintf(data, "# Temperature, ");
+	fprintf(data, "Temperature, ");
     fprintf(data, "Energy, Energy Error, "); 
     fprintf(data, "Entropy, Entropy Error, "); 
     fprintf(data, "Free Energy, Free Energy Error, "); 
     fprintf(data, "Heat Capacity\n");
 
-    // TODO: from here
-	for (int temp = 0; temp < (temperatures -> length); temp++)
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
 	{
-        fprintf(data, "%f, ", (temperatures -> temps)[temp]);
-		fprintf(data, "%f, ", energies_and_error[temp][0]);
-		fprintf(data, "%f, ", energies_and_error[temp][1]);
-		fprintf(data, "%f, ", entropies_and_error[temp][0]);
-		fprintf(data, "%f, ", entropies_and_error[temp][1]);
-		fprintf(data, "%f, ", free_energies_and_error[temp][0]);
-		fprintf(data, "%f, ", free_energies_and_error[temp][1]);
-        fprintf(data, "%f\n ", heat_capacities_and_error[temp]);
+        fprintf(data, "%f, ", temp);
+		fprintf(data, "%f, ", energies_and_error[ind][0]);
+		fprintf(data, "%f, ", energies_and_error[ind][1]);
+		fprintf(data, "%f, ", entropies_and_error[ind][0]);
+		fprintf(data, "%f, ", entropies_and_error[ind][1]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][0]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][1]);
+        fprintf(data, "%f\n", heat_capacities_and_error[ind]);
 	}
 	
 	fclose(data);

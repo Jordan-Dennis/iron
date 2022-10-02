@@ -2,21 +2,48 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-with open("pub/data/1d_test.csv") as question_1a_data:
-    data = []
-    for line in question_1a_data:
-        if not line.strip().startswith("#"):
-            data.append([int(spin) for spin in line.strip().split(",")])
+def plot_example_states(file_name: str) -> None:
+    with open("pub/data/1d_test.csv") as example_states:
+        data = []
+        for line in example_states:
+            if not line.strip().startswith("#"):
+                data.append([int(spin) for spin in line.strip().split(",")])
 
-    data = np.array([data])[0]
+        data = np.array([data])[0]
 
-print(data.shape)
+    plt.figure(figsize=(10, 10))
+    for temperature in range(3):
+        plt.subplot(3, 1, temperature + 1)
+        plt.title(temperature)
+        plt.imshow(data[temperature:temperature + 2, :])
+    
+    plt.show()
+    plt.savefig("pub/figures/example_states_ising_1d.pdf")
 
-plt.figure(figsize=(10, 10))
-for temperature in range(3):
-    plt.subplot(3, 1, temperature + 1)
-    plt.title(temperature)
-    plt.imshow(data[temperature:temperature + 2, :])
 
-plt.show()
+def plot_physical_parameters(file_name: str, save_name: str) -> None:
+    with open(file_name) as physical_parameters:
+        next(physical_parameters)
+        data = np.array([
+            [float(entry) for entry in line.strip().split(",")] 
+            for line in physical_parameters])
 
+    plt.figure(figsize=(10, 10))
+    plt.subplot(2, 2, 1)
+    plt.title(r"$\epsilon$")
+    plt.errorbar(data[:, 0], data[:, 1], data[:, 2])
+    plt.subplot(2, 2, 2)
+    plt.title(r"$\sigma$")
+    plt.errorbar(data[:, 0], data[:, 3], data[:, 4])
+    plt.subplot(2, 2, 3)
+    plt.title(r"$F$")
+    plt.errorbar(data[:, 0], data[:, 5], data[:, 6])
+    plt.subplot(2, 2, 4)
+    plt.title(r"$C_{V}$")
+    plt.plot(data[:, 0], data[:, 7])
+    plt.savefig(save_name)
+    plt.show()
+
+plot_physical_parameters(
+    "pub/data/1d_test.csv", 
+    "pub/figures/1d_physical_parameters.pdf")   

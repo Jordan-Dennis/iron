@@ -18,5 +18,5 @@ int main(void)
 //    printf("Energy: %f\n", energy_ising_1d(system));
 //    print_ising_1d(system);
     Config *config = init_config("src/tests/1d_test_config.toml");
-    first_and_last(config);
+    physical_parameters(config);
 }
