@@ -239,6 +239,17 @@ void print_ising_1d(Ising1D *system)
 }
 
 
+/*
+ * save_ising_1d
+ * -------------
+ * Convinient function that save the current state of the system to a 
+ * file. 
+ *
+ * parameters
+ * ----------
+ * const Ising1D *system: The current state of the system.
+ * FILE *file: The file to save the output. 
+ */
 void save_ising_1d(const Ising1D *system, FILE *file)
 {
     int length = system -> length;
@@ -264,6 +275,10 @@ void save_ising_1d(const Ising1D *system, FILE *file)
  * from the simulation for at least three different temperatures.
  * What do you notice about the size of the chunks of color at 
  * low temperatures compared to high temperatures. 
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the setup of the system. 
  */
 void first_and_last(Config *config)
 {
@@ -278,7 +293,7 @@ void first_and_last(Config *config)
     int num_temps = (int) ((stop - start) / step);
     FILE *save_file = fopen(save_file_name, "w");
 
-    for (int temp = start, ind = 0; temp < stop; temp += step, ind++)
+    for (float temp = start, ind = 0; temp < stop; temp += step, ind++)
     {
         Ising1D* system = init_ising_1d(num_spins, temp);
 
@@ -294,6 +309,114 @@ void first_and_last(Config *config)
     }
 }
 
+
+
+/*
+ * physical_parameters
+ * -------------------
+ * Compute and plot figures for energy, free energy, entropy and 
+ * heat capacity and the reduced magnetisation per dipole of the 
+ * 1d ising model against temperatur, T, using your simulation
+ * with N = 100. Obtain values for at least ten different 
+ * temeperatures. 
+ * 
+ * Compute time averages of these quantities for the best results
+ * and make sure that the system reaches thermodynamic equilibrium
+ * before taking measurements. Present against the analytic solutions.
+ */
+void physical_parameters(Config* config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+
+    int length = (int) ((stop - start) / step);
+
+    float energies_and_error[length][2];
+    float entropies_and_error[length][2];
+    float free_energies_and_error[length][2];
+    float heat_capacities_and_error[length];
+    
+    // Simulating the system. 
+    for (int temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        Ising1D *system = init_ising_1d( temp);
+    
+        // Running the burnin period. 
+        for (int epoch = 0; epoch <= 1000; epoch++)
+        { 
+            metropolis_step(system);
+        }
+
+        // Collecting the data'
+		// TODO: I think that I will have new arrays here to simply store
+		// the information and then I will invoke a mean and variance function 
+		// on these arrays. Damn, I keep adding linear complexity. 
+        float simulation_energies[reps];
+        float simulation_entropies[reps];
+        float simulation_free_energies[reps];
+        
+        for (int epoch = 0; epoch < reps; epoch++)
+        { 
+            metropolis_step(system);
+            float epoch_energy = energy(system);
+            float epoch_entropy = entropy(system);
+
+            simulation_energies[epoch] = epoch_energy;
+            simulation_entropies[epoch] = epoch_entropy;
+            simulation_free_energies[epoch] = epoch_energy - temp * epoch_entropy;
+        }
+
+        float mean_energy = mean(simulation_energies, reps);
+        float mean_entropy = mean(simulation_entropies, reps);
+        float mean_free_energy = mean(simulation_free_energies, reps);
+
+        float var_energy = variance(simulation_energies, mean_energy, reps);
+        float var_entropy = variance(simulation_entropies, mean_entropy, reps);
+        float var_free_energy = variance(simulation_free_energies, mean_free_energy, reps);
+        float mean_heat_capacity = var_energy / temp / temp;
+
+        int number = system -> number;
+
+        energies_and_error[temperature][1] = sqrt(var_energy) / number;
+        energies_and_error[temperature][0] = mean_energy / number;
+        entropies_and_error[temperature][1] = sqrt(var_entropy) / number;
+        entropies_and_error[temperature][0] = mean_entropy / number;
+        free_energies_and_error[temperature][1] = sqrt(var_free_energy) / number;
+        free_energies_and_error[temperature][0] = mean_free_energy / number;
+        heat_capacities_and_error[temperature] = mean_heat_capacity / number;
+      
+        random_system(system); 
+    }
+
+	// Writing the data to the file
+	FILE* data = fopen(out, "w");
+    validate_file(data, out);
+
+	// Writing the header row to the data. 
+	fprintf(data, "# Temperature, ");
+    fprintf(data, "Energy, Energy Error, "); 
+    fprintf(data, "Entropy, Entropy Error, "); 
+    fprintf(data, "Free Energy, Free Energy Error, "); 
+    fprintf(data, "Heat Capacity\n");
+
+    // TODO: from here
+	for (int temp = 0; temp < (temperatures -> length); temp++)
+	{
+        fprintf(data, "%f, ", (temperatures -> temps)[temp]);
+		fprintf(data, "%f, ", energies_and_error[temp][0]);
+		fprintf(data, "%f, ", energies_and_error[temp][1]);
+		fprintf(data, "%f, ", entropies_and_error[temp][0]);
+		fprintf(data, "%f, ", entropies_and_error[temp][1]);
+		fprintf(data, "%f, ", free_energies_and_error[temp][0]);
+		fprintf(data, "%f, ", free_energies_and_error[temp][1]);
+        fprintf(data, "%f\n ", heat_capacities_and_error[temp]);
+	}
+	
+	fclose(data);
+}
 
 
 
