@@ -326,6 +326,10 @@ void first_and_last(Config *config)
  * Compute time averages of these quantities for the best results
  * and make sure that the system reaches thermodynamic equilibrium
  * before taking measurements. Present against the analytic solutions.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the simulation. 
  */
 void physical_parameters(Config* config)
 {
@@ -422,3 +426,89 @@ void physical_parameters(Config* config)
 
 
 
+/*
+ * histogram
+ * ---------
+ * Create a histogram of the m values you obtain by running a 
+ * simulation of 500 spins at 1., 2. and 3. temperatures 100 times.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the simulation. 
+ */
+void histogram(Config* config)
+{
+    System* system = parse_system(config);
+    char* out = find(config, "out", "address");
+    int reps = atoi(find(config, "reps", "number"));
+    int second_number = atoi(find(config, "spins", "second_number"));
+    Temperatures* temperatures = parse_temperatures(config);
+    int reps_per_temp = atoi(find(config, "temperatures", "reps"));
+
+    float magnetisations[temperatures -> length][reps_per_temp][2]; 
+
+    for (int number = 0; number < 2; number++)
+    {
+        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+        {
+            (system -> temperature) = (temperatures -> temps)[temperature];
+            for (int rep = 0; rep < reps_per_temp; rep++)
+            {
+                // Running the burnin period. 
+                for (int epoch = 0; epoch <= 1000; epoch++)
+                { 
+                    metropolis_step(system);
+                }
+
+                // Running the simulation 
+                float simulation_magnetisation[reps];
+
+                for (int epoch = 0; epoch < reps; epoch++)
+                { 
+                    metropolis_step(system);
+                    simulation_magnetisation[epoch] = magnetisation(system);
+                }
+
+                float mean_magnetisation = mean(simulation_magnetisation, reps);
+                magnetisations[temperature][rep][number] = mean_magnetisation;
+
+                // Randomising for the next iteration.
+                random_system(system); 
+            }
+        }
+
+        system -> number = second_number;
+        random_system(system);
+    }
+
+    // Opening the data file. 
+    FILE* data = fopen(out, "w");
+    validate_file(data, out);
+    
+    // Printing the header row to the file. 
+    fprintf(data, "# ");
+    for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+    {
+        fprintf(data, "T%f, ", (temperatures -> temps)[temperature]);
+    }
+    fprintf(data, "\n");
+
+    // Writing the data to the file.
+    // TODO: I really need my toml manager to be able to handle arrays.
+    for (int rep = 0; rep < reps_per_temp; rep++)
+    {
+        for (int number = 0; number < 2; number++)
+        {
+            for (int temperature = 0; 
+                temperature < (temperatures -> length); 
+                temperature++)
+            {
+                fprintf(data, "%f, ", magnetisations[temperature][rep][number]);
+            }
+        }
+        fprintf(data, "\n");
+    }
+
+    // Closing the file
+    fclose(data);
+}
