@@ -438,59 +438,65 @@ void physical_parameters(Config* config)
  */
 void histogram(Config* config)
 {
-    System* system = parse_system(config);
-    char* out = find(config, "out", "address");
-    int reps = atoi(find(config, "reps", "number"));
-    int second_number = atoi(find(config, "spins", "second_number"));
-    Temperatures* temperatures = parse_temperatures(config);
-    int reps_per_temp = atoi(find(config, "temperatures", "reps"));
-
-    float magnetisations[temperatures -> length][reps_per_temp][2]; 
+    int num_spins[2] = {100, 500};
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+    float reps_per_temp = atoi(find(config, "reps_per_temp"));
+   
+    int length = (int) ((stop - start) / step); 
+    float magnetisations[length][reps_per_temp][2]; 
 
     for (int number = 0; number < 2; number++)
     {
-        for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+        int ind;    
+        float temp;
+
+        for (temp = start, ind = 0; temp < stop; temp += step, ind++)
         {
-            (system -> temperature) = (temperatures -> temps)[temperature];
+            Ising1D *system = init_ising_1d(num_spins[number], temp);
+
             for (int rep = 0; rep < reps_per_temp; rep++)
             {
+                int num_epochs = 1e3 * num_spins[number]
+
                 // Running the burnin period. 
-                for (int epoch = 0; epoch <= 1000; epoch++)
+                for (int epoch = 0; epoch <= num_epochs; epoch++)
                 { 
-                    metropolis_step(system);
+                    metropolis_step_ising_1d(system);
                 }
 
                 // Running the simulation 
-                float simulation_magnetisation[reps];
+                float sim_magnetisation[num_epochs];
 
-                for (int epoch = 0; epoch < reps; epoch++)
+                for (int epoch = 0; epoch < num_epochs; epoch++)
                 { 
-                    metropolis_step(system);
-                    simulation_magnetisation[epoch] = magnetisation(system);
+                    metropolis_step_ising_1d(system);
+                    sim_magnetisation[epoch] = magnetisation(system);
                 }
 
-                float mean_magnetisation = mean(simulation_magnetisation, reps);
-                magnetisations[temperature][rep][number] = mean_magnetisation;
-
-                // Randomising for the next iteration.
-                random_system(system); 
+                float mean_magnetisation = mean(sim_magnetisation, num_epochs);
+                magnetisations[ind][rep][number] = mean_magnetisation;
             }
         }
-
-        system -> number = second_number;
-        random_system(system);
     }
 
     // Opening the data file. 
-    FILE* data = fopen(out, "w");
-    validate_file(data, out);
+    FILE* data = fopen(save_file_name, "w");
+
+    if (data == NULL)
+    {
+        printf("Error: Could not open '%s'", save_file_name);
+        exit(1);
+    }
     
     // Printing the header row to the file. 
-    fprintf(data, "# ");
-    for (int temperature = 0; temperature < (temperatures -> length); temperature++)
+    for (float temp = start; temp < stop; temp += step)
     {
-        fprintf(data, "T%f, ", (temperatures -> temps)[temperature]);
+        fprintf(data, "T%f, ", temp);
     }
+
     fprintf(data, "\n");
 
     // Writing the data to the file.
@@ -499,11 +505,9 @@ void histogram(Config* config)
     {
         for (int number = 0; number < 2; number++)
         {
-            for (int temperature = 0; 
-                temperature < (temperatures -> length); 
-                temperature++)
+            for (int temp = 0; temp < length; temp++)
             {
-                fprintf(data, "%f, ", magnetisations[temperature][rep][number]);
+                fprintf(data, "%f, ", magnetisations[temp][rep][number]);
             }
         }
         fprintf(data, "\n");
