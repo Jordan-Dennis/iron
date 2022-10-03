@@ -1,5 +1,6 @@
 #ifndef ISING2D_H
 #define ISING2D_H
+#include"toml.h"
 
 
 /*
@@ -20,14 +21,15 @@ typedef struct Ising2D {
 } Ising2D;
 
  
-Ising2D *init_ising_2d(int length, float temperature);
+int magnetisation_ising_2d(const Ising2D *system);
 void metropolis_step_ising_2d(Ising2D *system);
 void flip_spin_ising_2d(Ising2D *system, int row, int col);
 void print_ising_2d(Ising2D *system);
+void first_and_last_ising_2d(Config *config);
 float spin_energy_ising_2d(const Ising2D *system, int row, int col);
 float energy_ising_2d(const Ising2D *system);
-float magnetisation_ising_2d(const Ising2D *system);
 float free_energy_ising_2d(const Ising2D *system);
 float heat_capacity_ising_2d(const Ising2D *system);
+Ising2D *init_ising_2d(int length, float temperature);
 
 #endif

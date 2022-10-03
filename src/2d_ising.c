@@ -1,6 +1,7 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include"include/toml.h"
 #include"include/utils.h"
 #include"include/2d_ising.h"
 
@@ -190,7 +191,7 @@ void metropolis_step_ising_2d(Ising2D *system)
 float entropy_ising_2d(Ising2D *system)
 {
     int len = system -> length;
-    int *ensemble = system -> ensemble; 
+    int **ensemble = system -> ensemble; 
     int up = 0;
 
     for (int row = 0; row < len; row++)
@@ -225,10 +226,10 @@ float entropy_ising_2d(Ising2D *system)
  * -------
  * int magnetisation: The magetisation of the system. 
  */
-int magnetisation_ising_2d(Ising2D *system)
+int magnetisation_ising_2d(const Ising2D *system)
 {
     int length = system -> length;
-    int *ensmeble = system -> ensemble;
+    int **ensemble = system -> ensemble;
     int magnetisation = 0;
 
     for (int row = 0; row < length; row++)
@@ -253,10 +254,10 @@ int magnetisation_ising_2d(Ising2D *system)
  * Ising2D *system: The ising model.
  * FILE *save_file: The file to save the model in. 
  */
-void save_system_ising_2d(Ising2D *system, FILE *save_file)
+void save_ising_2d(Ising2D *system, FILE *save_file)
 {
     int length = system -> length;
-    int *ensemble = system -> ensemble;
+    int **ensemble = system -> ensemble;
     
     for (int row = 0; row < length; row++)
     {
@@ -265,7 +266,7 @@ void save_system_ising_2d(Ising2D *system, FILE *save_file)
             fprintf(save_file, "%i,", ensemble[row][col]);
         }
         
-        fprinf(save_file, "%i\n", ensemble[row][length - 1]);
+        fprintf(save_file, "%i\n", ensemble[row][length - 1]);
     }
 }
 
@@ -290,6 +291,7 @@ void first_and_last_ising_2d(Config *config)
     {
         Ising2D* system = init_ising_2d(num_spins, temp);
 
+        fprintf(save_file, "# Temperature = %f\n", temp);
         save_ising_2d(system, save_file);
 
         // Running the metropolis algorithm over the system. 
