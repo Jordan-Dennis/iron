@@ -174,16 +174,23 @@ void metropolis_step_ising_2d(Ising2D *system)
 }
 
 
-float heat_capacity_ising_2d()
-{
-
-}
-
-
-float entropy()
+/*
+ * entropy_ising_2d
+ * ----------------
+ * Calculate the entropy of a two dimensional ising model.
+ *
+ * parameters
+ * ----------
+ * Ising2D *system: The system to calculate the entropy of.
+ * 
+ * returns
+ * -------
+ * float entropy: The entropy of the system. 
+ */
+float entropy_ising_2d(Ising2D *system)
 {
     int len = system -> length;
-    int* ensemble = system -> ensemble; 
+    int *ensemble = system -> ensemble; 
     int up = 0;
 
     for (int row = 0; row < len; row++)
@@ -202,8 +209,96 @@ float entropy()
     float entropy = total * log(total) - up * log(up) - down * log(down);
     
     return entropy;
-
 }
 
 
-int magnetisation()
+/*
+ * magnetisation_ising_2d
+ * ----------------------
+ * Calculate the magnetisation of the 2D ising model. 
+ *
+ * parameters
+ * ----------
+ * Ising2D *system: The system to calculate the total magnetisation of.
+ *
+ * returns
+ * -------
+ * int magnetisation: The magetisation of the system. 
+ */
+int magnetisation_ising_2d(Ising2D *system)
+{
+    int length = system -> length;
+    int *ensmeble = system -> ensemble;
+    int magnetisation = 0;
+
+    for (int row = 0; row < length; row++)
+    {
+        for (int col = 0; col < length; col++)
+        {
+            magnetisation += ensemble[row][col];
+        }
+    }
+
+    return magnetisation; 
+}
+
+
+/* 
+ * save_ising_2d
+ * -------------
+ * Save the current state of the system to a file. 
+ *
+ * parameters
+ * ----------
+ * Ising2D *system: The ising model.
+ * FILE *save_file: The file to save the model in. 
+ */
+void save_system_ising_2d(Ising2D *system, FILE *save_file)
+{
+    int length = system -> length;
+    int *ensemble = system -> ensemble;
+    
+    for (int row = 0; row < length; row++)
+    {
+        for(int col = 0; col < length - 1; col++)
+        {
+            fprintf(save_file, "%i,", ensemble[row][col]);
+        }
+        
+        fprinf(save_file, "%i\n", ensemble[row][length - 1]);
+    }
+}
+
+
+void first_and_last_ising_2d(Config *config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+
+    free(config);
+
+    int num_temps = (int) ((stop - start) / step);
+    FILE *save_file = fopen(save_file_name, "w");
+
+    int ind;
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        Ising2D* system = init_ising_2d(num_spins, temp);
+
+        save_ising_2d(system, save_file);
+
+        // Running the metropolis algorithm over the system. 
+        for (int epoch = 0; epoch <= num_spins * 1e3; epoch++)
+        { 
+            metropolis_step_ising_2d(system);
+        }
+
+        save_ising_2d(system, save_file);
+    }
+ 
+}
