@@ -174,6 +174,36 @@ void metropolis_step_ising_2d(Ising2D *system)
 }
 
 
-float heat_capacity()
+float heat_capacity_ising_2d()
+{
+
+}
+
+
 float entropy()
+{
+    int len = system -> length;
+    int* ensemble = system -> ensemble; 
+    int up = 0;
+
+    for (int row = 0; row < len; row++)
+    {
+        for (int col = 0; col < len; col++)
+        {
+            up += ensemble[row][col] == ensemble[modulo(row + 1, len)][col];
+            up += ensemble[row][col] == ensemble[modulo(row - 1, len)][col];
+            up += ensemble[row][col] == ensemble[row][modulo(col + 1, len)];
+            up += ensemble[row][col] == ensemble[row][modulo(col - 1, len)];
+        }
+    }
+    
+    int total = len * len;
+    int down = total - up;
+    float entropy = total * log(total) - up * log(up) - down * log(down);
+    
+    return entropy;
+
+}
+
+
 int magnetisation()
