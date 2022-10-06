@@ -199,17 +199,21 @@ float entropy_ising_2d(Ising2D *system)
         for (int col = 0; col < len; col++)
         {
             up += ensemble[row][col] == ensemble[modulo(row + 1, len)][col];
-            up += ensemble[row][col] == ensemble[modulo(row - 1, len)][col];
             up += ensemble[row][col] == ensemble[row][modulo(col + 1, len)];
-            up += ensemble[row][col] == ensemble[row][modulo(col - 1, len)];
         }
     }
-    
-    int total = len * len;
+        
+    int total = 2 * len * len;
     int down = total - up;
-    float entropy = total * log(total) - up * log(up) - down * log(down);
-    
-    return entropy;
+
+    if (up == 0 || up == total)
+    {
+        return log(2);
+    }
+    else
+    {
+        return total * log(total) - up * log(up) - down * log(down);
+    }
 }
 
 
@@ -274,6 +278,7 @@ void save_ising_2d(Ising2D *system, FILE *save_file)
 }
 
 
+// TODO: Needs documentation. 
 void first_and_last_ising_2d(Config *config)
 {
     int num_spins = atoi(find(config, "number_of_spins"));
@@ -342,23 +347,19 @@ void physical_parameters_ising_2d(Config* config)
     
     int ind;    
     float temp;
+    Ising2D *system = init_ising_2d(num_spins, stop);
 
-    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    // TODO: Implement the loop over the number in the sim. 
+    for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
     {
         printf("Temperature: %f\n", temp);
-        Ising2D *system = init_ising_2d(num_spins, temp);
+        system -> temperature = temp;
     
-        // Running the burnin period. 
-        for (int epoch = 0; epoch <= num_epochs; epoch++)
-        { 
-            metropolis_step_ising_2d(system);
-        }
-
         float sim_energies[num_epochs];
         float sim_entropies[num_epochs];
         float sim_free_energies[num_epochs];
         
-        for (int epoch = 0; epoch < num_epochs; epoch++)
+        for (int epoch = 0; epoch < num_epochs / 1e3; epoch++)
         { 
             metropolis_step_ising_2d(system);
             float energy = energy_ising_2d(system);
@@ -386,7 +387,7 @@ void physical_parameters_ising_2d(Config* config)
         free_energies_and_error[ind][0] = mean_free_energy / num_spins;
         heat_capacities_and_error[ind] = mean_heat_capacity / num_spins;
     }
-
+    
 	// Writing the data to the file
 	FILE* data = fopen(save_file_name, "w");
 
