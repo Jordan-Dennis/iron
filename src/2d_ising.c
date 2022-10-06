@@ -353,7 +353,7 @@ void physical_parameters_ising_2d(Config* config)
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
         int num_spins = spin_nums[num_spin];
-        int num_epochs = num_spins;
+        int num_epochs = num_spins * 1e3;
         int size = num_spins * num_spins;
 
         Ising2D *system = init_ising_2d(num_spins, stop);

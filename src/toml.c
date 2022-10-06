@@ -312,7 +312,9 @@ Config *parse(Toml *toml)
     Config *config = malloc(sizeof(Config));
     config -> pairs = malloc(sizeof(Pair));
     config -> length = 0;
-
+    
+    // TODO: For some reason there needs to be trailng whitspace or else 
+    //       it breaks.
     while (!done(toml))
     {
         if (peek(toml) == '#')
