@@ -258,7 +258,10 @@ void save_ising_2d(Ising2D *system, FILE *save_file)
 {
     int length = system -> length;
     int **ensemble = system -> ensemble;
+    float temp = system -> temperature;
     
+    fprintf(save_file, "# Temperature = %f\n", temp);
+
     for (int row = 0; row < length; row++)
     {
         for(int col = 0; col < length - 1; col++)
@@ -291,7 +294,6 @@ void first_and_last_ising_2d(Config *config)
     {
         Ising2D* system = init_ising_2d(num_spins, temp);
 
-        fprintf(save_file, "# Temperature = %f\n", temp);
         save_ising_2d(system, save_file);
 
         // Running the metropolis algorithm over the system. 
