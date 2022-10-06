@@ -358,6 +358,11 @@ void physical_parameters_ising_2d(Config* config)
 
         Ising2D *system = init_ising_2d(num_spins, stop);
 
+        for (int epoch = 0; epoch < num_epochs; epoch++)
+        {
+            metropolis_step_ising_2d(system);
+        }
+
         for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
         {
             system -> temperature = temp;

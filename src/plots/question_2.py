@@ -1,7 +1,9 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import typing as tp
+import matplotlib as mpl
 
+mpl.rcParams['text.usetex'] = True
 
 def print_tensor(tensor: list) -> None:
     def tensor_depth(tensor: list) -> int:
@@ -73,11 +75,12 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
 def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
     with open(data_file) as phys_param:
         next(phys_param)
-        data = [[float(entry) for entry in line] for line in phys_param]
+        data = [[float(entry) for entry in line.strip().split(",")] 
+            for line in phys_param]
         data = np.array(data, dtype=float)
 
-    temperature = data[:, 0]
-    numbers = data[:, 1]
+    temperature = data[:, 1]
+    numbers = data[:, 0]
     energy_est = data[:, 2]
     energy_err = data[:, 3]
     entropy_est = data[:, 4]
@@ -87,11 +90,15 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     heat_capacity_est = data[:, 8]
 
     figure, axes = plt.subplots(2, 2, figsize=(10, 10))
-    axes[0][0].set_title(r"$\textrm{Energy} (J)$")
-    axes[0][1].set_title(r"$\textrm{Entropy} (JK^{-1})$")
-    axes[1][0].set_title(r"$\textrm{Free Energy} (J)$")
-    axes[1][1].set_title(r"$\textrm{Heat Capacity} (JK^{-1})$")
-    for number in np.unique(number):
+    axes[0][0].set_title("$\\textrm{Energy} (J)$")
+    axes[0][1].set_title("$\\textrm{Entropy} (JK^{-1})$")
+    axes[1][0].set_title("$\\textrm{Free Energy} (J)$")
+    axes[1][1].set_title("$\\textrm{Heat Capacity} (JK^{-1})$")
+
+    print(np.unique(numbers))
+    print(energy_est.shape)
+
+    for number in np.unique(numbers):
         cond = numbers == number
         axes[0][0].errorbar(
             temperature[cond], 
@@ -114,8 +121,6 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
    
     if show:
         plt.show()
-    elif save_file:
-        figure.savefig(f"pub/figures/{save_file}.pdf")
-         
-        
-        
+    if save_file:
+        figure.savefig(f"pub/figures/{save_file}")
+
