@@ -14,11 +14,18 @@ int main(void)
 //    {
 //        printf("I am in the child process!\n");
 //    }
+
+    int arr[10];
  
     #pragma omp parallel for num_threads(10)
     for (int i = 0; i < 10; i++)
     {
-        printf("I am in process %i\n", i);
-        sleep(1);
+        arr[i] = i;
     }
+
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%i,", arr[i]);
+    }
+    printf("\n");
 }

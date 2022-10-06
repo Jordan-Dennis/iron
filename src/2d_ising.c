@@ -352,7 +352,7 @@ void physical_parameters_ising_2d(Config* config)
     int ind;    
     float temp;
 
-    // #pragma omp parallel for num_threads(3)
+    //#pragma omp parallel for num_threads(3) shared(energies_and_error)
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
         printf("Running num_spin: %i\n", num_spin);
@@ -439,4 +439,10 @@ void physical_parameters_ising_2d(Config* config)
     }
 	
 	fclose(data);
+}
+
+
+void magnetisation_vs_temperature()
+{
+
 }
