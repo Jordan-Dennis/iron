@@ -70,4 +70,52 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
             figure.savefig(f"pub/figures/{save_file}.pdf")
 
 
-first_and_last("pub/data/2d_test.csv", True)
+def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
+    with open(data_file) as phys_param:
+        next(phys_param)
+        data = [[float(entry) for entry in line] for line in phys_param]
+        data = np.array(data, dtype=float)
+
+    temperature = data[:, 0]
+    numbers = data[:, 1]
+    energy_est = data[:, 2]
+    energy_err = data[:, 3]
+    entropy_est = data[:, 4]
+    entropy_err = data[:, 5]
+    free_energy_est = data[:, 6]
+    free_energy_err = data[:, 7]
+    heat_capacity_est = data[:, 8]
+
+    figure, axes = plt.subplots(2, 2, figsize=(10, 10))
+    axes[0][0].set_title(r"$\textrm{Energy} (J)$")
+    axes[0][1].set_title(r"$\textrm{Entropy} (JK^{-1})$")
+    axes[1][0].set_title(r"$\textrm{Free Energy} (J)$")
+    axes[1][1].set_title(r"$\textrm{Heat Capacity} (JK^{-1})$")
+    for number in np.unique(number):
+        cond = numbers == number
+        axes[0][0].errorbar(
+            temperature[cond], 
+            energy_est[cond], 
+            energy_err[cond])
+
+        axes[0][1].errorbar(
+            temperature[cond], 
+            entropy_est[cond], 
+            entropy_err[cond])
+
+        axes[1][0].errorbar(
+            temperature[cond], 
+            free_energy_est[cond], 
+            free_energy_err[cond])
+
+        axes[1][1].plot(
+            temperature[cond], 
+            heat_capacity_est[cond]) 
+   
+    if show:
+        plt.show()
+    elif save_file:
+        figure.savefig(f"pub/figures/{save_file}.pdf")
+         
+        
+        

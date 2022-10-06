@@ -5,5 +5,5 @@
 int main(void)
 {
     Config *config = init_config("src/tests/2d_test_config.toml");
-    first_and_last_ising_2d(config);
+    physical_parameters_ising_2d(config);
 }

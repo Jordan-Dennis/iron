@@ -305,3 +305,115 @@ void first_and_last_ising_2d(Config *config)
         save_ising_2d(system, save_file);
     } 
 }
+
+
+/*
+ * physical_parameters
+ * -------------------
+ * Compute and plot figures for energy, free energy, entropy and 
+ * heat capacity and the reduced magnetisation per dipole of the 
+ * 1d ising model against temperatur, T, using your simulation
+ * with N = 100. Obtain values for at least ten different 
+ * temeperatures. 
+ * 
+ * Compute time averages of these quantities for the best results
+ * and make sure that the system reaches thermodynamic equilibrium
+ * before taking measurements. Present against the analytic solutions.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the simulation. 
+ */
+void physical_parameters_ising_2d(Config* config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+
+    int num_temps = (int) ((stop - start) / step);
+    int num_epochs = 1e3 * num_spins;
+
+    float energies_and_error[num_temps][2];
+    float entropies_and_error[num_temps][2];
+    float free_energies_and_error[num_temps][2];
+    float heat_capacities_and_error[num_temps];
+    
+    int ind;    
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        printf("Temperature: %f\n", temp);
+        Ising2D *system = init_ising_2d(num_spins, temp);
+    
+        // Running the burnin period. 
+        for (int epoch = 0; epoch <= num_epochs; epoch++)
+        { 
+            metropolis_step_ising_2d(system);
+        }
+
+        float sim_energies[num_epochs];
+        float sim_entropies[num_epochs];
+        float sim_free_energies[num_epochs];
+        
+        for (int epoch = 0; epoch < num_epochs; epoch++)
+        { 
+            metropolis_step_ising_2d(system);
+            float energy = energy_ising_2d(system);
+            float entropy = entropy_ising_2d(system);
+
+            sim_energies[epoch] = energy;
+            sim_entropies[epoch] = entropy;
+            sim_free_energies[epoch] = energy - temp * entropy;
+        }
+
+        float mean_energy = mean(sim_energies, num_epochs);
+        float mean_entropy = mean(sim_entropies, num_epochs);
+        float mean_free_energy = mean(sim_free_energies, num_epochs);
+
+        float var_energy = variance(sim_energies, mean_energy, num_epochs);
+        float var_entropy = variance(sim_entropies, mean_entropy, num_epochs);
+        float var_free_energy = variance(sim_free_energies, mean_free_energy, num_epochs);
+        float mean_heat_capacity = var_energy / temp / temp;
+
+        energies_and_error[ind][1] = sqrt(var_energy) / num_spins;
+        energies_and_error[ind][0] = mean_energy / num_spins;
+        entropies_and_error[ind][1] = sqrt(var_entropy) / num_spins;
+        entropies_and_error[ind][0] = mean_entropy / num_spins;
+        free_energies_and_error[ind][1] = sqrt(var_free_energy) / num_spins;
+        free_energies_and_error[ind][0] = mean_free_energy / num_spins;
+        heat_capacities_and_error[ind] = mean_heat_capacity / num_spins;
+    }
+
+	// Writing the data to the file
+	FILE* data = fopen(save_file_name, "w");
+
+    if (data == NULL)
+    {
+        printf("Error: Could not open '%s'", save_file_name);
+        exit(1);
+    }
+
+	// Writing the header row to the data. 
+	fprintf(data, "Temperature, ");
+    fprintf(data, "Energy, Energy Error, "); 
+    fprintf(data, "Entropy, Entropy Error, "); 
+    fprintf(data, "Free Energy, Free Energy Error, "); 
+    fprintf(data, "Heat Capacity\n");
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+	{
+        fprintf(data, "%f, ", temp);
+		fprintf(data, "%f, ", energies_and_error[ind][0]);
+		fprintf(data, "%f, ", energies_and_error[ind][1]);
+		fprintf(data, "%f, ", entropies_and_error[ind][0]);
+		fprintf(data, "%f, ", entropies_and_error[ind][1]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][0]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][1]);
+        fprintf(data, "%f\n", heat_capacities_and_error[ind]);
+	}
+	
+	fclose(data);
+}
