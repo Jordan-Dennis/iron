@@ -303,6 +303,5 @@ void first_and_last_ising_2d(Config *config)
         }
 
         save_ising_2d(system, save_file);
-    }
- 
+    } 
 }
