@@ -71,15 +71,13 @@ int random_index(int length)
  * -------
  * float* mean: The geometric mean of the sample. 
  */
-float mean(float array[], int length) 
+float mean(float *array, int length) 
 {
     float mean = 0;
     for (int entry = 0; entry < length; entry++)
     {
         mean += array[entry];
-        // printf("%f, ", array[entry]);
     }
-    // printf("\n");
     return mean / length;
 }
 

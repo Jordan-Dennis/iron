@@ -1,5 +1,7 @@
 save_file = pub/data/2d_test.csv
-number_of_spins = 3
+low_number_of_spins = 5
+mid_number_of_spins = 10
+high_number_of_spins = 20
 lowest_temperature = 1.0
 highest_temperature = 4.0
 temperature_step = 1.0
