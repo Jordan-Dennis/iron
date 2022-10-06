@@ -1,6 +1,8 @@
+#include<omp.h>
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include<unistd.h>
 #include"include/toml.h"
 #include"include/utils.h"
 #include"include/2d_ising.h"
@@ -350,8 +352,10 @@ void physical_parameters_ising_2d(Config* config)
     int ind;    
     float temp;
 
+    #pragma omp parallel for num_threads(3)
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
+        printf("Running num_spin: %i\n", num_spin);
         int num_spins = spin_nums[num_spin];
         int num_epochs = num_spins * 1e3;
         int size = num_spins * num_spins;

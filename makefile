@@ -1,6 +1,6 @@
 OUT_DIR = out
 CC = gcc
-CFLAGS = -lm
+CFLAGS = -lm -fopenmp
 
 ising_1d_test: src/1d_ising.c src/utils.c src/tests/1d_ising.c src/toml.c
 	$(CC) -o $(OUT_DIR)/$@ $? $(CFLAGS)
