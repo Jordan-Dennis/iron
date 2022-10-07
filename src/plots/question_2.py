@@ -124,3 +124,23 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     if save_file:
         figure.savefig(f"pub/figures/{save_file}")
 
+
+def magnetisations(data_file: str, show: bool, save_file: str) -> None:
+    with open(f"pub/data/{data_file}.csv") as mag_data:
+        data = np.array([[float(entry) for entry in line.strip()split(",")] 
+            for line in mag_data])
+
+    numbers = np.unique(data[:, 0])
+    
+    
+
+    repeats = data[(data[:, 0] == numbers[0]) & (data[:, 1] == temperatures[0])]
+    
+
+
+    figure = plt.figure(figsize = (10, 10))
+    axes = plt.axes()
+
+    for number in np.unique(numbers):
+        axes.plot(temperature, magnetisation)
+        
