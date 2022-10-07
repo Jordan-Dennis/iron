@@ -27,6 +27,7 @@ void flip_spin_ising_2d(Ising2D *system, int row, int col);
 void print_ising_2d(Ising2D *system);
 void first_and_last_ising_2d(Config *config);
 void physical_parameters_ising_2d(Config* config);
+void magnetisation_vs_temperature(Config *config);
 float spin_energy_ising_2d(const Ising2D *system, int row, int col);
 float energy_ising_2d(const Ising2D *system);
 float free_energy_ising_2d(const Ising2D *system);

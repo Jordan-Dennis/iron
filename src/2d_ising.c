@@ -442,7 +442,57 @@ void physical_parameters_ising_2d(Config* config)
 }
 
 
-void magnetisation_vs_temperature()
-{
 
+
+
+void magnetisation_vs_temperature(Config* config)
+{
+    int low_num_spins = atoi(find(config, "low_number_of_spins"));
+    int mid_num_spins = atoi(find(config, "mid_number_of_spins"));
+    int high_num_spins = atoi(find(config, "high_number_of_spins"));
+    int spin_nums[3] = {low_num_spins, mid_num_spins, high_num_spins};
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+    int length = (int) ((stop - start) / step);
+
+    float magnetisations[3][length];
+    float temperature;
+    Ising2D *system;
+
+    #pragma omp parallel num_threads(8) private(system, temperature) 
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            system = init_ising_2d(spin_nums[i], stop);
+            
+            // Running the burnin-period.  
+            for (int j = 0; j < spin_nums[i]; j++)
+            {
+                metropolis_step_ising_2d(system);
+            }
+
+            #pragma omp for 
+            for (int j = 0; j < length; j++)
+            {
+                for (int j = 0; j < 1e3 * spin_nums[i]; j++)
+                {
+                    metropolis_step_ising_2d(system);
+                }
+
+                magnetisations[i][j] = magnetisation_ising_2d(system);
+                temperature = stop - (j + 1) * step;
+            }
+        }
+    }
+
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < length; j++)
+        {
+            printf("%.1f,", magnetisations[i][j]);
+        }
+        printf("\n");
+    } 
 }
