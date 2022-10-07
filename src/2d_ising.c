@@ -457,42 +457,60 @@ void magnetisation_vs_temperature(Config* config)
     float step = atof(find(config, "temperature_step"));
     int length = (int) ((stop - start) / step);
 
-    float magnetisations[3][length];
+    int magnetisations[3][length][10];
     float temperature;
     Ising2D *system;
 
-    #pragma omp parallel num_threads(8) private(system, temperature) 
+    #pragma omp parallel num_threads(10) shared(magnetisations, spin_nums) \
+        private(system, temperature)
     {
-        for (int i = 0; i < 3; i++)
+        #pragma omp for 
+        for (int l = 0; l < 10; l++)
         {
-            system = init_ising_2d(spin_nums[i], stop);
-            
-            // Running the burnin-period.  
-            for (int j = 0; j < spin_nums[i]; j++)
+            for (int i = 0; i < 3; i++)
             {
-                metropolis_step_ising_2d(system);
-            }
-
-            #pragma omp for 
-            for (int j = 0; j < length; j++)
-            {
+                system = init_ising_2d(spin_nums[i], stop);
+                
+                // Running the burnin-period.  
                 for (int j = 0; j < 1e3 * spin_nums[i]; j++)
                 {
                     metropolis_step_ising_2d(system);
                 }
 
-                magnetisations[i][j] = magnetisation_ising_2d(system);
-                temperature = stop - (j + 1) * step;
+                for (int j = 0; j < length; j++)
+                {
+                    for (int k = 0; k < 1e3 * spin_nums[i]; k++)
+                    {
+                        metropolis_step_ising_2d(system);
+                    }
+
+                    magnetisations[i][j][l] = magnetisation_ising_2d(system);
+                    temperature = stop - (j + 1) * step;
+                }
             }
         }
     }
 
-    for (int i = 0; i < 3; i++)
+    FILE *save_file = fopen(save_file_name, "w");
+
+    if (save_file == NULL)
     {
-        for (int j = 0; j < length; j++)
+        printf("Error: Could not open '%s' for writing!", save_file_name);
+        exit(1);
+    }
+
+    for (int num = 0; num < 3; num++)
+    {
+        for (int temp = 0; temp < length; temp++)
         {
-            printf("%.1f,", magnetisations[i][j]);
+            for (int iter = 0; iter < 10; iter++)
+            {
+                temperature = stop - (temp + 1) * step;
+                fprintf(save_file, "%i, %f", num, temperature);
+                fprintf(save_file, "%i\n", magnetisations[num][temp][iter]);
+            }
         }
-        printf("\n");
-    } 
+    }
+    
+    fclose(save_file); 
 }
