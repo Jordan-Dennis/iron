@@ -457,47 +457,42 @@ void magnetisation_vs_temperature(Config* config)
     float step = atof(find(config, "temperature_step"));
     int length = (int) ((stop - start) / step);
 
-    int magnetisations[3][length][2];
+    float magnetisations[3][length][2];
     float temperature;
     Ising2D *system;
 
-    #pragma omp parallel num_threads(8) shared(magnetisations, spin_nums) \
-        private(system, temperature)
+    for (int num = 0; num < 3; num++)
     {
-
-        for (int num = 0; num < 3; num++)
+        system = init_ising_2d(spin_nums[num], stop);
+        
+        // Running the burnin-period.  
+        for (int epoch = 0; epoch < 1e3 * spin_nums[num]; epoch++)
         {
-            system = init_ising_2d(spin_nums[num], stop);
-            
-            // Running the burnin-period.  
-            for (int epoch = 0; epoch < 1e3 * spin_nums[num]; epoch++)
-            {
-                metropolis_step_ising_2d(system);
-            }
+            metropolis_step_ising_2d(system);
+        }
 
-            for (int temp = 0; temp < length; temp++)
-            {
-                int num_reps = 10;
-                float sim_mags[num_reps];
+        for (int temp = 0; temp < length; temp++)
+        {
+            int num_reps = 10;
+            float sim_mags[num_reps];
 
-                #pragma omp for 
-                for (int iter = 0; iter < num_reps; iter++)
+            for (int iter = 0; iter < num_reps; iter++)
+            {
+                for (int k = 0; k < 1e3 * spin_nums[num]; k++)
                 {
-                    for (int k = 0; k < 1e3 * spin_nums[num]; k++)
-                    {
-                        metropolis_step_ising_2d(system);
-                    }
-                    
-                    sim_mags[iter] = (float) magnetisation_ising_2d(system);
+                    metropolis_step_ising_2d(system);
                 }
 
-                float mag_est = mean(sim_mags, num_reps);
-                float mag_err = variance(sim_mags, mag_est, num_reps);
-
-                magnetisations[num][temp][0] = mag_est;
-                magnetisations[num][temp][1] = mag_err;
-                temperature = stop - (temp + 1) * step;
+                sim_mags[iter] = (float) magnetisation_ising_2d(system);
             }
+
+            float mag_est = mean(sim_mags, num_reps);
+            float mag_err = variance(sim_mags, mag_est, num_reps);
+
+            // TODO: Improve the error by dividing by sqrt(reps)
+            magnetisations[num][temp][0] = mag_est;
+            magnetisations[num][temp][1] = sqrt(mag_err / num_reps);
+            temperature = stop - (temp + 1) * step;
         }
     }
 
@@ -513,12 +508,10 @@ void magnetisation_vs_temperature(Config* config)
     {
         for (int temp = 0; temp < length; temp++)
         {
-            for (int iter = 0; iter < 10; iter++)
-            {
-                temperature = stop - (temp + 1) * step;
-                fprintf(save_file, "%i, %.1f, ", num, temperature);
-                fprintf(save_file, "%i\n", magnetisations[num][temp][iter]);
-            }
+            temperature = stop - (temp + 1) * step;
+            fprintf(save_file, "%i, %.1f, ", num, temperature);
+            fprintf(save_file, "%f, ", magnetisations[num][temp][0]);
+            fprintf(save_file, "%f\n", magnetisations[num][temp][1]);
         }
     }
     
