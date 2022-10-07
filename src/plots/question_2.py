@@ -130,12 +130,8 @@ def magnetisations(data_file: str, show: bool, save_file: str) -> None:
         data = np.array([[float(entry) for entry in line.strip()split(",")] 
             for line in mag_data])
 
-    numbers = np.unique(data[:, 0])
-    
-    
-
-    repeats = data[(data[:, 0] == numbers[0]) & (data[:, 1] == temperatures[0])]
-    
+   
+ 
 
 
     figure = plt.figure(figsize = (10, 10))

@@ -486,6 +486,8 @@ void magnetisation_vs_temperature(Config* config)
                 sim_mags[iter] = (float) magnetisation_ising_2d(system);
             }
 
+            // TODO: I need to divide this into positive and negatives 
+            // groups for this question to work. 
             float mag_est = mean(sim_mags, num_reps);
             float mag_err = variance(sim_mags, mag_est, num_reps);
 
