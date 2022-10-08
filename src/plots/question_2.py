@@ -125,21 +125,30 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
         figure.savefig(f"pub/figures/{save_file}")
 
 
-#def magnetisations(data_file: str, show: bool, save_file: str) -> None:
-#    with open(f"pub/data/{data_file}.csv") as mag_data:
-#        data = np.array([[float(entry) for entry in line.strip().split(",")] 
-#            for line in mag_data])
-#
-#    numbers = data[:, 0]
-#    temperatures = data[:, 1]
-#    neg_mags = data[:,  
-# 
-#
-#
-#    figure = plt.figure(figsize = (10, 10))
-#    axes = plt.axes()
-#
-#    for number in np.unique(numbers):
-#        axes.plot(temperature, magnetisation)
+def magnetisations(data_file: str, show: bool, save_file: str = None) -> None:
+    with open(f"pub/data/{data_file}") as mag_data:
+        data = np.array([[float(entry) for entry in line.strip().split(",")] 
+            for line in mag_data])
 
-first_and_last("pub/data/2d_test.csv", True)      
+    numbers = data[:, 0]
+    temperatures = data[:, 1]
+    neg_mag_est = data[:, 2] / numbers ** 2
+    neg_mag_err = data[:, 3] / numbers ** 2
+    pos_mag_est = data[:, 4] / numbers ** 2
+    pos_mag_err = data[:, 5] / numbers ** 2
+ 
+    figure = plt.figure(figsize = (10, 10))
+    axes = plt.axes()
+    axes.set_title(r"$\textrm{Magnetisation vs Temperature}$")
+
+    for number in np.unique(numbers):
+        cond = numbers == number
+        axes.errorbar(temperatures[cond], neg_mag_est[cond], neg_mag_err[cond])
+        axes.errorbar(temperatures[cond], pos_mag_est[cond], pos_mag_err[cond])
+
+    if show:
+        plt.show()
+    elif save_file:
+        figure.savefig(f"pub/data/{save_file}")
+
+magnetisations("2d_test.csv", True)      
