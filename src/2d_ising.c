@@ -467,7 +467,7 @@ void magnetisation_vs_temperature(Config* config)
     float step = atof(find(config, "temperature_step"));
     int length = (int) ((stop - start) / step);
 
-    float magnetisations[3][length][2];
+    float magnetisations[3][length][2][2]; // Num, temp, sign, est/err
     float temperature;
     Ising2D *system;
 
@@ -486,40 +486,34 @@ void magnetisation_vs_temperature(Config* config)
             int num_reps = 100;
             float *sim_mags = zeros(num_reps);
 
-            #pragma omp parallel for \
-                num_threads(8) \
-                shared(sim_mags) \
-                firstprivate(spin_nums, system) 
             for (int iter = 0; iter < num_reps; iter++)
             {
-                // printf("Iter: %i", iter);
                 for (int _ = 0; _ < 1e3 * spin_nums[num]; _++)
                 {
                     metropolis_step_ising_2d(system);
                 }
 
-                // printf("<<<");
-                #pragma omp critical
-                {
-                    sim_mags[iter] = (float) magnetisation_ising_2d(system);
-                }
-                // printf("done>>>\n");
+                sim_mags[iter] = (float) magnetisation_ising_2d(system);
             }
 
-            print_ising_2d(system);
 
-            int positive = 0;
-            printf("Temperature: %f\n", temperature);
+            int num_pos = 0;
+
             for (int iter = 0; iter < num_reps; iter++)
             {
-                printf("%i,", (int) sim_mags[iter]);
-                positive += (sim_mags[iter] > 0);
+                num_pos += (sim_mags[iter] > 0);
             } 
-            printf("\n\n");
 
-            int negative = num_reps - positive;
-            float *positives = zeros(positive);
-            float *negatives = zeros(negative);
+            int num_neg = num_reps - num_pos;
+
+            if ((num_neg == 0) || (num_pos == 0))
+            {
+                printf("Error: Either no negative or positive runs occurred");
+                exit(1);
+            }
+
+            float *positives = zeros(num_pos);
+            float *negatives = zeros(num_neg);
 
             int pos = 0, neg = 0;
             for (int iter = 0; iter < num_reps; iter++)
@@ -536,30 +530,24 @@ void magnetisation_vs_temperature(Config* config)
                 }
             } 
 
-            printf("Positive: %i\n", positive);
-            printf("Negative: %i\n", negative);
-            printf("The positive values were:\n");
-            for (int pos = 0; pos < positive; pos++)
-            {
-                printf("%.0f,", positives[pos]);
-            }
-            printf("\n");
-
-            printf("The negative values were:\n");
-            for (int neg = 0; neg < negative; neg++)
-            {
-                printf("%.0f,", negatives[neg]);
-            }
-            printf("\n");
-
             // TODO: I need to divide this into positive and negatives 
             // groups for this question to work. 
-            float mag_est = mean(sim_mags, num_reps);
-            float mag_err = variance(sim_mags, mag_est, num_reps);
+            // TODO: What happens if all of the runs returned positive 
+            // or all of the runs returned negative.
+            // TODO: I need to divide this function up into smaller functions 
+            // because it is just too large. Let me get the functionality 
+            // working first though. 
+            float pos_mag_est = mean(positives, num_pos);
+            float pos_mag_err = variance(positives, pos_mag_est, num_pos);
+
+            float neg_mag_est = mean(negatives, num_neg);
+            float neg_mag_err = variance(negatives, neg_mag_est, num_neg);
 
             // TODO: Improve the error by dividing by sqrt(reps)
-            magnetisations[num][temp][0] = mag_est;
-            magnetisations[num][temp][1] = sqrt(mag_err / num_reps);
+            magnetisations[num][temp][0][0] = pos_mag_est;
+            magnetisations[num][temp][0][1] = sqrt(pos_mag_err / (float) num_pos);
+            magnetisations[num][temp][1][0] = neg_mag_est;
+            magnetisations[num][temp][1][1] = sqrt(- neg_mag_est / (float) num_neg);
             temperature = stop - (temp + 1) * step;
         }
     }
@@ -578,8 +566,10 @@ void magnetisation_vs_temperature(Config* config)
         {
             temperature = stop - (temp + 1) * step;
             fprintf(save_file, "%i, %.1f, ", num, temperature);
-            fprintf(save_file, "%f, ", magnetisations[num][temp][0]);
-            fprintf(save_file, "%f\n", magnetisations[num][temp][1]);
+            fprintf(save_file, "%f, ", magnetisations[num][temp][0][0]);
+            fprintf(save_file, "%f, ", magnetisations[num][temp][0][1]);
+            fprintf(save_file, "%f, ", magnetisations[num][temp][1][0]);
+            fprintf(save_file, "%f\n", magnetisations[num][temp][1][1]);
         }
     }
     
