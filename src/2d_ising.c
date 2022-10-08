@@ -442,7 +442,17 @@ void physical_parameters_ising_2d(Config* config)
 }
 
 
+float *zeros(int size)
+{
+    float *zeros = (float*) calloc(size, sizeof(float));
+    
+    for (int elem = 0; elem < size; elem++)
+    {
+        zeros[elem] = 0.0;
+    }
 
+    return zeros;
+}
 
 
 void magnetisation_vs_temperature(Config* config)
@@ -473,18 +483,74 @@ void magnetisation_vs_temperature(Config* config)
 
         for (int temp = 0; temp < length; temp++)
         {
-            int num_reps = 10;
-            float sim_mags[num_reps];
+            int num_reps = 100;
+            float *sim_mags = zeros(num_reps);
 
+            #pragma omp parallel for \
+                num_threads(8) \
+                shared(sim_mags) \
+                firstprivate(spin_nums, system) 
             for (int iter = 0; iter < num_reps; iter++)
             {
-                for (int k = 0; k < 1e3 * spin_nums[num]; k++)
+                // printf("Iter: %i", iter);
+                for (int _ = 0; _ < 1e3 * spin_nums[num]; _++)
                 {
                     metropolis_step_ising_2d(system);
                 }
 
-                sim_mags[iter] = (float) magnetisation_ising_2d(system);
+                // printf("<<<");
+                #pragma omp critical
+                {
+                    sim_mags[iter] = (float) magnetisation_ising_2d(system);
+                }
+                // printf("done>>>\n");
             }
+
+            print_ising_2d(system);
+
+            int positive = 0;
+            printf("Temperature: %f\n", temperature);
+            for (int iter = 0; iter < num_reps; iter++)
+            {
+                printf("%i,", (int) sim_mags[iter]);
+                positive += (sim_mags[iter] > 0);
+            } 
+            printf("\n\n");
+
+            int negative = num_reps - positive;
+            float *positives = zeros(positive);
+            float *negatives = zeros(negative);
+
+            int pos = 0, neg = 0;
+            for (int iter = 0; iter < num_reps; iter++)
+            {
+                if (sim_mags[iter] > 0)
+                {
+                    positives[pos] = sim_mags[iter];
+                    pos++;
+                }
+                else
+                {
+                    negatives[neg] = sim_mags[iter];
+                    neg++;
+                }
+            } 
+
+            printf("Positive: %i\n", positive);
+            printf("Negative: %i\n", negative);
+            printf("The positive values were:\n");
+            for (int pos = 0; pos < positive; pos++)
+            {
+                printf("%.0f,", positives[pos]);
+            }
+            printf("\n");
+
+            printf("The negative values were:\n");
+            for (int neg = 0; neg < negative; neg++)
+            {
+                printf("%.0f,", negatives[neg]);
+            }
+            printf("\n");
 
             // TODO: I need to divide this into positive and negatives 
             // groups for this question to work. 
