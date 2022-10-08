@@ -130,7 +130,9 @@ def magnetisations(data_file: str, show: bool, save_file: str) -> None:
         data = np.array([[float(entry) for entry in line.strip()split(",")] 
             for line in mag_data])
 
-   
+    numbers = data[:, 0]
+    temperatures = data[:, 1]
+    neg_mags = data[:,  
  
 
 

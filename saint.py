@@ -67,7 +67,7 @@ def calc_entropy(spins: int) -> float:
     rows, columns = spins.shape
     aligned = 0
     for row in np.arange(rows):
-        for column in np.arange(columns):
+        for column in np.arange(columns:
             aligned += spins[row, column] == spins[(row + 1) % rows, column]
             aligned += spins[row, column] == spins[row, (column + 1) % columns]
             aligned += spins[row, column] == spins[(row - 1) % rows, column]
