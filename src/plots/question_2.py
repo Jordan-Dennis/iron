@@ -125,20 +125,21 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
         figure.savefig(f"pub/figures/{save_file}")
 
 
-def magnetisations(data_file: str, show: bool, save_file: str) -> None:
-    with open(f"pub/data/{data_file}.csv") as mag_data:
-        data = np.array([[float(entry) for entry in line.strip()split(",")] 
-            for line in mag_data])
+#def magnetisations(data_file: str, show: bool, save_file: str) -> None:
+#    with open(f"pub/data/{data_file}.csv") as mag_data:
+#        data = np.array([[float(entry) for entry in line.strip().split(",")] 
+#            for line in mag_data])
+#
+#    numbers = data[:, 0]
+#    temperatures = data[:, 1]
+#    neg_mags = data[:,  
+# 
+#
+#
+#    figure = plt.figure(figsize = (10, 10))
+#    axes = plt.axes()
+#
+#    for number in np.unique(numbers):
+#        axes.plot(temperature, magnetisation)
 
-    numbers = data[:, 0]
-    temperatures = data[:, 1]
-    neg_mags = data[:,  
- 
-
-
-    figure = plt.figure(figsize = (10, 10))
-    axes = plt.axes()
-
-    for number in np.unique(numbers):
-        axes.plot(temperature, magnetisation)
-        
+first_and_last("pub/data/2d_test.csv", True)      

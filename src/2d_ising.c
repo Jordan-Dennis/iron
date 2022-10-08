@@ -135,7 +135,7 @@ void print_ising_2d(Ising2D *system)
     int length = system -> length;
     int **ensemble = system -> ensemble;
     
-    printf("2D Ising System:\n");
+    printf("2D Ising System at %f:\n", system -> temperature);
     for (int row = 0; row < length; row++)
     {
         for (int col = 0; col < length; col++)
@@ -470,6 +470,8 @@ void magnetisation_vs_temperature(Config* config)
 
     for (int num = 0; num < 3; num++)
     {
+        float sim_mags[length][num_reps];
+        
         for (int iter = 0; iter < num_reps; iter++)
         {
             system = init_ising_2d(spin_nums[num], stop - step);
@@ -482,70 +484,77 @@ void magnetisation_vs_temperature(Config* config)
 
             for (int temp = 0; temp < length; temp++)
             {
-                float sim_mags[100];
-
-                for (int _ = 0; _ < spin_nums[num]; _++)
+                for (int _ = 0; _ < 1e3 * spin_nums[num]; _++)
                 {
                     metropolis_step_ising_2d(system);
                 }
-                sim_mags[iter] = (float) magnetisation_ising_2d(system);
 
-                int num_pos = 0;
-
-                for (int iter = 0; iter < num_reps; iter++)
-                {
-                    printf("%.1f,", sim_mags[iter]);
-                    num_pos += (sim_mags[iter] > 0);
-                } 
-                printf("\n");
-
-                int num_neg = num_reps - num_pos;
-
-                if ((num_neg == 0) || (num_pos == 0))
-                {
-                    printf("Error: Either no negative or positive runs occurred");
-                    exit(1);
-                }
-
-                float *positives = zeros(num_pos);
-                float *negatives = zeros(num_neg);
-
-                int pos = 0, neg = 0;
-                for (int iter = 0; iter < num_reps; iter++)
-                {
-                    if (sim_mags[iter] > 0)
-                    {
-                        positives[pos] = sim_mags[iter];
-                        pos++;
-                    }
-                    else
-                    {
-                        negatives[neg] = sim_mags[iter];
-                        neg++;
-                    }
-                } 
-
-                // TODO: I need to divide this into positive and negatives 
-                // groups for this question to work. 
-                // TODO: What happens if all of the runs returned positive 
-                // or all of the runs returned negative.
-                // TODO: I need to divide this function up into smaller functions 
-                // because it is just too large. Let me get the functionality 
-                // working first though. 
-                float pos_mag_est = mean(positives, num_pos);
-                float pos_mag_err = variance(positives, pos_mag_est, num_pos);
-
-                float neg_mag_est = mean(negatives, num_neg);
-                float neg_mag_err = variance(negatives, neg_mag_est, num_neg);
-
-                // TODO: Improve the error by dividing by sqrt(reps)
-                magnetisations[num][temp][0][0] = pos_mag_est;
-                magnetisations[num][temp][0][1] = sqrt(pos_mag_err / (float) num_pos);
-                magnetisations[num][temp][1][0] = neg_mag_est;
-                magnetisations[num][temp][1][1] = sqrt(- neg_mag_est / (float) num_neg);
+//                sim_mags[temp][iter] = (float) magnetisation_ising_2d(system);
                 system -> temperature = (stop - ((float) (temp + 1)) * step);
+                print_ising_2d(system);
             }
-        }
+            printf("Am I just in front of the seg fault?\n");
+       }
+
+//        for (int temp = 0; temp < length; temp++)
+//        {
+//            int num_pos = 0;
+//
+//            printf("Temp: %i\n", temp);
+//            for (int iter = 0; iter < num_reps; iter++)
+//            {
+//                printf("%.1f,", sim_mags[temp][iter]);
+//                num_pos += (sim_mags[temp][iter] > 0);
+//            } 
+//            printf("\n");    
+//    
+//            int num_neg = num_reps - num_pos;
+//
+//            if ((num_neg == 0) || (num_pos == 0))
+//            {
+//                printf("Error: Either no negative or positive runs occurred");
+//                exit(1);
+//            }
+//
+//            float *positives = zeros(num_pos);
+//            float *negatives = zeros(num_neg);
+//
+//            int pos = 0, neg = 0;
+//            for (int iter = 0; iter < num_reps; iter++)
+//            {
+//                if (sim_mags[temp][iter] > 0)
+//                {
+//                    positives[pos] = sim_mags[temp][iter];
+//                    pos++;
+//                }
+//                else
+//                {
+//                    negatives[neg] = sim_mags[temp][iter];
+//                    neg++;
+//                }
+//            }
+//
+//            printf("Positives:\n");
+//            for (int pos = 0; pos < num_pos; pos++)
+//            {
+//                printf("%.1f,", positives[pos]);
+//            }
+//            printf("\n");
+//           
+//            float pos_mag_est = mean(positives, num_pos);
+//            float pos_mag_err = variance(positives, pos_mag_est, num_pos);
+//
+//            printf("Mean: %.1f\n", pos_mag_est);
+//
+//            float neg_mag_est = mean(negatives, num_neg);
+//            float neg_mag_err = variance(negatives, neg_mag_est, num_neg);
+//
+//            // TODO: Improve the error by dividing by sqrt(reps)
+//            magnetisations[num][temp][0][0] = pos_mag_est;
+//            magnetisations[num][temp][0][1] = sqrt(pos_mag_err / (float) num_pos);
+//            magnetisations[num][temp][1][0] = neg_mag_est;
+//            magnetisations[num][temp][1][1] = sqrt(- neg_mag_est / (float) num_neg);
+//        }
     }
 
     FILE *save_file = fopen(save_file_name, "w");

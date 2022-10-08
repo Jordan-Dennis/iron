@@ -15,7 +15,7 @@
  */
 float normalised_random(void)
 { 
-    return (float) rand() / (float) RAND_MAX;
+    return (float) rand() / ((float) RAND_MAX);
 }
 
 
@@ -52,7 +52,7 @@ int random_spin(void)
 int random_index(int length)
 {
     float norm_rand = normalised_random();
-    float range_rand = norm_rand * length;
+    float range_rand = norm_rand * length - 0.5;
     return (int) range_rand;
 }
 
