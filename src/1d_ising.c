@@ -1,41 +1,238 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
-#include"include/ising.h"
-#include"include/statistics.h"
+#include"include/utils.h"
+#include"include/1d_ising.h"
+
 
 
 /*
- * random
- * ------
- * Generate a random number over the range [0, 1].
+ * init_ising_1d
+ * -------------
+ * Represents an ising system at some temperature and size. 
+ * 
+ * parameters
+ * ----------
+ * int length: The number of spins in the system.
+ * float temperature: The temperature of the system in natural units. 
  *
  * returns
  * -------
- * float: random number.
+ * Ising1D* system: The ising model. 
  */
-float normalised_random(void)
-{ 
-    return (float) rand() / (float) RAND_MAX;
+Ising1D* init_ising_1d(int length, float temperature)
+{
+    int *ensemble = (int*) calloc(length, sizeof(int));
+    for (int spin = 0; spin < length; spin++)
+    {
+        ensemble[spin] = random_spin();
+    }
+
+    Ising1D* system = (Ising1D*) malloc(sizeof(Ising1D));
+    system -> length = length;
+    system -> temperature = temperature;
+    system -> ensemble = ensemble;
+    return system;
 }
 
 
-/* 
- * random_sign
- * -----------
- * Generate + or - 1 randomly.
+/*
+ * spin_energy_ising_1d
+ * --------------------
+ * Calculate the energy of one spin interacting with its immediate 
+ * neighbours in normalised units for one diemsnional case of spins isolated
+ * along a line. 
+ *
+ * parameters
+ * ----------
+ * int spin: The index of the specific spin.
+ * Ising1D* system: The array representing the ensamble of spins.
+ * 
+ * returns
+ * -------
+ * int: The energy contribution of this specific spin.
+ */
+int spin_energy_ising_1d(Ising1D* system, int spin)
+{
+    int *ensemble = system -> ensemble;
+    int length = system -> length;
+    return ensemble[spin] * (
+        ensemble[modulo(spin + 1, length)] + 
+        ensemble[modulo(spin - 1, length)]);
+}
+
+
+/*
+ * energy
+ * ----------------
+ * The energy stored by the ensamble of spins.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The system representing the ensamble. 
  *
  * returns
  * -------
- * int: +1 or -1 randomly.
- */ 
-int random_spin(void) 
+ * int: The energy of the ensamble in units of epsilon.
+ */
+float energy_ising_1d(Ising1D* system)
 {
-    float normed_random = normalised_random();
-    float translated_random = normed_random - .5;
-    return (int) ((translated_random > 0) - (translated_random < 0));
+    int energy = 0;
+
+    for (int spin = 0; spin < system -> length; spin++) 
+    {
+        energy -= spin_energy_ising_1d(system, spin);
+    }
+
+    return (float) energy / (float) 2;
+}
+
+
+/*
+ * entropy
+ * -------
+ * Calculate the entropy at a given moment.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to calculate the entropy of.
+ *
+ * returns
+ * -------
+ * float entropy: The entropy of the system.  
+ */
+float entropy_ising_1d(Ising1D* system) 
+{
+    int length = system -> length;
+    int* ensemble = system -> ensemble; 
+    int up_spins = 0;
+
+    for (int spin = 0; spin < length; spin++)
+    {
+        if (ensemble[spin] == (ensemble[modulo(spin + 1, length)]))
+        {
+            up_spins++;
+        }
+    }
+
+    int down_spins = length - up_spins;
+
+    float entropy = length * log(length) - up_spins * log(up_spins) 
+        - down_spins * log(down_spins);
+    
+    return entropy;
+}
+
+
+/*
+ * free_energy
+ * -----------
+ * The free energy of the ensamble of spins.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to calculate the free energy of. 
+ * 
+ * returns
+ * -------
+ * float free_energy: The free energy.
+ */
+float free_energy_ising_1d(Ising1D* system)
+{
+    float temperature = system -> temperature;
+    return energy_ising_1d(system) - temperature * entropy_ising_1d(system);
+}
+
+
+/*
+ * flip_spin_ising_1d
+ * ------------------
+ * Flip a spin in the system.
+ *
+ * parameters
+ * ----------
+ * Ising1D *system: The system within which to flip.
+ * int spin: The index of the spin to flip.
+ */
+void flip_spin_ising_1d(Ising1D *system, int spin)
+{
+    system -> ensemble[spin] *= -1;
+}
+
+
+/*
+ * metropolis_step
+ * ---------------
+ * Evolve the spin state according to a metropolis algorithm. 
+ *
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to evolve.  
+ */
+void metropolis_step_ising_1d(Ising1D* system)
+{
+    int spin = random_index(system -> length);
+    int energy_change = 2 * spin_energy_ising_1d(system, spin);
+   
+    if (energy_change < 0)
+    {
+        flip_spin_ising_1d(system, spin);
+    } 
+    else
+    {
+        float probability = exp(- energy_change / (system -> temperature));
+        if (probability > normalised_random()) 
+        {
+            flip_spin_ising_1d(system, spin);
+        }
+    }
 }
 
 
 
+/*
+ * magnetisation
+ * -------------
+ * Calculate the net magnetisation of the system.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to calculate the magnetisation of.  
+ *
+ * returns
+ * -------
+ * int magnetisation: The net magnetisation.
+ */
+float magnetisation_ising_1d(Ising1D* system)
+{
+    int length = system -> length;
+    float magnetisation = 0;
+    for (int spin = 0; spin < length; spin++)
+    {
+        magnetisation += (system -> ensemble)[spin];
+    }
+    return magnetisation / length;
+}
+
+
+/*
+ * print_ising_1d
+ * --------------
+ * A useful debugging utility for developing the model.
+ * 
+ * parameters
+ * ----------
+ * Ising1D *system: The system to print.
+ */
+void print_ising_1d(Ising1D* system)
+{
+    int length = system -> length;
+    int *ensemble = system -> ensemble;
+    
+    printf("1D Ising System:\n");
+    for (int spin = 0; spin < length; spin++)
+    {
+        printf("%i", ensemble[spin] > 0); 
+    }
+    printf("\n");
+}

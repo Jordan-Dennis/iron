@@ -1,79 +1,8 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
-#include"include/statistics.h"
-
-
-/*
- * random
- * ------
- * Generate a random number over the range [0, 1].
- *
- * returns
- * -------
- * float: random number.
- */
-float normalised_random(void)
-{ 
-    return (float) rand() / (float) RAND_MAX;
-}
-
-
-/* 
- * random_sign
- * -----------
- * Generate + or - 1 randomly.
- *
- * returns
- * -------
- * int: +1 or -1 randomly.
- */ 
-int random_spin(void) 
-{
-    float normed_random = normalised_random();
-    float translated_random = normed_random - .5;
-    return (int) ((translated_random > 0) - (translated_random < 0));
-}
-
-
-/*
- * random_index
- * ------------
- * Generate a random index in the correct range.
- * 
- * parameters
- * ----------
- * int length: The length of the array that is getting indexed. 
- *
- * returns
- * -------
- * int rand_ind: A random index in the range [0, length]
- */
-int random_index(int length)
-{
-    float norm_rand = normalised_random();
-    float range_rand = norm_rand * length;
-    return (int) range_rand;
-}
-
-
-/*
- * Ising2D
- * -------
- * Represents the two-dimensional simulation of the ising model. 
- * These models are assumed to be square.
- *
- * parameters
- * ----------
- * int length: The number of spins in a single row/col.
- * int **ensemble: The matrix of spins. 
- */
-typedef struct Ising2D {
-    int     length;
-    float   temperature;
-    int     **ensemble;
-} Ising2D; 
+#include"include/utils.h"
+#include"include/2d_ising.h"
 
 
 /*
@@ -110,30 +39,6 @@ Ising2D* init_ising_2d(int length, float temperature)
     system -> temperature = temperature;
     system -> ensemble = ensemble;
     return system;
-}
-
-
-/*
- * modulo
- * ------
- * A number theory based version of the % operator
- *
- * parameters
- * ----------
- * int dividend: The n in n % m 
- * int divisor: The m in n % m
- *
- * returns
- * -------
- * int nmodm: The number theory modulo.
- */
-int modulo(int dividend, int divisor)
-{
-    if (divisor == 0)
-    {
-        return 0;
-    }
-    return ((dividend % divisor) + divisor) % divisor;
 }
 
 
@@ -248,9 +153,8 @@ void print_ising_2d(Ising2D *system)
  * ----------
  * System* system: The spin ensamble to evolve.  
  */
-void metropolis_step(Ising2D *system)
+void metropolis_step_ising_2d(Ising2D *system)
 {
-
     int row = random_index(system -> length);
     int col = random_index(system -> length);
     int energy_change = 2 * spin_energy_ising_2d(system, row, col);
@@ -267,25 +171,4 @@ void metropolis_step(Ising2D *system)
             flip_spin_ising_2d(system, row, col);
         }
     }
-}
-
-// OK so ... the question is should I allo myself to read the system 
-// from a file so that I can make deterministic tests against the python 
-// code? Perhaps I think for now though I forge ahead with the same 
-// statergy that I had before.
-
-
-int main(void)
-{
-    int length = 100;
-    Ising2D *system = init_ising_2d(length, 10.);
-
-    printf("Energy: %f\n", energy_ising_2d(system));
-    print_ising_2d(system);
-    for (int epoch = 0; epoch < 1000 * length; epoch++)
-    {
-        metropolis_step(system);
-    }
-    printf("Energy: %f\n", energy_ising_2d(system));
-    print_ising_2d(system);
 }
