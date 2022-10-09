@@ -604,4 +604,54 @@ void magnetisation_vs_temperature(Config* config)
 }
 
 
+/*
+ * cooling_and_heating
+ * -------------------
+ * Steadily heat and then cool the system to observe the phase transistion 
+ * in each direction.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration of the system.
+ */
+void cooling_and_heating(Config *config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+    int length = (int) ((stop - start) / step);
 
+    Ising2D *system = init_ising_2d(num_spins, start);
+    FILE *save_file = fopen(save_file_name, 'w');
+
+    for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+    {
+        metropolis_step_ising_2d(system);
+    }
+
+    save_ising_2d(system, save_file);
+
+    while (system -> temperature < stop)
+    {
+        system -> temperature += step;
+        for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+        {
+            metropolis_step_ising_2d(system);
+        }
+    }
+
+    save_ising_2d(system, save_file);
+
+    while (system -> temperature > start)
+    {
+        system -> temperature -= step;
+        for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+        {
+            metropolis_step_ising_2d(system);
+        }
+    }
+
+    save_ising_2d(system, save_file);
+}
