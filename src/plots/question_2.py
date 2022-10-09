@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import typing as tp
 import matplotlib as mpl
+import collections
 
 mpl.rcParams['text.usetex'] = True
 
@@ -29,6 +30,28 @@ def print_tensor(tensor: list) -> None:
     _print_tensor(tensor, max_depth)
 
 
+def _get_ising_image(data_file: str) -> dict:
+    with open(data_file) as images_file:
+        image = []
+        images = []
+        temperatures = []
+        for line in images_file:
+            if line.strip().startswith("#"):
+                temperature = []
+                for char in line.strip():
+                    if char.isnumeric() or char == '.':
+                        temperature.append(char)
+                temperatures.append(float("".join(temperature)))
+                if image:
+                    images.append(image)
+                    image = []
+            else:
+                image.append([int(entry) for entry in line.strip().split(",")])
+        if image:
+            images.append(image)
+
+        return tuple(zip(temperatures, images))
+
 
 def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
     with open(data_file) as images_file:
@@ -49,27 +72,28 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
                 image.append([int(entry) for entry in line.strip().split(",")])
         if image:
             images.append(image)
+    # TODO: Upgrade this to use the new functionality. 
 
-        assert len(temperatures) == len(images)
-        assert len(temperatures) % 2 == 0
+    assert len(temperatures) == len(images)
+    assert len(temperatures) % 2 == 0
 
-        images = np.array(images, dtype=int)           
-        number = images.shape[0]
-        figure, axes = plt.subplots(2, number // 2, figsize=(10, 15))
-        for subplot, index in enumerate(range(0, number, 2)):
-            axes[0][subplot].imshow(images[index])
-            axes[0][subplot].set_title(f"$T = {temperatures[index]}$")
-            axes[0][subplot].set_xticks([])
-            axes[0][subplot].set_yticks([])
-            axes[1][subplot].imshow(images[index + 1])
-            axes[1][subplot].set_title(f"$T = {temperatures[index + 1]}$")
-            axes[1][subplot].set_xticks([])
-            axes[1][subplot].set_yticks([])
+    images = np.array(images, dtype=int)           
+    number = images.shape[0]
+    figure, axes = plt.subplots(2, number // 2, figsize=(10, 15))
+    for subplot, index in enumerate(range(0, number, 2)):
+        axes[0][subplot].imshow(images[index])
+        axes[0][subplot].set_title(f"$T = {temperatures[index]}$")
+        axes[0][subplot].set_xticks([])
+        axes[0][subplot].set_yticks([])
+        axes[1][subplot].imshow(images[index + 1])
+        axes[1][subplot].set_title(f"$T = {temperatures[index + 1]}$")
+        axes[1][subplot].set_xticks([])
+        axes[1][subplot].set_yticks([])
 
-        if show:
-            plt.show()
-        else:
-            figure.savefig(f"pub/figures/{save_file}.pdf")
+    if show:
+        plt.show()
+    else:
+        figure.savefig(f"pub/figures/{save_file}.pdf")
 
 
 def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
@@ -152,3 +176,21 @@ def magnetisations(data_file: str, show: bool, save_file: str = None) -> None:
         figure.savefig(f"pub/data/{save_file}")
 
 
+def heating_and_cooling(data_file: str, show: bool, save_file: str = None) -> None:
+    images = _get_ising_image(f"pub/data/{data_file}")
+
+    figure, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    for index, image in enumerate(images):
+        axes[index].imshow(image[1])
+        axes[index].set_title(r"$\textrm{T = " + f"{image[0]}" + "}$")
+
+    if show:
+        plt.show()
+
+    if save_file:
+        figure.savefig("pub/figures/{save_file}")
+
+     
+
+heating_and_cooling("2d_test.csv", True)
