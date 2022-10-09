@@ -1,6 +1,7 @@
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include"include/toml.h"
 #include"include/utils.h"
 #include"include/1d_ising.h"
 
@@ -224,7 +225,7 @@ float magnetisation_ising_1d(Ising1D* system)
  * ----------
  * Ising1D *system: The system to print.
  */
-void print_ising_1d(Ising1D* system)
+void print_ising_1d(Ising1D *system)
 {
     int length = system -> length;
     int *ensemble = system -> ensemble;
@@ -235,4 +236,289 @@ void print_ising_1d(Ising1D* system)
         printf("%i", ensemble[spin] > 0); 
     }
     printf("\n");
+}
+
+
+/*
+ * save_ising_1d
+ * -------------
+ * Convinient function that save the current state of the system to a 
+ * file. 
+ *
+ * parameters
+ * ----------
+ * const Ising1D *system: The current state of the system.
+ * FILE *file: The file to save the output. 
+ */
+void save_ising_1d(const Ising1D *system, FILE *file)
+{
+    int length = system -> length;
+    int *ensemble = system -> ensemble;
+    float temperature = system -> temperature;
+
+    fprintf(file, "# Temperature: %f\n", temperature);
+
+    for (int spin = 0; spin < (length - 1); spin++) 
+    {
+        fprintf(file, "%i,", ensemble[spin]);
+    }
+
+    fprintf(file, "%i\n", ensemble[length - 1]);
+}
+
+
+/*
+ * first_and_last 
+ * --------------
+ * A one dimensional ising model with periodic boundaries using the 
+ * metropolis algorithm. Provide the initial and the final outputs 
+ * from the simulation for at least three different temperatures.
+ * What do you notice about the size of the chunks of color at 
+ * low temperatures compared to high temperatures. 
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the setup of the system. 
+ */
+void first_and_last(Config *config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+
+    free(config);
+
+    int num_temps = (int) ((stop - start) / step);
+    FILE *save_file = fopen(save_file_name, "w");
+
+    int ind;
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        Ising1D* system = init_ising_1d(num_spins, temp);
+
+        save_ising_1d(system, save_file);
+
+        // Running the metropolis algorithm over the system. 
+        for (int epoch = 0; epoch <= num_spins * 1e3; epoch++)
+        { 
+            metropolis_step_ising_1d(system);
+        }
+
+        save_ising_1d(system, save_file);
+    }
+}
+
+
+
+/*
+ * physical_parameters
+ * -------------------
+ * Compute and plot figures for energy, free energy, entropy and 
+ * heat capacity and the reduced magnetisation per dipole of the 
+ * 1d ising model against temperatur, T, using your simulation
+ * with N = 100. Obtain values for at least ten different 
+ * temeperatures. 
+ * 
+ * Compute time averages of these quantities for the best results
+ * and make sure that the system reaches thermodynamic equilibrium
+ * before taking measurements. Present against the analytic solutions.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the simulation. 
+ */
+void physical_parameters(Config* config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+
+    int num_temps = (int) ((stop - start) / step);
+    int num_epochs = 1e3 * num_spins;
+
+    float energies_and_error[num_temps][2];
+    float entropies_and_error[num_temps][2];
+    float free_energies_and_error[num_temps][2];
+    float heat_capacities_and_error[num_temps];
+    
+    int ind;    
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        Ising1D *system = init_ising_1d(num_spins, temp);
+    
+        // Running the burnin period. 
+        for (int epoch = 0; epoch <= num_epochs; epoch++)
+        { 
+            metropolis_step_ising_1d(system);
+        }
+
+        float sim_energies[num_epochs];
+        float sim_entropies[num_epochs];
+        float sim_free_energies[num_epochs];
+        
+        for (int epoch = 0; epoch < num_epochs; epoch++)
+        { 
+            metropolis_step_ising_1d(system);
+            float energy = energy_ising_1d(system);
+            float entropy = entropy_ising_1d(system);
+
+            sim_energies[epoch] = energy;
+            sim_entropies[epoch] = entropy;
+            sim_free_energies[epoch] = energy - temp * entropy;
+        }
+
+        float mean_energy = mean(sim_energies, num_epochs);
+        float mean_entropy = mean(sim_entropies, num_epochs);
+        float mean_free_energy = mean(sim_free_energies, num_epochs);
+
+        float var_energy = variance(sim_energies, mean_energy, num_epochs);
+        float var_entropy = variance(sim_entropies, mean_entropy, num_epochs);
+        float var_free_energy = variance(sim_free_energies, mean_free_energy, num_epochs);
+        float mean_heat_capacity = var_energy / temp / temp;
+
+        energies_and_error[ind][1] = sqrt(var_energy) / num_spins;
+        energies_and_error[ind][0] = mean_energy / num_spins;
+        entropies_and_error[ind][1] = sqrt(var_entropy) / num_spins;
+        entropies_and_error[ind][0] = mean_entropy / num_spins;
+        free_energies_and_error[ind][1] = sqrt(var_free_energy) / num_spins;
+        free_energies_and_error[ind][0] = mean_free_energy / num_spins;
+        heat_capacities_and_error[ind] = mean_heat_capacity / num_spins;
+    }
+
+	// Writing the data to the file
+	FILE* data = fopen(save_file_name, "w");
+
+    if (data == NULL)
+    {
+        printf("Error: Could not open '%s'", save_file_name);
+        exit(1);
+    }
+
+	// Writing the header row to the data. 
+	fprintf(data, "Temperature, ");
+    fprintf(data, "Energy, Energy Error, "); 
+    fprintf(data, "Entropy, Entropy Error, "); 
+    fprintf(data, "Free Energy, Free Energy Error, "); 
+    fprintf(data, "Heat Capacity\n");
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+	{
+        fprintf(data, "%f, ", temp);
+		fprintf(data, "%f, ", energies_and_error[ind][0]);
+		fprintf(data, "%f, ", energies_and_error[ind][1]);
+		fprintf(data, "%f, ", entropies_and_error[ind][0]);
+		fprintf(data, "%f, ", entropies_and_error[ind][1]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][0]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][1]);
+        fprintf(data, "%f\n", heat_capacities_and_error[ind]);
+	}
+	
+	fclose(data);
+}
+
+
+
+/*
+ * histogram
+ * ---------
+ * Create a histogram of the m values you obtain by running a 
+ * simulation of 500 spins at 1., 2. and 3. temperatures 100 times.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the simulation. 
+ */
+void histogram(Config* config)
+{
+    int num_spins[2] = {100, 500};
+    int reps_per_temp = atoi(find(config, "reps_per_temp"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+   
+    int length = (int) ((stop - start) / step); 
+    float magnetisations[length][reps_per_temp][2]; 
+
+    for (int number = 0; number < 2; number++)
+    {
+        int ind;    
+        float temp;
+
+        for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+        {
+            Ising1D *system = init_ising_1d(num_spins[number], temp);
+
+            for (int rep = 0; rep < reps_per_temp; rep++)
+            {
+                int num_epochs = 1e3 * num_spins[number];
+
+                // Running the burnin period. 
+                for (int epoch = 0; epoch <= num_epochs; epoch++)
+                { 
+                    metropolis_step_ising_1d(system);
+                }
+
+                // Running the simulation 
+                float sim_magnetisation[num_epochs];
+
+                for (int epoch = 0; epoch < num_epochs; epoch++)
+                { 
+                    metropolis_step_ising_1d(system);
+                    sim_magnetisation[epoch] = magnetisation_ising_1d(system);
+                }
+
+                float mean_magnetisation = mean(sim_magnetisation, num_epochs);
+                magnetisations[ind][rep][number] = mean_magnetisation;
+            }
+        }
+    }
+
+    // Opening the data file. 
+    FILE* data = fopen(save_file_name, "w");
+
+    if (data == NULL)
+    {
+        printf("Error: Could not open '%s'", save_file_name);
+        exit(1);
+    }
+    
+    // Printing the header row to the file. 
+    for (float temp = start; temp < stop; temp += step)
+    {
+        fprintf(data, "T%f, ", temp);
+    }
+
+    fprintf(data, "\n");
+
+    // Writing the data to the file.
+    // TODO: I really need my toml manager to be able to handle arrays.
+    for (int rep = 0; rep < reps_per_temp; rep++)
+    {
+        for (int number = 0; number < 2; number++)
+        {
+            for (int temp = 0; temp < length; temp++)
+            {
+                char* fstring = "%f,";
+
+                if ((temp == length - 1) && (number == 1))
+                {
+                    fstring = "%f\n";
+                }
+
+                fprintf(data, fstring, magnetisations[temp][rep][number]);
+            }
+        }
+    }
+
+    // Closing the file
+    fclose(data);
 }

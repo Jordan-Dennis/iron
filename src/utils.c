@@ -15,7 +15,7 @@
  */
 float normalised_random(void)
 { 
-    return (float) rand() / (float) RAND_MAX;
+    return (float) rand() / ((float) RAND_MAX);
 }
 
 
@@ -52,7 +52,7 @@ int random_spin(void)
 int random_index(int length)
 {
     float norm_rand = normalised_random();
-    float range_rand = norm_rand * length;
+    float range_rand = norm_rand * length - 0.5;
     return (int) range_rand;
 }
 
@@ -71,15 +71,13 @@ int random_index(int length)
  * -------
  * float* mean: The geometric mean of the sample. 
  */
-float mean(float array[], int length) 
+float mean(float *array, int length) 
 {
     float mean = 0;
     for (int entry = 0; entry < length; entry++)
     {
         mean += array[entry];
-        // printf("%f, ", array[entry]);
     }
-    // printf("\n");
     return mean / length;
 }
 
@@ -134,4 +132,3 @@ int modulo(int dividend, int divisor)
     }
     return ((dividend % divisor) + divisor) % divisor;
 }
-

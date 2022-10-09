@@ -1,5 +1,6 @@
 #ifndef ISING1D_H
 #define ISING1D_H
+#include"toml.h"
 
 
 /*
@@ -25,6 +26,9 @@ int spin_energy_ising_1d(Ising1D *system, int spin);
 void metropolis_step_ising_1d(Ising1D *system);
 void flip_spin_ising_1d(Ising1D *system, int spin);
 void print_ising_1d(Ising1D *system);
+void first_and_last(Config *config);
+void physical_parameters(Config *config);
+void histogram(Config* config);
 float energy_ising_1d(Ising1D *system);
 float magnetisation_ising_1d(Ising1D *system);
 float entropy_ising_1d(Ising1D *system);

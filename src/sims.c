@@ -9,49 +9,7 @@
 #include"include/statistics.h"
 
 
-// TODO: Document
-// TODO: Maybe generalise so that I am working with vector or Vector?
-typedef struct Temperatures
-{
-    int length;
-    float* temps;
-} Temperatures;
 
-
-/*
- * parse_temperatures
- * ------------------
- * A helper function for parsing the arguments to the question 1 code. 
- *
- * parameters
- * ----------
- * float temperatures[]: The array to store the temperatures in.
- * float low: The lowest temperature to simulate.
- * float high: The highest temperature to simulate. 
- * float step: The increment for the temperature. 
- */
-Temperatures* parse_temperatures(Config* config)
-{ 
-    // TODO: I decided to pass the config so that the high low and step 
-    // automatically dropped out of scope.
-	Temperatures* temperatures = malloc(sizeof(Temperatures));
-    
-    // TODO: Finish the castings here and then complete this function.
-    float low = atof(find(config, "temperatures", "low"));
-    float high = atof(find(config, "temperatures", "high"));
-    float step = atof(find(config, "temperatures", "step"));
-    float length = (int) ((high - low) / step);
-	
-    temperatures -> length = length;
-    temperatures -> temps = calloc(length, sizeof(float));
-
-	for (int temperature = 0; temperature <= length; temperature++)
-    {
-        (temperatures -> temps)[temperature] = low + step * temperature;
-	}
-
-    return temperatures;
-}
 
 
 /*
