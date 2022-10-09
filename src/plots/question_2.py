@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import typing as tp
 import matplotlib as mpl
 import collections
+import sys
 
 mpl.rcParams['text.usetex'] = True
 
@@ -144,7 +145,7 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     save_file: str
         The file to save the image. 
     """
-    with open(data_file) as phys_param:
+    with open(f"pub/data/{data_file}") as phys_param:
         next(phys_param)
         data = [[float(entry) for entry in line.strip().split(",")] 
             for line in phys_param]
@@ -264,6 +265,12 @@ def heating_and_cooling(data_file: str, show: bool, save_file: str = None) -> No
     if save_file:
         figure.savefig("pub/figures/{save_file}")
 
-     
+    
+if __name__ == "main":
+    option = sys.argv[0]
+    file = sys.argv[1]
 
-heating_and_cooling("2d_test.csv", True)
+    if not file.endswith(".csv"):
+        raise Error("The data file should be a csv")
+
+    exec(f"{option}({file}, True, {option}_ising_2d.pdf)")

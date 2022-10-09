@@ -339,20 +339,15 @@ void physical_parameters_ising_2d(Config* config)
     float stop = atof(find(config, "highest_temperature"));
     float step = atof(find(config, "temperature_step"));
 
-    int num_temps = (int) ((stop - start) / step);
+    int length = (int) ((stop - start) / step);
 
-    float energies_and_error[num_temps][2][3];
-    float entropies_and_error[num_temps][2][3];
-    float free_energies_and_error[num_temps][2][3];
-    float heat_capacities_and_error[num_temps][3];
+    float energies_and_error[length][2][3];
+    float entropies_and_error[length][2][3];
+    float free_energies_and_error[length][2][3];
+    float heat_capacities_and_error[length][3];
     
-    int ind;    
-    float temp;
-
-    //#pragma omp parallel for num_threads(3) shared(energies_and_error)
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
-        printf("Running num_spin: %i\n", num_spin);
         int num_spins = spin_nums[num_spin];
         int num_epochs = num_spins * 1e3;
         int size = num_spins * num_spins;
@@ -364,13 +359,14 @@ void physical_parameters_ising_2d(Config* config)
             metropolis_step_ising_2d(system);
         }
 
-        for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
+        for (int temp = 0; temp < length; temp++)
         {
-            system -> temperature = temp;
-        
+            float temperature = stop - (temp + 1) * step;
             float sim_energies[num_epochs];
             float sim_entropies[num_epochs];
             float sim_free_energies[num_epochs];
+
+            system -> temperature = temperature;
             
             for (int epoch = 0; epoch < num_epochs; epoch++)
             { 
@@ -380,7 +376,7 @@ void physical_parameters_ising_2d(Config* config)
 
                 sim_energies[epoch] = energy;
                 sim_entropies[epoch] = entropy;
-                sim_free_energies[epoch] = energy - temp * entropy;
+                sim_free_energies[epoch] = energy - temperature * entropy;
             }
             
             float mean_energy = mean(sim_energies, num_epochs);
@@ -392,13 +388,13 @@ void physical_parameters_ising_2d(Config* config)
             float var_free_energy = variance(sim_free_energies, mean_free_energy, num_epochs);
             float mean_heat_capacity = var_energy / temp / temp;
 
-            energies_and_error[ind][1][num_spin] = sqrt(var_energy) / size;
-            energies_and_error[ind][0][num_spin] = mean_energy / size;
-            entropies_and_error[ind][1][num_spin] = sqrt(var_entropy) / size;
-            entropies_and_error[ind][0][num_spin] = mean_entropy / size;
-            free_energies_and_error[ind][1][num_spin] = sqrt(var_free_energy) / size;
-            free_energies_and_error[ind][0][num_spin] = mean_free_energy / size;
-            heat_capacities_and_error[ind][num_spin] = mean_heat_capacity / size;
+            energies_and_error[temp][1][num_spin] = sqrt(var_energy) / size;
+            energies_and_error[temp][0][num_spin] = mean_energy / size;
+            entropies_and_error[temp][1][num_spin] = sqrt(var_entropy) / size;
+            entropies_and_error[temp][0][num_spin] = mean_entropy / size;
+            free_energies_and_error[temp][1][num_spin] = sqrt(var_free_energy) / size;
+            free_energies_and_error[temp][0][num_spin] = mean_free_energy / size;
+            heat_capacities_and_error[temp][num_spin] = mean_heat_capacity / size;
         }
     }
     
@@ -421,17 +417,18 @@ void physical_parameters_ising_2d(Config* config)
     // TODO: Change the 3D tensors into two 2D tensors. 
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
-        for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+        for (int temp = 0; temp < length; temp++)
         {
+            float temperature = stop - (temp + 1) * step;
             fprintf(data, "%i, ", spin_nums[num_spin]);
-            fprintf(data, "%f, ", temp);
-            fprintf(data, "%f, ", energies_and_error[ind][0][num_spin]);
-            fprintf(data, "%f, ", energies_and_error[ind][1][num_spin]);
-            fprintf(data, "%f, ", entropies_and_error[ind][0][num_spin]);
-            fprintf(data, "%f, ", entropies_and_error[ind][1][num_spin]);
-            fprintf(data, "%f, ", free_energies_and_error[ind][0][num_spin]);
-            fprintf(data, "%f, ", free_energies_and_error[ind][1][num_spin]);
-            fprintf(data, "%f\n", heat_capacities_and_error[ind][num_spin]);
+            fprintf(data, "%f, ", temperature);
+            fprintf(data, "%f, ", energies_and_error[temp][0][num_spin]);
+            fprintf(data, "%f, ", energies_and_error[temp][1][num_spin]);
+            fprintf(data, "%f, ", entropies_and_error[temp][0][num_spin]);
+            fprintf(data, "%f, ", entropies_and_error[temp][1][num_spin]);
+            fprintf(data, "%f, ", free_energies_and_error[temp][0][num_spin]);
+            fprintf(data, "%f, ", free_energies_and_error[temp][1][num_spin]);
+            fprintf(data, "%f\n", heat_capacities_and_error[temp][num_spin]);
         }
     }
 	
@@ -655,3 +652,15 @@ void heating_and_cooling(Config *config)
 
     save_ising_2d(system, save_file);
 }
+
+
+/*
+ * external_magnetic_field
+ * -----------------------
+ * Compare the absolute magnetisation and the energy to the trength of 
+ * an external magnetic field. 
+ *
+ *
+ *
+ *
+ */
