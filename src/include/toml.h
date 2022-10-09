@@ -24,8 +24,7 @@
  */
 typedef struct Pair 
 { 
-    char *key, *group;
-    void *value; 
+    char *key, *value;
 } Pair;
 
 
@@ -43,7 +42,7 @@ typedef struct Pair
 typedef struct Config
 {
     int length;
-    Pair** pairs;
+    Pair **pairs;
 } Config;
 
 
@@ -72,27 +71,19 @@ typedef struct Toml
 
 
 
-Toml* __toml__(char* file_name); // TODO: Add global as group at start
-Pair* __pair__(char* key, char* value, char* group);
-Config* __config__(char* file_name);
+Toml* init_toml(char* file_name);
+Pair* init_pair(char* key, char* value);
+Config* init_config(char* file_name);
 
-
-// So I want to add functionality to do an arbitrary level of nesting for the 
-// group. How can I do this? group -> global/group/subgroup
-
-
-int done(Toml* toml);
 char peek(Toml* toml);
 char next(Toml* toml);
 char* word(Toml* toml);
-// void* array(Toml* toml); // TODO: 
-// void comment(Toml* toml); // TODO:
 void whitespace(Toml* toml);
-char* group(Toml* toml);
+void comment(Toml *toml);
+void skip(Toml *toml);
 Pair* entry(Toml* toml);
 Config* parse(Toml* toml);
 
-
 void add_pair_to_config(Config* config, Pair* pair);
-char* find(Config* config, char* header, char* field);
+char* find(Config* config, char* key);
 #endif 

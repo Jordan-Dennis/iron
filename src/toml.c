@@ -2,7 +2,6 @@
 #include<ctype.h>
 #include<string.h>
 #include<stdlib.h>
-#include<stdbool.h>
 #include"include/toml.h"
 #include"include/errors.h"
 
@@ -23,7 +22,11 @@
 char* read(char* file_name)                                                        
 {                                                          
     FILE* source = fopen(file_name, "r"); 
-    validate_file(source, file_name); 
+    if (source == NULL)
+    {
+        printf("Error: Failed to open '%s'", file_name);
+        exit(1);
+    }
 
     fseek(source, 0, SEEK_END); 
     float numbytes = ftell(source); 
@@ -37,8 +40,8 @@ char* read(char* file_name)
 
 
 /*
- * __toml__
- * --------
+ * init_toml
+ * ---------
  * Read a toml file into memory.
  *
  * parameters
@@ -49,7 +52,7 @@ char* read(char* file_name)
  * -------
  * Toml* toml: The parsed toml file. 
  */
-Toml* __toml__(char* file_name)
+Toml* init_toml(char* file_name)
 {
     char* contents = read(file_name);
     Toml* toml = malloc(sizeof(Toml));
@@ -61,8 +64,8 @@ Toml* __toml__(char* file_name)
 
 
 /*
- * __pair__
- * --------
+ * init_pair
+ * ---------
  * Create a key value pair. 
  *
  * parameters
@@ -74,12 +77,11 @@ Toml* __toml__(char* file_name)
  * -------
  * Pair* pair: The key value pair. 
  */
-Pair* __pair__(char* key, char* value, char* group)
+Pair* init_pair(char* key, char* value)
 {
     Pair* dict = calloc(1, sizeof(Pair));
     dict -> key = key;
     dict -> value = value;
-    dict -> group = group;
     return dict;
 } 
 
@@ -168,11 +170,12 @@ char next(Toml* toml)
 char* word(Toml* toml)
 {
     char* str = calloc(1, sizeof(char));
-    while (isalpha(peek(toml)) 
-        || isdigit(peek(toml)) 
-        || (peek(toml) == '/')
-        || (peek(toml) == '.')
-        || (peek(toml) == '_'))
+//    while (isalpha(peek(toml)) 
+//        || isdigit(peek(toml)) 
+//        || (peek(toml) == '/')
+//        || (peek(toml) == '.')
+//        || (peek(toml) == '_'))
+    while (!(isspace(peek(toml))))
     {
         str = realloc(str, (strlen(str) + 2) * sizeof(char));
         strcat(str, (char[]){next(toml), 0});
@@ -197,32 +200,40 @@ void whitespace(Toml* toml)
 
 
 /*
- * group
- * -----
- * Parse a header from the toml. This will have the format [group_name]
- * and should not contain whitespace. 
+ * skip
+ * ----
+ * Skip a character in a configuration file.
  *
  * parameters
  * ----------
- * Toml* toml: The toml to parse. 
- * 
- * returns
- * -------
- * char* group: The group name.
+ * Toml *toml: The file in which to skip a character.
  */
-char* group(Toml* toml)
+void skip(Toml *toml)
 {
-    // debug(toml -> debug, "Entered group");
-    validate_char('[', peek(toml));
+    toml -> cursor++;
+}
 
-    char lsparen = next(toml);
-    char* head = word(toml);
- 
-    validate_char(']', peek(toml));    
 
-    char rparen = next(toml);
-    toml -> current_group = head;
-    return head;
+/*
+ * comment
+ * -------
+ * Parse a comment in a configuration file. 
+ *
+ * parameters
+ * ----------
+ * Toml *toml: The file in which the comment is found. 
+ */
+void comment(Toml* toml)
+{
+    if (peek(toml) != '#')
+    {
+        printf("Error: Expected '#' but recieved %c", peek(toml));
+        exit(1);
+    }
+    while (peek(toml) != '\n')
+    {
+        skip(toml);
+    }
 }
 
 
@@ -241,14 +252,19 @@ char* group(Toml* toml)
  */
 Pair* entry(Toml* toml)
 {
-    // debug(toml -> debug, "Entered entry!\n");
     char* key = word(toml);
     whitespace(toml);
-    validate_char('=', peek(toml));
+
+    if (peek(toml) != '=')
+    {
+        printf("Error: Expected '=' but recieved '%c'", peek(toml));
+        exit(1);
+    }
+
     next(toml);
     whitespace(toml);
     char* value = word(toml); 
-    return __pair__(key, value, toml -> current_group);
+    return init_pair(key, value);
 }
 
 
@@ -297,21 +313,24 @@ Config* parse(Toml* toml)
     config -> pairs = malloc(sizeof(Pair));
     config -> length = 0;
 
-    Pair* pair;
     while (!done(toml))
     {
-        if (peek(toml) == '[')
+        if (peek(toml) == '#')
         {
-            toml -> current_group = group(toml);
+            comment(toml);
+        }
+        else if (isspace(peek(toml)))
+        {
+            whitespace(toml);
         }
         else if (isdigit(peek(toml)) || isalpha(peek(toml)))
         {
-            pair = entry(toml);
-            add_pair_to_config(config, pair);
+            add_pair_to_config(config, entry(toml));
         }
-        else 
+        else
         {
-            next(toml);
+            printf("Error: Unexpected character %c", peek(toml));
+            exit(1);
         }
     }
     return config;
@@ -333,25 +352,24 @@ Config* parse(Toml* toml)
  * -------
  * char* out: The value at the specified location.
  */
-char* find(Config* config, char* header, char* field)
+char* find(Config* config, char* key)
 {
     for (int pair = 0; pair < (config -> length); pair++)
     {
         Pair* inner = (config -> pairs)[pair];
-        if ((strcmp((inner -> key), field) == 0) 
-            && (strcmp((inner -> group), header) == 0))
+        if (strcmp((inner -> key), key) == 0) 
         {
             return inner -> value;
         }
     }
-    printf("Error: Could not find toml entry: [%s]: %s!", header, field);
+    printf("Error: Could not find toml entry: %s!", key);
     exit(1);
 }
 
 
 /*
- * __config__
- * ----------
+ * init_config 
+ * -----------
  * Constructor for the configurations.
  *
  * parameters
@@ -362,9 +380,9 @@ char* find(Config* config, char* header, char* field)
  * -------
  * Config* config: The program configuration.
  */
-Config* __config__(char* file_name)
+Config* init_config(char* file_name)
 {
-    Toml* toml = __toml__(file_name);
+    Toml* toml = init_toml(file_name);
     Config* config = parse(toml);
     return config;
 }

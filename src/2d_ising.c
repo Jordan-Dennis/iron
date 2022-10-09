@@ -172,3 +172,8 @@ void metropolis_step_ising_2d(Ising2D *system)
         }
     }
 }
+
+
+float heat_capacity()
+float entropy()
+int magnetisation()
