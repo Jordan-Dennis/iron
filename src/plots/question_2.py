@@ -151,4 +151,4 @@ def magnetisations(data_file: str, show: bool, save_file: str = None) -> None:
     elif save_file:
         figure.savefig(f"pub/data/{save_file}")
 
-magnetisations("2d_test.csv", True)      
+

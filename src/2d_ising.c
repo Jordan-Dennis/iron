@@ -614,7 +614,7 @@ void magnetisation_vs_temperature(Config* config)
  * ----------
  * Config *config: The configuration of the system.
  */
-void cooling_and_heating(Config *config)
+void heating_and_cooling(Config *config)
 {
     int num_spins = atoi(find(config, "number_of_spins"));
     char *save_file_name = find(config, "save_file");
@@ -624,7 +624,7 @@ void cooling_and_heating(Config *config)
     int length = (int) ((stop - start) / step);
 
     Ising2D *system = init_ising_2d(num_spins, start);
-    FILE *save_file = fopen(save_file_name, 'w');
+    FILE *save_file = fopen(save_file_name, "w");
 
     for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
     {
@@ -644,14 +644,14 @@ void cooling_and_heating(Config *config)
 
     save_ising_2d(system, save_file);
 
-    while (system -> temperature > start)
+    do
     {
         system -> temperature -= step;
         for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
         {
             metropolis_step_ising_2d(system);
         }
-    }
+    } while (system -> temperature > (start + step));
 
     save_ising_2d(system, save_file);
 }
