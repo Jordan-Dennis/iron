@@ -439,6 +439,18 @@ void physical_parameters_ising_2d(Config* config)
 }
 
 
+/*
+ * zeros
+ * -----
+ * Construct an array of zeros as floats.
+ *
+ * parameters
+ * ----------
+ * int size: The length of the one-dimensional array. 
+ *
+ * returns
+ * float *arr: A floating point array full of zeros. 
+ */
 float *zeros(int size)
 {
     float *zeros = (float*) calloc(size, sizeof(float));
@@ -452,6 +464,16 @@ float *zeros(int size)
 }
 
 
+/*
+ * magnetisation_vs_temperature
+ * ----------------------------
+ * This maps the positive and negative magnetisations of the system to 
+ * the temperature. 
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration of the system to use.
+ */
 void magnetisation_vs_temperature(Config* config)
 {
     int low_num_spins = atoi(find(config, "low_number_of_spins"));
@@ -580,3 +602,6 @@ void magnetisation_vs_temperature(Config* config)
     
     fclose(save_file); 
 }
+
+
+
