@@ -91,6 +91,20 @@ void metropolis_step_ising_t(ising_t *system)
 
 int main(void)
 {
-    int number = 50;
+    int length = 50;
     float critical_temperature = 2 / log(1 + sqrt(2));
+    float temperature_step = critical_temperature / 5;
+
+    for (float _temperature = 5; _temperature >= -5; _temperature--)
+    {
+        #pragma omp parallel for num_threads(8) \
+        private(_temperature, critical_temperature, length)
+        for (float _magnetic_field = 0; _magnetic_field < 10; _magnetic_field++)
+        {
+            float temperature = (1. + temperature / 5.) * critical_temperature;
+            float magnetic_field = _magnetic_field / 2.;
+            ising_t *system = init_ising_t(temperature, magnetic_field, length);
+            
+        }
+    }
 }
