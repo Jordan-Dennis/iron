@@ -56,5 +56,41 @@ inline float spin_energy_ising_t(ising_t *system, int row, int col)
 // moment. 
 float energy_ising_t(ising_t *system)
 {
+    int length = system -> length;
 
+    for (int row = 0; row < length; row++)
+        for (int col = 0; col < length; col++)
+            energy += spin_energy_ising_t(system, row, col);
+
+    return energy / 2.;
+}
+
+
+inline int should_flip(float change, float temperature)
+{
+    return (change < 0) || (normalised_random() < exp(- change / temperature));
+}
+
+
+inline void flip(ising_t *system, int row, int col)
+{
+    system -> ensemble[row][col] *= -1;
+}
+
+
+void metropolis_step_ising_t(ising_t *system)
+{
+    int length = system -> length;
+    int row = random_index(length);
+    int col = random_index(length);
+    float change = 2 * spin_energy_ising_t(system, row, col);
+    float temperature = system -> temperature;
+    if should_flip(change, temperature) flip(system, row, col); 
+}
+
+
+int main(void)
+{
+    int number = 50;
+    float critical_temperature = 2 / log(1 + sqrt(2));
 }
