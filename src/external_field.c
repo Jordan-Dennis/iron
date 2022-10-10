@@ -89,22 +89,82 @@ void metropolis_step_ising_t(ising_t *system)
 }
 
 
+float magnetisation_ising_t(ising_t *system)
+{
+    int **ensemble = system -> ensemble;
+    int length = system -> length;
+    float magnetisation = 0.;
+
+    for (int row = 0; row < length; row++)
+        for (int col = 0; col < length; col++)
+            magnetisation += (float) ensemble[row][col];
+
+    return magnetisation;
+}
+
+
 int main(void)
 {
+    int size = 10;
     int length = 50;
+    int epochs = length * 1e3;
+    float magnetisations[size][size];
+    float energies[size][size];
+    float _magnetisations[epochs];
+    float _energies[epochs];
+    float magnetisation;
+    float energy;
     float critical_temperature = 2 / log(1 + sqrt(2));
-    float temperature_step = critical_temperature / 5;
+    ising_t *system = init_ising_t(2. * critical_temperature, 0., length);
 
-    for (float _temperature = 5; _temperature >= -5; _temperature--)
+    for (int _ = 0; _ < length * 1e3; _++)
+        metropolis_step_ising_t(system);
+
+    for (float temperature = size/2.; temperature >= -size/2.; temperature--)
     {
-        #pragma omp parallel for num_threads(8) \
-        private(_temperature, critical_temperature, length)
-        for (float _magnetic_field = 0; _magnetic_field < 10; _magnetic_field++)
+        system -> temperature = (1. + temperature / 5.) * critical_temperature;
+        for (float magnetic_field = 0; magnetic_field < size; magnetic_field++)
         {
-            float temperature = (1. + temperature / 5.) * critical_temperature;
-            float magnetic_field = _magnetic_field / 2.;
-            ising_t *system = init_ising_t(temperature, magnetic_field, length);
-            
+            system -> magnetic_field = 2. * magnetic_field / size;            
+            for (int _ = 0; _ < epochs; _++) 
+            {
+                metropolis_step_ising_t(system);
+                _magnetisations[_] = magnetisation_ising_t(system);
+                _energies[_] = energy_ising_t(system);
+            }
+            magnetisation = mean(_magnetisations, length);
+            energy = mean(_energies, length);
+            magnetisations[temperature][magnetic_field] = magnetisation; 
+            energies[temperature][magnetic_field] = energy;
         }
     }
+
+    free(system); 
+
+    char *save_file_name = "pub/data/external_field.csv";
+    FILE *save_file = fopen(save_file_name, "w");
+
+    if (save_file == NULL) 
+    {
+        printf("Error: Could not open '%s', for writing!", save_file_name);
+        exit(1);
+    }
+
+    float _temperature;
+    float _magnetic_field;
+
+    for (float temperature = size/2.; temperature >= -size/2.; temperature--)
+    {
+        _temperature = (1. + temperature / 5.) * critical_temperature;
+        for (float magnetic_field = 0; magnetic_field < size; magnetic_field++)
+        {
+            _magnetic_field = 2. * magnetic_field / size;
+            fprintf(save_file, "%f,", _temperature);
+            fprintf(save_file, "%f,", _magnetic_field);
+            fprintf(save_file, "%f,", magnetisations[temperature][magnetic_field]);
+            fprintf(save_file, "%f\n", energies[temperature][magnetic_field]);
+        }
+    }
+
+    fclose(save_file);
 }
