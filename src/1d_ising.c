@@ -1,35 +1,524 @@
+#include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include"../include/toml.h"
-#include"../include/1d_ising.h"
+#include"include/toml.h"
+#include"include/utils.h"
+#include"include/1d_ising.h"
 
-int main(int num_args, char **args)
+
+
+/*
+ * init_ising_1d
+ * -------------
+ * Represents an ising system at some temperature and size. 
+ * 
+ * parameters
+ * ----------
+ * int length: The number of spins in the system.
+ * float temperature: The temperature of the system in natural units. 
+ *
+ * returns
+ * -------
+ * Ising1D* system: The ising model. 
+ */
+Ising1D* init_ising_1d(int length, float temperature)
 {
-    if (!(num_args == 2))
+    int *ensemble = (int*) calloc(length, sizeof(int));
+    for (int spin = 0; spin < length; spin++)
     {
-        printf("Error: Please specify the program you want to load!");
+        ensemble[spin] = random_spin();
+    }
+
+    Ising1D* system = (Ising1D*) malloc(sizeof(Ising1D));
+    system -> length = length;
+    system -> temperature = temperature;
+    system -> ensemble = ensemble;
+    return system;
+}
+
+
+/*
+ * spin_energy_ising_1d
+ * --------------------
+ * Calculate the energy of one spin interacting with its immediate 
+ * neighbours in normalised units for one diemsnional case of spins isolated
+ * along a line. 
+ *
+ * parameters
+ * ----------
+ * int spin: The index of the specific spin.
+ * Ising1D* system: The array representing the ensamble of spins.
+ * 
+ * returns
+ * -------
+ * int: The energy contribution of this specific spin.
+ */
+int spin_energy_ising_1d(Ising1D* system, int spin)
+{
+    int *ensemble = system -> ensemble;
+    int length = system -> length;
+    return ensemble[spin] * (
+        ensemble[modulo(spin + 1, length)] + 
+        ensemble[modulo(spin - 1, length)]);
+}
+
+
+/*
+ * energy
+ * ----------------
+ * The energy stored by the ensamble of spins.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The system representing the ensamble. 
+ *
+ * returns
+ * -------
+ * int: The energy of the ensamble in units of epsilon.
+ */
+float energy_ising_1d(Ising1D* system)
+{
+    int energy = 0;
+
+    for (int spin = 0; spin < system -> length; spin++) 
+    {
+        energy -= spin_energy_ising_1d(system, spin);
+    }
+
+    return (float) energy / (float) 2;
+}
+
+
+/*
+ * entropy
+ * -------
+ * Calculate the entropy at a given moment.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to calculate the entropy of.
+ *
+ * returns
+ * -------
+ * float entropy: The entropy of the system.  
+ */
+float entropy_ising_1d(Ising1D* system) 
+{
+    int length = system -> length;
+    int* ensemble = system -> ensemble; 
+    int up_spins = 0;
+
+    for (int spin = 0; spin < length; spin++)
+    {
+        if (ensemble[spin] == (ensemble[modulo(spin + 1, length)]))
+        {
+            up_spins++;
+        }
+    }
+
+    int down_spins = length - up_spins;
+
+    float entropy = length * log(length) - up_spins * log(up_spins) 
+        - down_spins * log(down_spins);
+    
+    return entropy;
+}
+
+
+/*
+ * free_energy
+ * -----------
+ * The free energy of the ensamble of spins.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to calculate the free energy of. 
+ * 
+ * returns
+ * -------
+ * float free_energy: The free energy.
+ */
+float free_energy_ising_1d(Ising1D* system)
+{
+    float temperature = system -> temperature;
+    return energy_ising_1d(system) - temperature * entropy_ising_1d(system);
+}
+
+
+/*
+ * flip_spin_ising_1d
+ * ------------------
+ * Flip a spin in the system.
+ *
+ * parameters
+ * ----------
+ * Ising1D *system: The system within which to flip.
+ * int spin: The index of the spin to flip.
+ */
+void flip_spin_ising_1d(Ising1D *system, int spin)
+{
+    system -> ensemble[spin] *= -1;
+}
+
+
+/*
+ * metropolis_step
+ * ---------------
+ * Evolve the spin state according to a metropolis algorithm. 
+ *
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to evolve.  
+ */
+void metropolis_step_ising_1d(Ising1D* system)
+{
+    int spin = random_index(system -> length);
+    int energy_change = 2 * spin_energy_ising_1d(system, spin);
+   
+    if (energy_change < 0)
+    {
+        flip_spin_ising_1d(system, spin);
+    } 
+    else
+    {
+        float probability = exp(- energy_change / (system -> temperature));
+        if (probability > normalised_random()) 
+        {
+            flip_spin_ising_1d(system, spin);
+        }
+    }
+}
+
+
+
+/*
+ * magnetisation
+ * -------------
+ * Calculate the net magnetisation of the system.
+ * 
+ * parameters
+ * ----------
+ * Ising1D* system: The spin ensamble to calculate the magnetisation of.  
+ *
+ * returns
+ * -------
+ * int magnetisation: The net magnetisation.
+ */
+float magnetisation_ising_1d(Ising1D* system)
+{
+    int length = system -> length;
+    float magnetisation = 0;
+    for (int spin = 0; spin < length; spin++)
+    {
+        magnetisation += (system -> ensemble)[spin];
+    }
+    return magnetisation / length;
+}
+
+
+/*
+ * print_ising_1d
+ * --------------
+ * A useful debugging utility for developing the model.
+ * 
+ * parameters
+ * ----------
+ * Ising1D *system: The system to print.
+ */
+void print_ising_1d(Ising1D *system)
+{
+    int length = system -> length;
+    int *ensemble = system -> ensemble;
+    
+    printf("1D Ising System:\n");
+    for (int spin = 0; spin < length; spin++)
+    {
+        printf("%i", ensemble[spin] > 0); 
+    }
+    printf("\n");
+}
+
+
+/*
+ * save_ising_1d
+ * -------------
+ * Convinient function that save the current state of the system to a 
+ * file. 
+ *
+ * parameters
+ * ----------
+ * const Ising1D *system: The current state of the system.
+ * FILE *file: The file to save the output. 
+ */
+void save_ising_1d(const Ising1D *system, FILE *file)
+{
+    int length = system -> length;
+    int *ensemble = system -> ensemble;
+    float temperature = system -> temperature;
+
+    fprintf(file, "# Temperature: %f\n", temperature);
+
+    for (int spin = 0; spin < (length - 1); spin++) 
+    {
+        fprintf(file, "%i,", ensemble[spin]);
+    }
+
+    fprintf(file, "%i\n", ensemble[length - 1]);
+}
+
+
+/*
+ * first_and_last 
+ * --------------
+ * A one dimensional ising model with periodic boundaries using the 
+ * metropolis algorithm. Provide the initial and the final outputs 
+ * from the simulation for at least three different temperatures.
+ * What do you notice about the size of the chunks of color at 
+ * low temperatures compared to high temperatures. 
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the setup of the system. 
+ */
+void first_and_last(Config *config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+
+    free(config);
+
+    int num_temps = (int) ((stop - start) / step);
+    FILE *save_file = fopen(save_file_name, "w");
+
+    int ind;
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        Ising1D* system = init_ising_1d(num_spins, temp);
+
+        save_ising_1d(system, save_file);
+
+        // Running the metropolis algorithm over the system. 
+        for (int epoch = 0; epoch <= num_spins * 1e3; epoch++)
+        { 
+            metropolis_step_ising_1d(system);
+        }
+
+        save_ising_1d(system, save_file);
+    }
+}
+
+
+
+/*
+ * physical_parameters
+ * -------------------
+ * Compute and plot figures for energy, free energy, entropy and 
+ * heat capacity and the reduced magnetisation per dipole of the 
+ * 1d ising model against temperatur, T, using your simulation
+ * with N = 100. Obtain values for at least ten different 
+ * temeperatures. 
+ * 
+ * Compute time averages of these quantities for the best results
+ * and make sure that the system reaches thermodynamic equilibrium
+ * before taking measurements. Present against the analytic solutions.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the simulation. 
+ */
+void physical_parameters(Config* config)
+{
+    int num_spins = atoi(find(config, "number_of_spins"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+
+    int num_temps = (int) ((stop - start) / step);
+    int num_epochs = 1e3 * num_spins;
+
+    float energies_and_error[num_temps][2];
+    float entropies_and_error[num_temps][2];
+    float free_energies_and_error[num_temps][2];
+    float heat_capacities_and_error[num_temps];
+    
+    int ind;    
+    float temp;
+
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    {
+        Ising1D *system = init_ising_1d(num_spins, temp);
+    
+        // Running the burnin period. 
+        for (int epoch = 0; epoch <= num_epochs; epoch++)
+        { 
+            metropolis_step_ising_1d(system);
+        }
+
+        float sim_energies[num_epochs];
+        float sim_entropies[num_epochs];
+        float sim_free_energies[num_epochs];
+        
+        for (int epoch = 0; epoch < num_epochs; epoch++)
+        { 
+            metropolis_step_ising_1d(system);
+            float energy = energy_ising_1d(system);
+            float entropy = entropy_ising_1d(system);
+
+            sim_energies[epoch] = energy;
+            sim_entropies[epoch] = entropy;
+            sim_free_energies[epoch] = energy - temp * entropy;
+        }
+
+        float mean_energy = mean(sim_energies, num_epochs);
+        float mean_entropy = mean(sim_entropies, num_epochs);
+        float mean_free_energy = mean(sim_free_energies, num_epochs);
+
+        float var_energy = variance(sim_energies, mean_energy, num_epochs);
+        float var_entropy = variance(sim_entropies, mean_entropy, num_epochs);
+        float var_free_energy = variance(sim_free_energies, mean_free_energy, num_epochs);
+        float mean_heat_capacity = var_energy / temp / temp;
+
+        energies_and_error[ind][1] = sqrt(var_energy) / num_spins;
+        energies_and_error[ind][0] = mean_energy / num_spins;
+        entropies_and_error[ind][1] = sqrt(var_entropy) / num_spins;
+        entropies_and_error[ind][0] = mean_entropy / num_spins;
+        free_energies_and_error[ind][1] = sqrt(var_free_energy) / num_spins;
+        free_energies_and_error[ind][0] = mean_free_energy / num_spins;
+        heat_capacities_and_error[ind] = mean_heat_capacity / num_spins;
+    }
+
+	// Writing the data to the file
+	FILE* data = fopen(save_file_name, "w");
+
+    if (data == NULL)
+    {
+        printf("Error: Could not open '%s'", save_file_name);
         exit(1);
     }
 
-    Config *config = init_config("src/tests/2d_test_config.toml");
+	// Writing the header row to the data. 
+	fprintf(data, "Temperature, ");
+    fprintf(data, "Energy, Energy Error, "); 
+    fprintf(data, "Entropy, Entropy Error, "); 
+    fprintf(data, "Free Energy, Free Energy Error, "); 
+    fprintf(data, "Heat Capacity\n");
 
-    if (strcmp(args[1], "first_and_last") == 0)
+    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+	{
+        fprintf(data, "%f, ", temp);
+		fprintf(data, "%f, ", energies_and_error[ind][0]);
+		fprintf(data, "%f, ", energies_and_error[ind][1]);
+		fprintf(data, "%f, ", entropies_and_error[ind][0]);
+		fprintf(data, "%f, ", entropies_and_error[ind][1]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][0]);
+		fprintf(data, "%f, ", free_energies_and_error[ind][1]);
+        fprintf(data, "%f\n", heat_capacities_and_error[ind]);
+	}
+	
+	fclose(data);
+}
+
+
+
+/*
+ * histogram
+ * ---------
+ * Create a histogram of the m values you obtain by running a 
+ * simulation of 500 spins at 1., 2. and 3. temperatures 100 times.
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration file detailing the simulation. 
+ */
+void histogram(Config* config)
+{
+    int num_spins[2] = {100, 500};
+    int reps_per_temp = atoi(find(config, "reps_per_temp"));
+    char *save_file_name = find(config, "save_file");
+    float start = atof(find(config, "lowest_temperature"));
+    float stop = atof(find(config, "highest_temperature"));
+    float step = atof(find(config, "temperature_step"));
+   
+    int length = (int) ((stop - start) / step); 
+    float magnetisations[length][reps_per_temp][2]; 
+
+    for (int number = 0; number < 2; number++)
     {
-        first_and_last_ising_2d(config);
+        int ind;    
+        float temp;
+
+        for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+        {
+            Ising1D *system = init_ising_1d(num_spins[number], temp);
+
+            for (int rep = 0; rep < reps_per_temp; rep++)
+            {
+                int num_epochs = 1e3 * num_spins[number];
+
+                // Running the burnin period. 
+                for (int epoch = 0; epoch <= num_epochs; epoch++)
+                { 
+                    metropolis_step_ising_1d(system);
+                }
+
+                // Running the simulation 
+                float sim_magnetisation[num_epochs];
+
+                for (int epoch = 0; epoch < num_epochs; epoch++)
+                { 
+                    metropolis_step_ising_1d(system);
+                    sim_magnetisation[epoch] = magnetisation_ising_1d(system);
+                }
+
+                float mean_magnetisation = mean(sim_magnetisation, num_epochs);
+                magnetisations[ind][rep][number] = mean_magnetisation;
+            }
+        }
     }
-    else if (strcmp(args[1], "physical_parameters") == 0)
+
+    // Opening the data file. 
+    FILE* data = fopen(save_file_name, "w");
+
+    if (data == NULL)
     {
-        physical_parameters_ising_2d(config);
+        printf("Error: Could not open '%s'", save_file_name);
+        exit(1);
     }
-    else if (strcmp(args[1], "magnetisation_vs_temperature") == 0)
+    
+    // Printing the header row to the file. 
+    for (float temp = start; temp < stop; temp += step)
     {
-       histogram(config);
+        fprintf(data, "T%f, ", temp);
     }
-    else
+
+    fprintf(data, "\n");
+
+    // Writing the data to the file.
+    // TODO: I really need my toml manager to be able to handle arrays.
+    for (int rep = 0; rep < reps_per_temp; rep++)
     {
-        printf("Error: A valid option was not specified.\n");
-        printf("The valid options are:\n");
-        printf(" - first_and_last\n");
-        printf(" - physical_parameters\n");
-        printf(" - histogram \n");
+        for (int number = 0; number < 2; number++)
+        {
+            for (int temp = 0; temp < length; temp++)
+            {
+                char* fstring = "%f,";
+
+                if ((temp == length - 1) && (number == 1))
+                {
+                    fstring = "%f\n";
+                }
+
+                fprintf(data, fstring, magnetisations[temp][rep][number]);
+            }
+        }
     }
+
+    // Closing the file
+    fclose(data);
+}
