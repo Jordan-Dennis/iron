@@ -4,6 +4,10 @@
 #include"include/utils.h"
 
 
+// TODO: So this is clearly not working because the line along 0 magnetic 
+// field is not behaving as I would expect. 
+
+
 typedef struct ising_t 
 {
     float temperature;
@@ -13,10 +17,6 @@ typedef struct ising_t
 } ising_t;
 
 
-// TODO: Do I want to initialise with the temperature and the magnetic field?
-// Yes I think that I do otherwise we end up with a dLux type scenario where 
-// the state is not guaranteed to be correct. I might also try setters and 
-// getters for the struct. 
 ising_t *init_ising_t(float temperature, float magnetic_field, int length)
 {
     int **ensemble = (int**) calloc(length, sizeof(int*));
@@ -38,9 +38,9 @@ ising_t *init_ising_t(float temperature, float magnetic_field, int length)
 }
 
 
-inline float spin_energy_ising_t(ising_t *system, int row, int col)
+static inline float spin_energy_ising_t(ising_t *system, int row, int col)
 {
-    float magnetic_filed = system -> magnetic_field;
+    float magnetic_field = system -> magnetic_field;
     int **ensemble = system -> ensemble;
     int length = system -> length;
     float neighbours = 0.0;
@@ -48,32 +48,31 @@ inline float spin_energy_ising_t(ising_t *system, int row, int col)
     neighbours += ensemble[modulo(row - 1, length)][col];
     neighbours += ensemble[row][modulo(col + 1, length)];
     neighbours += ensemble[row][modulo(col - 1, length)];
-    return (neighbours + magnetic_field) * ensemble[row][column]; 
+    return (neighbours + magnetic_field) * ensemble[row][col]; 
 }
 
 
-// TODO: So I am re-writing a lot of code at the moment. The question 2 
-// should be able to run on this but I think that I will leave it for the 
-// moment. 
 float energy_ising_t(ising_t *system)
 {
     int length = system -> length;
+    int row, col;
+    float energy = 0.;
 
-    for (int row = 0; row < length; row++)
-        for (int col = 0; col < length; col++)
-            energy += spin_energy_ising_t(system, row, col);
+    for (row = 0; row < length; row++)
+        for (col = 0; col < length; col++)
+            energy += (float) spin_energy_ising_t(system, row, col);
 
     return energy / 2.;
 }
 
 
-inline int should_flip(float change, float temperature)
+static inline int should_flip(float change, float temperature)
 {
     return (change < 0) || (normalised_random() < exp(- change / temperature));
 }
 
 
-inline void flip(ising_t *system, int row, int col)
+static inline void flip(ising_t *system, int row, int col)
 {
     system -> ensemble[row][col] *= -1;
 }
@@ -86,7 +85,8 @@ void metropolis_step_ising_t(ising_t *system)
     int col = random_index(length);
     float change = 2 * spin_energy_ising_t(system, row, col);
     float temperature = system -> temperature;
-    if should_flip(change, temperature) flip(system, row, col); 
+    if (should_flip(change, temperature)) 
+        flip(system, row, col); 
 }
 
 
@@ -104,35 +104,59 @@ float magnetisation_ising_t(ising_t *system)
 }
 
 
+void print_ising_t(ising_t *system)
+{
+    int row, col, length = system -> length, **ensemble = system -> ensemble;
+
+    printf("Temperature: %f\n", system -> temperature);
+    printf("Magnetic Field: %f\n", system -> magnetic_field);
+
+    for (row = 0; row < length; row++)
+    {
+        for (col = 0; col < length; col++)
+        {
+            printf("%i,", ensemble[row][col] > 0);
+        }
+        printf("\n");
+    }
+}
+
+
 int main(void)
 {
-    int size = 10;
-    int length = 50;
+    int size = 5;
+    int length = 20;
     int epochs = length * 1e3;
-    float magnetisations[size][size];
-    float energies[size][size];
-    float _magnetisations[epochs];
-    float _energies[epochs];
-    float magnetisation;
-    float energy;
+    int temperature, magnetic_field;
+    float _temperature, _magnetic_field;
+    float magnetisations[size][size], energies[size][size];
+    float _magnetisations[epochs], _energies[epochs];
+    float magnetisation, energy, ratio;
     float critical_temperature = 2 / log(1 + sqrt(2));
+    float maximum_temperature = 2. * critical_temperature;
     ising_t *system = init_ising_t(2. * critical_temperature, 0., length);
 
     for (int _ = 0; _ < length * 1e3; _++)
         metropolis_step_ising_t(system);
 
-    for (float temperature = size/2.; temperature >= -size/2.; temperature--)
+    for (temperature = 0; temperature < size; temperature++)
     {
-        system -> temperature = (1. + temperature / 5.) * critical_temperature;
-        for (float magnetic_field = 0; magnetic_field < size; magnetic_field++)
+        ratio = ((float) temperature / (float) size);
+        _temperature = maximum_temperature - ratio * maximum_temperature;
+        system -> temperature = _temperature;
+
+        for (magnetic_field = 0; magnetic_field < size; magnetic_field++)
         {
-            system -> magnetic_field = 2. * magnetic_field / size;            
+            _magnetic_field = 2. * magnetic_field / size; 
+            system -> magnetic_field = _magnetic_field;       
+
             for (int _ = 0; _ < epochs; _++) 
             {
                 metropolis_step_ising_t(system);
                 _magnetisations[_] = magnetisation_ising_t(system);
                 _energies[_] = energy_ising_t(system);
             }
+
             magnetisation = mean(_magnetisations, length);
             energy = mean(_energies, length);
             magnetisations[temperature][magnetic_field] = magnetisation; 
@@ -151,13 +175,12 @@ int main(void)
         exit(1);
     }
 
-    float _temperature;
-    float _magnetic_field;
-
-    for (float temperature = size/2.; temperature >= -size/2.; temperature--)
+    fprintf(save_file, "tau, B, m, U\n");
+    for (temperature = 0; temperature < size; temperature++)
     {
-        _temperature = (1. + temperature / 5.) * critical_temperature;
-        for (float magnetic_field = 0; magnetic_field < size; magnetic_field++)
+        ratio = ((float) temperature / (float) size);
+        _temperature = maximum_temperature - ratio * maximum_temperature;
+        for (magnetic_field = 0; magnetic_field < size; magnetic_field++)
         {
             _magnetic_field = 2. * magnetic_field / size;
             fprintf(save_file, "%f,", _temperature);
