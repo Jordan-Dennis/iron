@@ -310,7 +310,6 @@ void first_and_last_ising_2d(Config *config)
     } 
 
     fclose(save_file);
-    free(system);
 }
 
 
@@ -393,18 +392,16 @@ void physical_parameters_ising_2d(Config* config)
             float heat_capacity_err = (energies[temp - 1][1][num_spin] + energy_err) / step;
 
             energies[temp][1][num_spin] = energy_err;
-            energies[temp][0][num_spin] energy_est / size;
+            energies[temp][0][num_spin] = energy_est / size;
             entropies[temp][1][num_spin] = entropy_err;
-            entropies[temp][0][num_spin] entropy_est / size;
+            entropies[temp][0][num_spin] = entropy_est / size;
             free_energies[temp][1][num_spin] = free_energy_err;
-            free_energies[temp][0][num_spin] free_energy_est / size;
-            heat_capacities[temp][0][num_spin] heat_capacity_est / size;
+            free_energies[temp][0][num_spin] = free_energy_est / size;
+            heat_capacities[temp][0][num_spin] = heat_capacity_est / size;
             heat_capacities[temp][1][num_spin] = heat_capacity_err;
         }
     }
 
-    free(system);
-    
 	// Writing the data to the file
 	FILE* data = fopen(save_file_name, "w");
 
@@ -479,7 +476,7 @@ float *zeros(int size)
  * ----------
  * Config *config: The configuration of the system to use.
  */
-void magnetisation_vs_temperature(Config* config)
+void magnetisation_vs_temperature_ising_2d(Config* config)
 {
     int low_num_spins = atoi(find(config, "low_number_of_spins"));
     int mid_num_spins = atoi(find(config, "mid_number_of_spins"));
@@ -607,7 +604,7 @@ void magnetisation_vs_temperature(Config* config)
  * ----------
  * Config *config: The configuration of the system.
  */
-void heating_and_cooling(Config *config)
+void heating_and_cooling_ising_2d(Config *config)
 {
     int num_spins = atoi(find(config, "number_of_spins"));
     char *save_file_name = find(config, "save_file");

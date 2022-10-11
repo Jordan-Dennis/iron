@@ -3,7 +3,6 @@
 #include<string.h>
 #include<stdlib.h>
 #include"include/toml.h"
-#include"include/errors.h"
 
 
 /*
@@ -33,7 +32,7 @@ char *read(char *file_name)
     fseek(source, 0, SEEK_SET); 
                                                                                    
     char *text = (char*) calloc(numbytes, sizeof(char));                           
-    fread(text, sizeof(char), numbytes, source);                                   
+    int num_bytes = fread(text, sizeof(char), numbytes, source);                                   
     fclose(source); 
     return text;                                                                   
 }

@@ -280,7 +280,7 @@ void save_ising_1d(const Ising1D *system, FILE *file)
  * ----------
  * Config *config: The configuration file detailing the setup of the system. 
  */
-void first_and_last(Config *config)
+void first_and_last_ising_1d(Config *config)
 {
     int num_spins = atoi(find(config, "number_of_spins"));
     char *save_file_name = find(config, "save_file");
@@ -380,10 +380,10 @@ void physical_parameters_ising_1d(Config* config)
         float free_energy_est = mean(_free_energies, epochs);
         float heat_capacity_est = (energies[ind - 1][0] - energy_est / spins) / step;
 
-        float energy_err = sqrt(variance(_energies, energy_est, epochs) / size);
-        float entropy_err = sqrt(variance(_entropies, entropy_est, epochs) / size);
-        float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs) / size);
-        float heat_capacity_err = (energies[ind - 1][1] + energy_err) / step
+        float energy_err = sqrt(variance(_energies, energy_est, epochs) / spins);
+        float entropy_err = sqrt(variance(_entropies, entropy_est, epochs) / spins);
+        float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs) / spins);
+        float heat_capacity_err = (energies[ind - 1][1] + energy_err) / step;
 
         energies[ind][1] = energy_err;
         energies[ind][0] = energy_est / spins;
@@ -439,7 +439,7 @@ void physical_parameters_ising_1d(Config* config)
  * ----------
  * Config *config: The configuration file detailing the simulation. 
  */
-void magnetisation_ising_1d(Config* config)
+void magnetisation_vs_temperature_ising_1d(Config* config)
 {
     int num_spins[2] = {100, 500};
     int reps_per_temp = atoi(find(config, "reps_per_temp"));

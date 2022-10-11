@@ -1,9 +1,9 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-#include"../include/toml.h"
-#include"../include/1d_ising.h"
-#include"../include/2d_ising.h"
+#include"include/toml.h"
+#include"include/1d_ising.h"
+#include"include/2d_ising.h"
 
 
 int main_ising_1d(char **args)
@@ -12,15 +12,15 @@ int main_ising_1d(char **args)
 
     if (strcmp(args[1], "first_and_last") == 0)
     {
-        first_and_last_ising_2d(config);
+        first_and_last_ising_1d(config);
     }
     else if (strcmp(args[1], "physical_parameters") == 0)
     {
-        physical_parameters_ising_2d(config);
+        physical_parameters_ising_1d(config);
     }
     else if (strcmp(args[1], "magnetisation_vs_temperature") == 0)
     {
-       histogram(config);
+        magnetisation_vs_temperature_ising_1d(config);
     }
     else
     {
@@ -49,11 +49,11 @@ int main_ising_2d(char **args)
     }
     else if (strcmp(args[1], "magnetisation_vs_temperature") == 0)
     {
-        magnetisation_vs_temperature(config);
+        magnetisation_vs_temperature_ising_2d(config);
     }
     else if (strcmp(args[1], "heating_and_cooling") == 0)
     {
-        heating_and_cooling(config);
+        heating_and_cooling_ising_2d(config);
     }
     else
     {
@@ -77,7 +77,9 @@ int main(int num_args, char **args)
         exit(1);
     }
 
-    char **new_args = {args[3], args[4]};
+    char **new_args = (char**) calloc(2, sizeof(char*));
+    new_args[0] = args[3];
+    new_args[1] = args[4];
 
     if (strcmp(args[1], "1d") == 0)
     {
@@ -92,4 +94,6 @@ int main(int num_args, char **args)
         printf("Error: Please specify either 1d or 2d from this switchboard!");
         exit(1);
     }
+
+    free(new_args);
 }
