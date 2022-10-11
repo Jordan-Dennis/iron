@@ -33,3 +33,10 @@ int main(int num_args, char **args)
         printf(" - physical_parameters\n");
         printf(" - histogram \n");
     }
+#include<stdio.h> #include<stdlib.h> #include<string.h> #include"../include/2d_ising.h" int main(int num_args, char **args) { if (!(num_args == 2)) { printf("Error: Please specify the program you want to load!"); exit(1); } Config *config = init_config("src/tests/2d_test_config.toml"); if (strcmp(args[1], "first_and_last") == 0) { first_and_last_ising_2d(config); } else if (strcmp(args[1], "physical_parameters") == 0) { physical_parameters_ising_2d(config); } else if (strcmp(args[1], "magnetisation_vs_temperature") == 0) { magnetisation_vs_temperature(config); } else if (strcmp(args[1], "heating_and_cooling") == 0) { heating_and_cooling(config); } else { printf("Error: A valid option was not specified.
+"); printf("The valid options are:
+"); printf(" - first_and_last
+"); printf(" - physical_parameters
+"); printf(" - magnetisation_vs_temperature
+"); printf(" - heating_and_cooling
+"); } }
