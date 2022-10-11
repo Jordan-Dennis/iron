@@ -2,10 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import typing as tp
 import matplotlib as mpl
+import collections
+import sys
 
 mpl.rcParams['text.usetex'] = True
 
 def print_tensor(tensor: list) -> None:
+    """
+    A debugging function that prints out a tensor of arbitrary shape 
+    and nesting. 
+
+    parameters
+    ----------
+    tensor: list
+        The tensor to print.
+    """
     def tensor_depth(tensor: list) -> int:
         def _tensor_depth(tensor: tp.Union[list, object], depth: int) -> int:
             if not isinstance(tensor[0], list):
@@ -29,8 +40,20 @@ def print_tensor(tensor: list) -> None:
     _print_tensor(tensor, max_depth)
 
 
+def _get_ising_image(data_file: str) -> tuple:
+    """
+    Load an ising model from a file of many saved images.
 
-def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
+    parameters
+    ----------
+    data_file: str
+        The file to search for the ising images.
+
+    returns 
+    -------
+    images: tuple
+        A highly nested tuple with the structure ((temperature, image)*)
+    """
     with open(data_file) as images_file:
         image = []
         images = []
@@ -50,30 +73,79 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
         if image:
             images.append(image)
 
-        assert len(temperatures) == len(images)
-        assert len(temperatures) % 2 == 0
+        return tuple(zip(temperatures, images))
 
-        images = np.array(images, dtype=int)           
-        number = images.shape[0]
-        figure, axes = plt.subplots(2, number // 2, figsize=(10, 15))
-        for subplot, index in enumerate(range(0, number, 2)):
-            axes[0][subplot].imshow(images[index])
-            axes[0][subplot].set_title(f"$T = {temperatures[index]}$")
-            axes[0][subplot].set_xticks([])
-            axes[0][subplot].set_yticks([])
-            axes[1][subplot].imshow(images[index + 1])
-            axes[1][subplot].set_title(f"$T = {temperatures[index + 1]}$")
-            axes[1][subplot].set_xticks([])
-            axes[1][subplot].set_yticks([])
 
-        if show:
-            plt.show()
-        else:
-            figure.savefig(f"pub/figures/{save_file}.pdf")
+def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
+    """
+    Plot the first and last states of three different evolved ising system
+    models.
+
+    parameters
+    ----------
+    data_file: str
+        The data file to retrieve the data from.
+    show: bool
+        True if the plot is to be shown else False.
+    save_file: str = None
+        The name of the file to save the image in. 
+    """
+    with open(data_file) as images_file:
+        image = []
+        images = []
+        temperatures = []
+        for line in images_file:
+            if line.strip().startswith("#"):
+                temperature = []
+                for char in line.strip():
+                    if char.isnumeric() or char == '.':
+                        temperature.append(char)
+                temperatures.append(float("".join(temperature)))
+                if image:
+                    images.append(image)
+                    image = []
+            else:
+                image.append([int(entry) for entry in line.strip().split(",")])
+        if image:
+            images.append(image)
+    # TODO: Upgrade this to use the new functionality. 
+
+    assert len(temperatures) == len(images)
+    assert len(temperatures) % 2 == 0
+
+    images = np.array(images, dtype=int)           
+    number = images.shape[0]
+    figure, axes = plt.subplots(2, number // 2, figsize=(10, 15))
+    for subplot, index in enumerate(range(0, number, 2)):
+        axes[0][subplot].imshow(images[index])
+        axes[0][subplot].set_title(f"$T = {temperatures[index]}$")
+        axes[0][subplot].set_xticks([])
+        axes[0][subplot].set_yticks([])
+        axes[1][subplot].imshow(images[index + 1])
+        axes[1][subplot].set_title(f"$T = {temperatures[index + 1]}$")
+        axes[1][subplot].set_xticks([])
+        axes[1][subplot].set_yticks([])
+
+    if show:
+        plt.show()
+    else:
+        figure.savefig(f"pub/figures/{save_file}.pdf")
 
 
 def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
-    with open(data_file) as phys_param:
+    """
+    Plot the physical parameters of the system against temperature.
+
+    parameters
+    ----------
+    data_file: str
+        The file to search for the data in.
+    show: bool 
+        True if the plot should be shown else false.
+    save_file: str
+        The file to save the image. 
+    """
+    with open(f"pub/data/{data_file}") as phys_param:
         next(phys_param)
         data = [[float(entry) for entry in line.strip().split(",")] 
             for line in phys_param]
@@ -126,6 +198,19 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
 
 
 def magnetisations(data_file: str, show: bool, save_file: str = None) -> None:
+    """
+    Plot the magnetisation as a function temperature for multiple different 
+    values of the spin.
+
+    parameters
+    ----------
+    data_file: str
+        The file to search the data for.
+    show: bool
+        True if the plot is to be shown else False.
+    save_file: str
+        The file to save the plot in.
+    """
     with open(f"pub/data/{data_file}") as mag_data:
         data = np.array([[float(entry) for entry in line.strip().split(",")] 
             for line in mag_data])
@@ -151,4 +236,41 @@ def magnetisations(data_file: str, show: bool, save_file: str = None) -> None:
     elif save_file:
         figure.savefig(f"pub/data/{save_file}")
 
-magnetisations("2d_test.csv", True)      
+
+def heating_and_cooling(data_file: str, show: bool, save_file: str = None) -> None:
+    """
+    Plot the initial, middle and final states of a system as it is 
+    heated and cooled. 
+
+    parameters
+    ----------
+    data_file: str
+        The file to search the data for.
+    show: bool
+        True if the plot is to be shown else False.
+    save_file: str
+        The file to save the plot in.
+    """
+    images = _get_ising_image(f"pub/data/{data_file}")
+
+    figure, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    for index, image in enumerate(images):
+        axes[index].imshow(image[1])
+        axes[index].set_title(r"$\textrm{T = " + f"{image[0]}" + "}$")
+
+    if show:
+        plt.show()
+
+    if save_file:
+        figure.savefig("pub/figures/{save_file}")
+
+    
+if __name__ == "main":
+    option = sys.argv[0]
+    file = sys.argv[1]
+
+    if not file.endswith(".csv"):
+        raise Error("The data file should be a csv")
+
+    exec(f"{option}({file}, True, {option}_ising_2d.pdf)")
