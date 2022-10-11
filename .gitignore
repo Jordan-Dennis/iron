@@ -1,9 +1,13 @@
 *.log
+*.aux
 *.swp
+*.rpt
 pub/data/*.csv
 pub/*.log
 pub/*.aux
 pub/*.pdf
 pub/*.txt
 out/*
+oprofile_data/*
+
 

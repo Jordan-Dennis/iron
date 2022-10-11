@@ -341,20 +341,20 @@ void physical_parameters_ising_2d(Config* config)
 
     int length = (int) ((stop - start) / step);
 
-    float energies_and_error[length][2][3];
-    float entropies_and_error[length][2][3];
-    float free_energies_and_error[length][2][3];
-    float heat_capacities_and_error[length][3];
+    float energies[length][2][3];
+    float entropies[length][2][3];
+    float free_energies[length][2][3];
+    float heat_capacities[length][2][3];
     
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
         int num_spins = spin_nums[num_spin];
-        int num_epochs = num_spins * 1e3;
+        int epochs = num_spins * 1e3;
         int size = num_spins * num_spins;
 
         Ising2D *system = init_ising_2d(num_spins, stop);
 
-        for (int epoch = 0; epoch < num_epochs; epoch++)
+        for (int epoch = 0; epoch < epochs; epoch++)
         {
             metropolis_step_ising_2d(system);
         }
@@ -362,39 +362,41 @@ void physical_parameters_ising_2d(Config* config)
         for (int temp = 0; temp < length; temp++)
         {
             float temperature = stop - (temp + 1) * step;
-            float sim_energies[num_epochs];
-            float sim_entropies[num_epochs];
-            float sim_free_energies[num_epochs];
+            float _energies[epochs];
+            float _entropies[epochs];
+            float _free_energies[epochs];
 
             system -> temperature = temperature;
             
-            for (int epoch = 0; epoch < num_epochs; epoch++)
+            for (int epoch = 0; epoch < epochs; epoch++)
             { 
                 metropolis_step_ising_2d(system);
                 float energy = energy_ising_2d(system);
                 float entropy = entropy_ising_2d(system);
 
-                sim_energies[epoch] = energy;
-                sim_entropies[epoch] = entropy;
-                sim_free_energies[epoch] = energy - temperature * entropy;
+                _energies[epoch] = energy;
+                _entropies[epoch] = entropy;
+                _free_energies[epoch] = energy - temperature * entropy;
             }
             
-            float mean_energy = mean(sim_energies, num_epochs);
-            float mean_entropy = mean(sim_entropies, num_epochs);
-            float mean_free_energy = mean(sim_free_energies, num_epochs);
+            float energy_est = mean(_energies, epochs) / size;
+            float entropy_est = mean(_entropies, epochs) / size;
+            float free_energy_est = mean(_free_energies, epochs) / size;
+            float heat_capacity_est = (energies[temp - 1][0][num_spin] - energy_est) / step;
 
-            float var_energy = variance(sim_energies, mean_energy, num_epochs);
-            float var_entropy = variance(sim_entropies, mean_entropy, num_epochs);
-            float var_free_energy = variance(sim_free_energies, mean_free_energy, num_epochs);
-            float mean_heat_capacity = var_energy / temp / temp;
+            float energy_err = variance(_energies, energy_est, epochs);
+            float entropy_err = variance(_entropies, entropy_est, epochs);
+            float free_energy_err = variance(_free_energies, free_energy_est, epochs);
+            float heat_capacity_err = (energies[temp - 1][1][num_spin] + energy_err) / step;
 
-            energies_and_error[temp][1][num_spin] = sqrt(var_energy) / size;
-            energies_and_error[temp][0][num_spin] = mean_energy / size;
-            entropies_and_error[temp][1][num_spin] = sqrt(var_entropy) / size;
-            entropies_and_error[temp][0][num_spin] = mean_entropy / size;
-            free_energies_and_error[temp][1][num_spin] = sqrt(var_free_energy) / size;
-            free_energies_and_error[temp][0][num_spin] = mean_free_energy / size;
-            heat_capacities_and_error[temp][num_spin] = mean_heat_capacity / size;
+            energies[temp][1][num_spin] = sqrt(energy_err);
+            energies[temp][0][num_spin] = energy_est;
+            entropies[temp][1][num_spin] = sqrt(entropy_err);
+            entropies[temp][0][num_spin] = entropy_est;
+            free_energies[temp][1][num_spin] = sqrt(free_energy_err);
+            free_energies[temp][0][num_spin] = free_energy_est;
+            heat_capacities[temp][0][num_spin] = heat_capacity_est;
+            heat_capacities[temp][1][num_spin] = heat_capacity_err;
         }
     }
     
@@ -412,7 +414,7 @@ void physical_parameters_ising_2d(Config* config)
     fprintf(data, "Energy, Energy Error, "); 
     fprintf(data, "Entropy, Entropy Error, "); 
     fprintf(data, "Free Energy, Free Energy Error, "); 
-    fprintf(data, "Heat Capacity\n");
+    fprintf(data, "Heat Capacity, Heat Capacity Error\n");
 
     // TODO: Change the 3D tensors into two 2D tensors. 
     for (int num_spin = 0; num_spin < 3; num_spin++)
@@ -422,13 +424,14 @@ void physical_parameters_ising_2d(Config* config)
             float temperature = stop - (temp + 1) * step;
             fprintf(data, "%i, ", spin_nums[num_spin]);
             fprintf(data, "%f, ", temperature);
-            fprintf(data, "%f, ", energies_and_error[temp][0][num_spin]);
-            fprintf(data, "%f, ", energies_and_error[temp][1][num_spin]);
-            fprintf(data, "%f, ", entropies_and_error[temp][0][num_spin]);
-            fprintf(data, "%f, ", entropies_and_error[temp][1][num_spin]);
-            fprintf(data, "%f, ", free_energies_and_error[temp][0][num_spin]);
-            fprintf(data, "%f, ", free_energies_and_error[temp][1][num_spin]);
-            fprintf(data, "%f\n", heat_capacities_and_error[temp][num_spin]);
+            fprintf(data, "%f, ", energies[temp][0][num_spin]);
+            fprintf(data, "%f, ", energies[temp][1][num_spin]);
+            fprintf(data, "%f, ", entropies[temp][0][num_spin]);
+            fprintf(data, "%f, ", entropies[temp][1][num_spin]);
+            fprintf(data, "%f, ", free_energies[temp][0][num_spin]);
+            fprintf(data, "%f, ", free_energies[temp][1][num_spin]);
+            fprintf(data, "%f, ", heat_capacities[temp][0][num_spin]);
+            fprintf(data, "%f\n", heat_capacities[temp][1][num_spin]);
         }
     }
 	
@@ -510,22 +513,17 @@ void magnetisation_vs_temperature(Config* config)
 
                 sim_mags[temp][iter] = (float) magnetisation_ising_2d(system);
                 system -> temperature = (stop - ((float) (temp + 1)) * step);
-//                print_ising_2d(system);
             }
-//            printf("Am I just in front of the seg fault?\n");
        }
 
         for (int temp = 0; temp < length; temp++)
         {
             int num_pos = 0;
 
-//            printf("Temp: %i\n", temp);
             for (int iter = 0; iter < num_reps; iter++)
             {
-//                printf("%.1f,", sim_mags[temp][iter]);
                 num_pos += (sim_mags[temp][iter] > 0);
             } 
-//            printf("\n");    
     
             int num_neg = num_reps - num_pos;
 
@@ -553,17 +551,8 @@ void magnetisation_vs_temperature(Config* config)
                 }
             }
 
-//            printf("Positives:\n");
-//            for (int pos = 0; pos < num_pos; pos++)
-//            {
-//                printf("%.1f,", positives[pos]);
-//            }
-//            printf("\n");
-           
             float pos_mag_est = mean(positives, num_pos);
             float pos_mag_err = variance(positives, pos_mag_est, num_pos);
-
-//            printf("Mean: %.1f\n", pos_mag_est);
 
             float neg_mag_est = mean(negatives, num_neg);
             float neg_mag_err = variance(negatives, neg_mag_est, num_neg);
