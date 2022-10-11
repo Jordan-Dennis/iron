@@ -331,66 +331,68 @@ void first_and_last(Config *config)
  * ----------
  * Config *config: The configuration file detailing the simulation. 
  */
-void physical_parameters(Config* config)
+void physical_parameters_ising_1d(Config* config)
 {
-    int num_spins = atoi(find(config, "number_of_spins"));
+    int spins = atoi(find(config, "number_of_spins"));
     char *save_file_name = find(config, "save_file");
     float start = atof(find(config, "lowest_temperature"));
     float stop = atof(find(config, "highest_temperature"));
     float step = atof(find(config, "temperature_step"));
 
     int num_temps = (int) ((stop - start) / step);
-    int num_epochs = 1e3 * num_spins;
+    int epochs = 1e3 * spins;
 
-    float energies_and_error[num_temps][2];
-    float entropies_and_error[num_temps][2];
-    float free_energies_and_error[num_temps][2];
-    float heat_capacities_and_error[num_temps];
+    float energies[num_temps][2];
+    float entropies[num_temps][2];
+    float free_energies[num_temps][2];
+    float heat_capacities[num_temps][2];
     
     int ind;    
     float temp;
 
     for (temp = start, ind = 0; temp < stop; temp += step, ind++)
     {
-        Ising1D *system = init_ising_1d(num_spins, temp);
+        Ising1D *system = init_ising_1d(spins, temp);
     
         // Running the burnin period. 
-        for (int epoch = 0; epoch <= num_epochs; epoch++)
+        for (int epoch = 0; epoch <= epochs; epoch++)
         { 
             metropolis_step_ising_1d(system);
         }
 
-        float sim_energies[num_epochs];
-        float sim_entropies[num_epochs];
-        float sim_free_energies[num_epochs];
+        float _energies[epochs];
+        float _entropies[epochs];
+        float _free_energies[epochs];
         
-        for (int epoch = 0; epoch < num_epochs; epoch++)
+        for (int epoch = 0; epoch < epochs; epoch++)
         { 
             metropolis_step_ising_1d(system);
             float energy = energy_ising_1d(system);
             float entropy = entropy_ising_1d(system);
 
-            sim_energies[epoch] = energy;
-            sim_entropies[epoch] = entropy;
-            sim_free_energies[epoch] = energy - temp * entropy;
+            _energies[epoch] = energy;
+            _entropies[epoch] = entropy;
+            _free_energies[epoch] = energy - temp * entropy;
         }
 
-        float mean_energy = mean(sim_energies, num_epochs);
-        float mean_entropy = mean(sim_entropies, num_epochs);
-        float mean_free_energy = mean(sim_free_energies, num_epochs);
+        float energy_est = mean(_energies, epochs);
+        float entropy_est = mean(_entropies, epochs);
+        float free_energy_est = mean(_free_energies, epochs);
+        float heat_capacity_est = (energies[ind - 1][0] - energy_est / spins) / step;
 
-        float var_energy = variance(sim_energies, mean_energy, num_epochs);
-        float var_entropy = variance(sim_entropies, mean_entropy, num_epochs);
-        float var_free_energy = variance(sim_free_energies, mean_free_energy, num_epochs);
-        float mean_heat_capacity = var_energy / temp / temp;
+        float energy_err = sqrt(variance(_energies, energy_est, epochs) / size);
+        float entropy_err = sqrt(variance(_entropies, entropy_est, epochs) / size);
+        float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs) / size);
+        float heat_capacity_err = (energies[ind - 1][1] + energy_err) / step
 
-        energies_and_error[ind][1] = sqrt(var_energy) / num_spins;
-        energies_and_error[ind][0] = mean_energy / num_spins;
-        entropies_and_error[ind][1] = sqrt(var_entropy) / num_spins;
-        entropies_and_error[ind][0] = mean_entropy / num_spins;
-        free_energies_and_error[ind][1] = sqrt(var_free_energy) / num_spins;
-        free_energies_and_error[ind][0] = mean_free_energy / num_spins;
-        heat_capacities_and_error[ind] = mean_heat_capacity / num_spins;
+        energies[ind][1] = energy_err;
+        energies[ind][0] = energy_est / spins;
+        entropies[ind][1] = entropy_err;
+        entropies[ind][0] = entropy_est / spins;
+        free_energies[ind][1] = free_energy_err;
+        free_energies[ind][0] = free_energy_est / spins;
+        heat_capacities[ind][1] = heat_capacity_err;
+        heat_capacities[ind][0] = heat_capacity_est;
     }
 
 	// Writing the data to the file
@@ -407,18 +409,19 @@ void physical_parameters(Config* config)
     fprintf(data, "Energy, Energy Error, "); 
     fprintf(data, "Entropy, Entropy Error, "); 
     fprintf(data, "Free Energy, Free Energy Error, "); 
-    fprintf(data, "Heat Capacity\n");
+    fprintf(data, "Heat Capacity, Heat Capacity Error\n");
 
     for (temp = start, ind = 0; temp < stop; temp += step, ind++)
 	{
         fprintf(data, "%f, ", temp);
-		fprintf(data, "%f, ", energies_and_error[ind][0]);
-		fprintf(data, "%f, ", energies_and_error[ind][1]);
-		fprintf(data, "%f, ", entropies_and_error[ind][0]);
-		fprintf(data, "%f, ", entropies_and_error[ind][1]);
-		fprintf(data, "%f, ", free_energies_and_error[ind][0]);
-		fprintf(data, "%f, ", free_energies_and_error[ind][1]);
-        fprintf(data, "%f\n", heat_capacities_and_error[ind]);
+		fprintf(data, "%f, ", energies[ind][0]);
+		fprintf(data, "%f, ", energies[ind][1]);
+		fprintf(data, "%f, ", entropies[ind][0]);
+		fprintf(data, "%f, ", entropies[ind][1]);
+		fprintf(data, "%f, ", free_energies[ind][0]);
+		fprintf(data, "%f, ", free_energies[ind][1]);
+        fprintf(data, "%f, ", heat_capacities[ind][0]);
+        fprintf(data, "%f\n", heat_capacities[ind][1]);
 	}
 	
 	fclose(data);
@@ -436,7 +439,7 @@ void physical_parameters(Config* config)
  * ----------
  * Config *config: The configuration file detailing the simulation. 
  */
-void histogram(Config* config)
+void magnetisation_ising_1d(Config* config)
 {
     int num_spins[2] = {100, 500};
     int reps_per_temp = atoi(find(config, "reps_per_temp"));

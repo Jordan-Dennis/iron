@@ -1,5 +1,5 @@
 reps_per_temp = 100
-save_file = pub/data/1d_test.csv
+save_file = pub/data/magnetisation_ising_1d.csv
 lowest_temperature = 1.0
 highest_temperature = 4.0
 temperature_step = 1.0

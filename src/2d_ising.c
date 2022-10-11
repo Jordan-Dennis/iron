@@ -308,6 +308,9 @@ void first_and_last_ising_2d(Config *config)
 
         save_ising_2d(system, save_file);
     } 
+
+    fclose(save_file);
+    free(system);
 }
 
 
@@ -379,26 +382,28 @@ void physical_parameters_ising_2d(Config* config)
                 _free_energies[epoch] = energy - temperature * entropy;
             }
             
-            float energy_est = mean(_energies, epochs) / size;
-            float entropy_est = mean(_entropies, epochs) / size;
-            float free_energy_est = mean(_free_energies, epochs) / size;
-            float heat_capacity_est = (energies[temp - 1][0][num_spin] - energy_est) / step;
+            float energy_est = mean(_energies, epochs);
+            float entropy_est = mean(_entropies, epochs);
+            float free_energy_est = mean(_free_energies, epochs);
+            float heat_capacity_est = (energies[temp - 1][0][num_spin] - energy_est / size) / step;
 
-            float energy_err = variance(_energies, energy_est, epochs);
-            float entropy_err = variance(_entropies, entropy_est, epochs);
-            float free_energy_err = variance(_free_energies, free_energy_est, epochs);
+            float energy_err = sqrt(variance(_energies, energy_est, epochs) / size);
+            float entropy_err = sqrt(variance(_entropies, entropy_est, epochs) / size);
+            float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs) / size);
             float heat_capacity_err = (energies[temp - 1][1][num_spin] + energy_err) / step;
 
-            energies[temp][1][num_spin] = sqrt(energy_err);
-            energies[temp][0][num_spin] = energy_est;
-            entropies[temp][1][num_spin] = sqrt(entropy_err);
-            entropies[temp][0][num_spin] = entropy_est;
-            free_energies[temp][1][num_spin] = sqrt(free_energy_err);
-            free_energies[temp][0][num_spin] = free_energy_est;
-            heat_capacities[temp][0][num_spin] = heat_capacity_est;
+            energies[temp][1][num_spin] = energy_err;
+            energies[temp][0][num_spin] energy_est / size;
+            entropies[temp][1][num_spin] = entropy_err;
+            entropies[temp][0][num_spin] entropy_est / size;
+            free_energies[temp][1][num_spin] = free_energy_err;
+            free_energies[temp][0][num_spin] free_energy_est / size;
+            heat_capacities[temp][0][num_spin] heat_capacity_est / size;
             heat_capacities[temp][1][num_spin] = heat_capacity_err;
         }
     }
+
+    free(system);
     
 	// Writing the data to the file
 	FILE* data = fopen(save_file_name, "w");
@@ -565,6 +570,8 @@ void magnetisation_vs_temperature(Config* config)
         }
     }
 
+    free(system);
+
     FILE *save_file = fopen(save_file_name, "w");
 
     if (save_file == NULL)
@@ -640,16 +647,6 @@ void heating_and_cooling(Config *config)
     } while (system -> temperature > (start + step));
 
     save_ising_2d(system, save_file);
+    fclose(save_file);
+    free(system);
 }
-
-
-/*
- * external_magnetic_field
- * -----------------------
- * Compare the absolute magnetisation and the energy to the trength of 
- * an external magnetic field. 
- *
- *
- *
- *
- */
