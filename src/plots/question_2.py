@@ -90,7 +90,7 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
     save_file: str = None
         The name of the file to save the image in. 
     """
-    with open(data_file) as images_file:
+    with open(f"pub/data/{data_file}") as images_file:
         image = []
         images = []
         temperatures = []
@@ -167,9 +167,6 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     axes[1][0].set_title("$\\textrm{Free Energy} (J)$")
     axes[1][1].set_title("$\\textrm{Heat Capacity} (JK^{-1})$")
 
-    print(np.unique(numbers))
-    print(energy_est.shape)
-
     for number in np.unique(numbers):
         cond = numbers == number
         axes[0][0].errorbar(
@@ -197,7 +194,7 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
         figure.savefig(f"pub/figures/{save_file}")
 
 
-def magnetisations(data_file: str, show: bool, save_file: str = None) -> None:
+def magnetisation(data_file: str, show: bool, save_file: str = None) -> None:
     """
     Plot the magnetisation as a function temperature for multiple different 
     values of the spin.
@@ -263,14 +260,8 @@ def heating_and_cooling(data_file: str, show: bool, save_file: str = None) -> No
         plt.show()
 
     if save_file:
-        figure.savefig("pub/figures/{save_file}")
+        figure.savefig(f"pub/figures/{save_file}")
 
-    
-if __name__ == "main":
-    option = sys.argv[0]
-    file = sys.argv[1]
 
-    if not file.endswith(".csv"):
-        raise Error("The data file should be a csv")
-
-    exec(f"{option}({file}, True, {option}_ising_2d.pdf)")
+option = sys.argv[1]
+exec(f"{option}('{option}_ising_2d.csv', False, '{option}_ising_2d.pdf')")

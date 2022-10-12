@@ -38,9 +38,19 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
 
 # TODO: I need to write of the analytical expression and plot them alongside.
 def energy(temperature: float) -> float:
+   return - np.tanh(1 / temperature)
+
+
 def entropy(temperature: float) -> float:
+    return 1 / temperature * (1 - np.tanh(1 / temperature)) + np.log(1 + np.exp(-2 / temperature))
+
+
 def free_energy(temperature: float) -> float:
+    return -1 - temperature * np.log(1 + np.exp(1 + np.exp(-2 / temperature)))
+
+
 def heat_capacity(temperature: float) -> float:
+    return 1 / temperature ** 2 / np.cosh(1 / temperature) ** 2
 
 
 def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
@@ -62,19 +72,25 @@ def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
             [float(entry) for entry in line.strip().split(",")] 
             for line in physical_parameters])
 
+    temperatures = np.linspace(data[:, 0].min(), data[:, 0].max(), 1000)
+
     plt.figure(figsize=(10, 10))
     plt.subplot(2, 2, 1)
     plt.title(r"$\epsilon$")
     plt.errorbar(data[:, 0], data[:, 1], data[:, 2])
+    plt.plot(temperatures, energy(temperatures))
     plt.subplot(2, 2, 2)
     plt.title(r"$\sigma$")
     plt.errorbar(data[:, 0], data[:, 3], data[:, 4])
+    plt.plot(temperatures, entropy(temperatures))
     plt.subplot(2, 2, 3)
     plt.title(r"$F$")
     plt.errorbar(data[:, 0], data[:, 5], data[:, 6])
+    plt.plot(temperatures, free_energy(temperatures))
     plt.subplot(2, 2, 4)
     plt.title(r"$C_{V}$")
     plt.plot(data[:, 0], data[:, 7])
+    plt.plot(temperatures, heat_capacity(temperatures))
 
     if show:
         plt.show()
