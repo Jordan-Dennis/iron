@@ -393,7 +393,7 @@ void physical_parameters_ising_1d(Config* config)
         float energy_err = sqrt(variance(_energies, energy_est, epochs));
         float entropy_err = sqrt(variance(_entropies, entropy_est, epochs));
         float free_energy_err = energy_err + temp * entropy_err;
-        float heat_capacity_err = energy_err / temp / temp / spins - heat_capacity_est;
+        float heat_capacity_err = energy_err * energy_err / temp / temp / spins - heat_capacity_est;
 
         energies[ind][1] = energy_err / spins;
         energies[ind][0] = energy_est / spins;
@@ -402,7 +402,7 @@ void physical_parameters_ising_1d(Config* config)
         free_energies[ind][1] = free_energy_err / spins;
         free_energies[ind][0] = free_energy_est / spins;
         heat_capacities[ind][1] = heat_capacity_err;
-        heat_capacities[ind][0] = heat_capacity_est;
+        heat_capacities[ind][0] = energy_err * energy_err / temp / temp / spins;
     }
 
 	// Writing the data to the file
