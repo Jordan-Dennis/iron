@@ -3,6 +3,19 @@ import matplotlib.pyplot as plt
 import sys
 
 def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
+    """
+    Plot the first and last states of the ising system at three temperatures
+    and evolve the system for some amount of time in between. 
+
+    Parameters
+    ----------
+    data_file: str
+        The file from which to collect the data.
+    show: bool
+        True if the plot is to be shown else false.
+    save_file: str
+        The location to save the plot as a pdf. 
+    """
     with open(f"pub/data/{data_file}") as example_states:
         data = []
         for line in example_states:
@@ -23,7 +36,26 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
         plt.savefig(f"pub/figures/{save_file}")
 
 
+# TODO: I need to write of the analytical expression and plot them alongside.
+def energy(temperature: float) -> float:
+def entropy(temperature: float) -> float:
+def free_energy(temperature: float) -> float:
+def heat_capacity(temperature: float) -> float:
+
+
 def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
+    """
+    Plot the physical parameters against there analytical solutions. 
+
+    Parameters
+    ----------
+    data_file: str
+        The file to access the data from.
+    show: bool
+        True if the plots are to be displayed else false. 
+    save_file: str
+        The location to save the plot as a pdf. 
+    """
     with open(f"pub/data/{data_file}") as physical_parameters:
         next(physical_parameters)
         data = np.array([
