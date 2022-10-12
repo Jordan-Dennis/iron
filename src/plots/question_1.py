@@ -64,6 +64,12 @@ def plot_magnetisation_histogram(file_name: str, save_name: str) -> None:
     plt.savefig(save_name)
     plt.show()
 
-plot_magnetisation_histogram(
-    "pub/data/1d_test.csv", 
-    "pub/figures/1d_magneitsation_histograms.pdf")   
+
+if __name__ == "main":
+    option = sys.argv[0]
+    file = sys.argv[1]
+
+    if not file.endswith(".csv"):
+        raise Error("The data file should be a csv")
+
+    exec(f"{option}({file}, True, {option}_ising_2d.pdf)")

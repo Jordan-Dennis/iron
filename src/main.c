@@ -18,7 +18,7 @@ int main_ising_1d(char **args)
     {
         physical_parameters_ising_1d(config);
     }
-    else if (strcmp(args[1], "magnetisation_vs_temperature") == 0)
+    else if (strcmp(args[1], "magnetisation") == 0)
     {
         magnetisation_vs_temperature_ising_1d(config);
     }
@@ -47,7 +47,7 @@ int main_ising_2d(char **args)
     {
         physical_parameters_ising_2d(config);
     }
-    else if (strcmp(args[1], "magnetisation_vs_temperature") == 0)
+    else if (strcmp(args[1], "magnetisation") == 0)
     {
         magnetisation_vs_temperature_ising_2d(config);
     }
@@ -61,7 +61,7 @@ int main_ising_2d(char **args)
         printf("The valid options are:\n");
         printf(" - first_and_last\n");
         printf(" - physical_parameters\n");
-        printf(" - magnetisation_vs_temperature\n");
+        printf(" - magnetisation\n");
         printf(" - heating_and_cooling\n");
     }
 
