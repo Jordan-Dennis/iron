@@ -8,17 +8,17 @@
 
 int main_ising_1d(char **args)
 {
-    Config *config = init_config(args[0]);
+    Config *config = init_config(args[1]);
 
-    if (strcmp(args[1], "first_and_last") == 0)
+    if (strcmp(args[0], "first_and_last") == 0)
     {
         first_and_last_ising_1d(config);
     }
-    else if (strcmp(args[1], "physical_parameters") == 0)
+    else if (strcmp(args[0], "physical_parameters") == 0)
     {
         physical_parameters_ising_1d(config);
     }
-    else if (strcmp(args[1], "magnetisation") == 0)
+    else if (strcmp(args[0], "magnetisation") == 0)
     {
         magnetisation_vs_temperature_ising_1d(config);
     }
@@ -37,21 +37,21 @@ int main_ising_1d(char **args)
 
 int main_ising_2d(char **args)
 {
-    Config *config = init_config(args[0]);
+    Config *config = init_config(args[1]);
 
-    if (strcmp(args[1], "first_and_last") == 0)
+    if (strcmp(args[0], "first_and_last") == 0)
     {
         first_and_last_ising_2d(config);
     }
-    else if (strcmp(args[1], "physical_parameters") == 0)
+    else if (strcmp(args[0], "physical_parameters") == 0)
     {
         physical_parameters_ising_2d(config);
     }
-    else if (strcmp(args[1], "magnetisation") == 0)
+    else if (strcmp(args[0], "magnetisation") == 0)
     {
         magnetisation_vs_temperature_ising_2d(config);
     }
-    else if (strcmp(args[1], "heating_and_cooling") == 0)
+    else if (strcmp(args[0], "heating_and_cooling") == 0)
     {
         heating_and_cooling_ising_2d(config);
     }
@@ -78,8 +78,8 @@ int main(int num_args, char **args)
     }
 
     char **new_args = (char**) calloc(2, sizeof(char*));
-    new_args[0] = args[3];
-    new_args[1] = args[4];
+    new_args[0] = args[2];
+    new_args[1] = args[3];
 
     if (strcmp(args[1], "1d") == 0)
     {
