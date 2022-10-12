@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
-
-def plot_example_states(file_name: str) -> None:
-    with open("pub/data/1d_test.csv") as example_states:
+def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
+    with open(f"pub/data/{data_file}") as example_states:
         data = []
         for line in example_states:
             if not line.strip().startswith("#"):
@@ -17,12 +17,14 @@ def plot_example_states(file_name: str) -> None:
         plt.title(temperature)
         plt.imshow(data[temperature:temperature + 2, :])
     
-    plt.show()
-    plt.savefig("pub/figures/example_states_ising_1d.pdf")
+    if show:
+        plt.show()
+    if save_file:
+        plt.savefig(f"pub/figures/{save_file}")
 
 
-def plot_physical_parameters(file_name: str, save_name: str) -> None:
-    with open(file_name) as physical_parameters:
+def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
+    with open(f"pub/data/{data_file}") as physical_parameters:
         next(physical_parameters)
         data = np.array([
             [float(entry) for entry in line.strip().split(",")] 
@@ -41,11 +43,15 @@ def plot_physical_parameters(file_name: str, save_name: str) -> None:
     plt.subplot(2, 2, 4)
     plt.title(r"$C_{V}$")
     plt.plot(data[:, 0], data[:, 7])
-    plt.savefig(save_name)
-    plt.show()
 
-def plot_magnetisation_histogram(file_name: str, save_name: str) -> None:
-    with open(file_name) as frequencies:
+    if show:
+        plt.show()
+    if save_file:
+        plt.savefig(f"pub/figures/{save_file}")
+
+
+def magnetisation(data_file: str, show: bool, save_file: str) -> None:
+    with open(f"pub/data/{data_file}") as frequencies:
         next(frequencies)
         data = np.array([
             [float(entry) for entry in line.strip().split(",")] 
@@ -61,15 +67,12 @@ def plot_magnetisation_histogram(file_name: str, save_name: str) -> None:
         plt.title(f"$N = 500, T={temp + 1}K$")
         plt.hist(data[:, temp + 3])
 
-    plt.savefig(save_name)
-    plt.show()
+    if show:
+        plt.show()
+    if save_file:
+        plt.savefig(f"pub/figures/{save_file}")
 
 
-if __name__ == "main":
-    option = sys.argv[0]
-    file = sys.argv[1]
-
-    if not file.endswith(".csv"):
-        raise Error("The data file should be a csv")
-
-    exec(f"{option}({file}, True, {option}_ising_2d.pdf)")
+option = sys.argv[1]
+exec(f"{option}('{option}_ising_1d.csv', False, '{option}_ising_1d.pdf')")
+    
