@@ -46,7 +46,7 @@ def entropy(temperature: float) -> float:
 
 
 def free_energy(temperature: float) -> float:
-    return -1 - temperature * np.log(1 + np.exp(1 + np.exp(-2 / temperature)))
+    return - 1 - temperature * np.log(1 + np.exp(-2 / temperature))
 
 
 def heat_capacity(temperature: float) -> float:
@@ -89,7 +89,7 @@ def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
     plt.plot(temperatures, free_energy(temperatures))
     plt.subplot(2, 2, 4)
     plt.title(r"$C_{V}$")
-    plt.plot(data[:, 0], data[:, 7])
+    plt.errorbar(data[:, 0], data[:, 7], data[:, 8])
     plt.plot(temperatures, heat_capacity(temperatures))
 
     if show:

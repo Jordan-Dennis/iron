@@ -350,7 +350,7 @@ void physical_parameters_ising_1d(Config* config)
     int ind;    
     float temp;
 
-    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
     {
         Ising1D *system = init_ising_1d(spins, temp);
     
@@ -378,7 +378,7 @@ void physical_parameters_ising_1d(Config* config)
         float energy_est = mean(_energies, epochs);
         float entropy_est = mean(_entropies, epochs);
         float free_energy_est = mean(_free_energies, epochs);
-        float heat_capacity_est = (energies[ind - 1][0] - energy_est / spins) / step;
+        float heat_capacity_est = (energy_est / spins - energies[ind - 1][0]) / step;
 
         float energy_err = sqrt(variance(_energies, energy_est, epochs) / spins);
         float entropy_err = sqrt(variance(_entropies, entropy_est, epochs) / spins);
@@ -411,7 +411,7 @@ void physical_parameters_ising_1d(Config* config)
     fprintf(data, "Free Energy, Free Energy Error, "); 
     fprintf(data, "Heat Capacity, Heat Capacity Error\n");
 
-    for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+    for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
 	{
         fprintf(data, "%f, ", temp);
 		fprintf(data, "%f, ", energies[ind][0]);

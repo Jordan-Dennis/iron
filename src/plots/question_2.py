@@ -115,7 +115,7 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
 
     images = np.array(images, dtype=int)           
     number = images.shape[0]
-    figure, axes = plt.subplots(2, number // 2, figsize=(10, 15))
+    figure, axes = plt.subplots(2, number // 2, figsize=(15, 10))
     for subplot, index in enumerate(range(0, number, 2)):
         axes[0][subplot].imshow(images[index])
         axes[0][subplot].set_title(f"$T = {temperatures[index]}$")
@@ -129,7 +129,7 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
     if show:
         plt.show()
     else:
-        figure.savefig(f"pub/figures/{save_file}.pdf")
+        figure.savefig(f"pub/figures/{save_file}")
 
 
 def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:

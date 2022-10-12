@@ -381,23 +381,33 @@ void physical_parameters_ising_2d(Config* config)
                 _free_energies[epoch] = energy - temperature * entropy;
             }
             
+            float number = size * size;
             float energy_est = mean(_energies, epochs);
             float entropy_est = mean(_entropies, epochs);
             float free_energy_est = mean(_free_energies, epochs);
-            float heat_capacity_est = (energies[temp - 1][0][num_spin] - energy_est / size) / step;
+            float heat_capacity_est;
 
-            float energy_err = sqrt(variance(_energies, energy_est, epochs) / size);
-            float entropy_err = sqrt(variance(_entropies, entropy_est, epochs) / size);
-            float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs) / size);
+            if (temp == 0)
+            {
+                heat_capacity_est = 0.0;
+            }
+            else
+            {
+                heat_capacity_est = (energies[temp - 1][0][num_spin] - energy_est / number) / step;
+            }
+
+            float energy_err = sqrt(variance(_energies, energy_est, epochs)) / number;
+            float entropy_err = sqrt(variance(_entropies, entropy_est, epochs)) / number;
+            float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs)) / number;
             float heat_capacity_err = (energies[temp - 1][1][num_spin] + energy_err) / step;
 
             energies[temp][1][num_spin] = energy_err;
-            energies[temp][0][num_spin] = energy_est / size;
+            energies[temp][0][num_spin] = energy_est / number;
             entropies[temp][1][num_spin] = entropy_err;
-            entropies[temp][0][num_spin] = entropy_est / size;
+            entropies[temp][0][num_spin] = entropy_est / number;
             free_energies[temp][1][num_spin] = free_energy_err;
-            free_energies[temp][0][num_spin] = free_energy_est / size;
-            heat_capacities[temp][0][num_spin] = heat_capacity_est / size;
+            free_energies[temp][0][num_spin] = free_energy_est / number;
+            heat_capacities[temp][0][num_spin] = heat_capacity_est / number;
             heat_capacities[temp][1][num_spin] = heat_capacity_err;
         }
     }

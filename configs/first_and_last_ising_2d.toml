@@ -1,5 +1,5 @@
 save_file = pub/data/first_and_last_ising_2d.csv
 number_of_spins = 100
-lowest_temperature = 0.2
-highest_temperature = 5.0
-temperature_step = 0.2
+lowest_temperature = 1.0
+highest_temperature = 4.0
+temperature_step = 1.0
