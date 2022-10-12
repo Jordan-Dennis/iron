@@ -309,6 +309,7 @@ void first_and_last_ising_1d(Config *config)
         }
 
         save_ising_1d(system, save_file);
+        free(system);
     }
 }
 
@@ -350,19 +351,20 @@ void physical_parameters_ising_1d(Config* config)
     int ind;    
     float temp;
 
+    Ising1D *system = init_ising_1d(spins, stop);
+    
+    // Running the burnin period. 
+    for (int epoch = 0; epoch <= epochs; epoch++)
+    { 
+        metropolis_step_ising_1d(system);
+    }
+
     for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
     {
-        Ising1D *system = init_ising_1d(spins, temp);
-    
-        // Running the burnin period. 
-        for (int epoch = 0; epoch <= epochs; epoch++)
-        { 
-            metropolis_step_ising_1d(system);
-        }
+        system -> temperature = temp;
 
         float _energies[epochs];
         float _entropies[epochs];
-        float _free_energies[epochs];
         
         for (int epoch = 0; epoch < epochs; epoch++)
         { 
@@ -372,24 +374,32 @@ void physical_parameters_ising_1d(Config* config)
 
             _energies[epoch] = energy;
             _entropies[epoch] = entropy;
-            _free_energies[epoch] = energy - temp * entropy;
         }
 
         float energy_est = mean(_energies, epochs);
         float entropy_est = mean(_entropies, epochs);
-        float free_energy_est = mean(_free_energies, epochs);
-        float heat_capacity_est = (energy_est / spins - energies[ind - 1][0]) / step;
+        float free_energy_est =  energy_est - temp * entropy_est;
+        float heat_capacity_est;
 
-        float energy_err = sqrt(variance(_energies, energy_est, epochs) / spins);
-        float entropy_err = sqrt(variance(_entropies, entropy_est, epochs) / spins);
-        float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs) / spins);
-        float heat_capacity_err = (energies[ind - 1][1] + energy_err) / step;
+        if (ind == 0)
+        {
+            heat_capacity_est = 0.0;
+        }
+        else
+        {
+            heat_capacity_est = (energies[ind - 1][0] - energy_est / spins) / step;
+        }
 
-        energies[ind][1] = energy_err;
+        float energy_err = sqrt(variance(_energies, energy_est, epochs));
+        float entropy_err = sqrt(variance(_entropies, entropy_est, epochs));
+        float free_energy_err = energy_err + temp * entropy_err;
+        float heat_capacity_err = energy_err / temp / temp / spins - heat_capacity_est;
+
+        energies[ind][1] = energy_err / spins;
         energies[ind][0] = energy_est / spins;
-        entropies[ind][1] = entropy_err;
+        entropies[ind][1] = entropy_err / spins;
         entropies[ind][0] = entropy_est / spins;
-        free_energies[ind][1] = free_energy_err;
+        free_energies[ind][1] = free_energy_err / spins;
         free_energies[ind][0] = free_energy_est / spins;
         heat_capacities[ind][1] = heat_capacity_err;
         heat_capacities[ind][0] = heat_capacity_est;
@@ -455,21 +465,20 @@ void magnetisation_vs_temperature_ising_1d(Config* config)
     {
         int ind;    
         float temp;
+        int num_epochs = 1e3 * num_spins[number];
 
-        for (temp = start, ind = 0; temp < stop; temp += step, ind++)
+        Ising1D *system = init_ising_1d(num_spins[number], stop);
+
+        // Running the burnin period. 
+        for (int epoch = 0; epoch <= num_epochs; epoch++)
+        { 
+            metropolis_step_ising_1d(system);
+        }
+
+        for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
         {
-            Ising1D *system = init_ising_1d(num_spins[number], temp);
-
             for (int rep = 0; rep < reps_per_temp; rep++)
             {
-                int num_epochs = 1e3 * num_spins[number];
-
-                // Running the burnin period. 
-                for (int epoch = 0; epoch <= num_epochs; epoch++)
-                { 
-                    metropolis_step_ising_1d(system);
-                }
-
                 // Running the simulation 
                 float sim_magnetisation[num_epochs];
 

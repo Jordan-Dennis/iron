@@ -389,11 +389,12 @@ void physical_parameters_ising_2d(Config* config)
 
             if (temp == 0)
             {
+                printf("Fuck me!\n");
                 heat_capacity_est = 0.0;
             }
             else
             {
-                heat_capacity_est = (energies[temp - 1][0][num_spin] - energy_est / number) / step;
+                heat_capacity_est = (energy_est / number - energies[temp - 1][0][num_spin]) / step;
             }
 
             float energy_err = sqrt(variance(_energies, energy_est, epochs)) / number;
@@ -407,7 +408,7 @@ void physical_parameters_ising_2d(Config* config)
             entropies[temp][0][num_spin] = entropy_est / number;
             free_energies[temp][1][num_spin] = free_energy_err;
             free_energies[temp][0][num_spin] = free_energy_est / number;
-            heat_capacities[temp][0][num_spin] = heat_capacity_est / number;
+            heat_capacities[temp][0][num_spin] = heat_capacity_est;
             heat_capacities[temp][1][num_spin] = heat_capacity_err;
         }
     }

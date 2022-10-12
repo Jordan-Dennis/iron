@@ -1,21 +1,30 @@
-plot() {
+plot_ising_1d() {
     python src/plots/question_1.py first_and_last 
     python src/plots/question_1.py physical_parameters 
     python src/plots/question_1.py magnetisation 
+}
+
+
+plot_ising_2d() {
+    python src/plots/question_2.py first_and_last
     python src/plots/question_2.py physical_parameters 
     python src/plots/question_2.py magnetisation 
     python src/plots/question_2.py heating_and_cooling 
 }
 
 
-run() {
+ising_1d() {
     echo -e "\033[31mRunning 1D simulations:\033[37m"
-    out/ising 1d first_and_last configs/first_and_last_ising_1d.toml
+    out/ising 1d first_and_last configs/first_and_last_ising_1d.toml 
     echo -e "\t - First and last!"
-    out/ising 1d physical_parameters configs/physical_parameters_ising_1d.toml
+    out/ising 1d physical_parameters configs/physical_parameters_ising_1d.toml 
     echo -e "\t - Physical Parameters!"
-    out/ising 1d magnetisation configs/magnetisation_ising_1d.toml
+    out/ising 1d magnetisation configs/magnetisation_ising_1d.toml 
     echo -e "\t - Magnetisations!"
+}
+
+
+ising_2d() {
     echo -e "\033[31mRunning 2D simulations:\033[37m"
     out/ising 2d first_and_last configs/first_and_last_ising_2d.toml
     python src/plots/question_2.py first_and_last pub/data/first_and_last_ising_2d.csv
@@ -30,6 +39,7 @@ run() {
 
 
 schedule() {
-    run 
+    ising_1d
+    ising_2d
     plot
 }

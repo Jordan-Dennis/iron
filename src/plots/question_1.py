@@ -22,11 +22,11 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
             if not line.strip().startswith("#"):
                 data.append([int(spin) for spin in line.strip().split(",")])
 
-        data = np.array([data])[0]
+        data = np.array(data)
 
     plt.figure(figsize=(10, 10))
-    for temperature in range(3):
-        plt.subplot(3, 1, temperature + 1)
+    for ind, temperature in enumerate(range(0, 6, 2)):
+        plt.subplot(3, 1, ind + 1)
         plt.title(temperature)
         plt.imshow(data[temperature:temperature + 2, :])
     
@@ -89,7 +89,7 @@ def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
     plt.plot(temperatures, free_energy(temperatures))
     plt.subplot(2, 2, 4)
     plt.title(r"$C_{V}$")
-    plt.errorbar(data[:, 0], data[:, 7], data[:, 8])
+    plt.errorbar(data[:, 0], data[:, 7], np.abs(data[:, 8]))
     plt.plot(temperatures, heat_capacity(temperatures))
 
     if show:
