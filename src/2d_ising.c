@@ -662,13 +662,17 @@ void heating_and_cooling_ising_2d(Config *config)
     float step = atof(find(config, "temperature_step"));
     int length = (int) ((stop - start) / step);
 
-    Ising2D *system = init_ising_2d(num_spins, start);
+    Ising2D *system = init_ising_2d(num_spins, stop);
     FILE *save_file = fopen(save_file_name, "w");
 
-    for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+    do
     {
-        metropolis_step_ising_2d(system);
-    }
+        system -> temperature -= step;
+        for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+        {
+            metropolis_step_ising_2d(system);
+        }
+    } while (system -> temperature > (start + step));
 
     save_ising_2d(system, save_file);
 
@@ -694,5 +698,5 @@ void heating_and_cooling_ising_2d(Config *config)
 
     save_ising_2d(system, save_file);
     fclose(save_file);
-    free(system);
+    free_ising_2d(system);
 }
