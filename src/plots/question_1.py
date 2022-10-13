@@ -105,17 +105,13 @@ def magnetisation(data_file: str, show: bool, save_file: str) -> None:
             [float(entry) for entry in line.strip().split(",")] 
             for line in frequencies])
 
-    plt.figure(figsize=(12, 8))
+    figure, axes = plt.subplots(2, 3, figsize=(12, 8), sharex=True)
     for temp in range(3):
-        plt.subplot(2, 3, temp + 1)
-        plt.title(f"$N = 100, T={temp + 1}K$")
-        plt.hist(data[:, temp])
-        plt.xlim([-0.5, 0.5])
+        axes[0][temp].set_title(f"$N = 100, T={temp + 1}K$")
+        axes[0][temp].hist(data[:, temp])
 
-        plt.subplot(2, 3, temp + 4)
-        plt.title(f"$N = 500, T={temp + 1}K$")
-        plt.hist(data[:, temp + 3])
-        plt.xlim([-0.5, 0.5])
+        axes[1][temp].set_title(f"$N = 500, T={temp + 1}K$")
+        axes[1][temp].hist(data[:, temp + 3])
 
     if show:
         plt.show()

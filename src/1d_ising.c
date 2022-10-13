@@ -384,13 +384,6 @@ void physical_parameters_ising_1d(Config* config)
                 __entropies[epoch] = entropy;
             }
 
-            // TODO: So the variance of the energy is twice as large as it 
-            // should be. I do not know why but it is very frustrating.
-            // This suggests to me that the change for flipping a single spin 
-            // is twice as large as it should be and hence that the energy 
-            // calculation itself is wrong. However, the energy calculation 
-            // agrees perfectly with the data predicted model so I do not 
-            // think that it is this.
             _energies[run] = mean(__energies, epochs);
             _entropies[run] = mean(__entropies, epochs);
             _heat_capacities[run] = variance(__energies, __energies[run], epochs) / temp / temp;
