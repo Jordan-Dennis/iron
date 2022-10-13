@@ -167,7 +167,7 @@ void metropolis_step_ising_2d(Ising2D *system)
     {
         flip_spin_ising_2d(system, row, col);
     } 
-    else if (normalised_random() <  exp(- energy_change / temperature))
+    else if (normalised_random() < exp(- energy_change / temperature))
     {
         flip_spin_ising_2d(system, row, col);
     }
@@ -313,6 +313,20 @@ void first_and_last_ising_2d(Config *config)
 }
 
 
+void free_ising_2d(Ising2D *system)
+{
+    int length = system -> length;
+
+    for (int row = 0; row < length; row++)
+    {
+        free(system -> ensemble[row]);
+    }
+
+    free(system -> ensemble);
+    free(system);
+}
+
+
 /*
  * physical_parameters
  * -------------------
@@ -342,76 +356,100 @@ void physical_parameters_ising_2d(Config* config)
     float step = atof(find(config, "temperature_step"));
 
     int length = (int) ((stop - start) / step);
+    int runs = 10;
 
     float energies[length][2][3];
     float entropies[length][2][3];
     float free_energies[length][2][3];
     float heat_capacities[length][2][3];
+
+    Ising2D **systems = (Ising2D**) calloc(runs, sizeof(Ising2D*));
     
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
         int num_spins = spin_nums[num_spin];
         int epochs = num_spins * 1e3;
-        int size = num_spins * num_spins;
 
-        Ising2D *system = init_ising_2d(num_spins, stop);
-
-        for (int epoch = 0; epoch < epochs; epoch++)
+        #pragma omp parallel for num_threads(8) shared(systems) \
+            private(num_spins, stop, step, epochs)
+        for (int run = 0; run < runs; run++)
         {
-            metropolis_step_ising_2d(system);
+            systems[run] = init_ising_2d(num_spins, stop - step);
+
+            for (int epoch = 0; epoch < epochs; epoch++)
+            {
+                metropolis_step_ising_2d(systems[run]);
+            }
         }
 
         for (int temp = 0; temp < length; temp++)
         {
             float temperature = stop - (temp + 1) * step;
-            float _energies[epochs];
-            float _entropies[epochs];
-            float _free_energies[epochs];
+            float _energies[runs];
+            float _entropies[runs];
+            float _heat_capacities[runs];
 
-            system -> temperature = temperature;
-            
-            for (int epoch = 0; epoch < epochs; epoch++)
-            { 
-                metropolis_step_ising_2d(system);
-                float energy = energy_ising_2d(system);
-                float entropy = entropy_ising_2d(system);
+            printf("Temperature: %f\n", temperature);
 
-                _energies[epoch] = energy;
-                _entropies[epoch] = entropy;
-                _free_energies[epoch] = energy - temperature * entropy;
-            }
-            
-            float number = size * size;
-            float energy_est = mean(_energies, epochs);
-            float entropy_est = mean(_entropies, epochs);
-            float free_energy_est = mean(_free_energies, epochs);
-            float heat_capacity_est;
-
-            if (temp == 0)
+            for (int run = 0; run < runs; run++)
             {
-                printf("Fuck me!\n");
-                heat_capacity_est = 0.0;
+                systems[run] -> temperature = temperature;
             }
-            else
+
+            #pragma omp parallel for num_threads(8) \
+                shared(systems, _energies, _entropies, _heat_capacities) \
+                private(runs, epochs)
+            for (int run = 0; run < runs; run++)
             {
-                heat_capacity_est = (energy_est / number - energies[temp - 1][0][num_spin]) / step;
+                float __energies[epochs];
+                float __entropies[epochs];
+              
+                for (int epoch = 0; epoch < epochs; epoch++)
+                { 
+                    metropolis_step_ising_2d(systems[run]);
+                    float energy = energy_ising_2d(systems[run]);
+                    float entropy = entropy_ising_2d(systems[run]);
+
+                    __energies[epoch] = energy;
+                    __entropies[epoch] = entropy;
+                }
+
+                printf("Run: %i\n", run);
+
+                _energies[run] = mean(__energies, epochs);
+                _entropies[run] = mean(__entropies, epochs);
+                _heat_capacities[run] = variance(__energies, _energies[run], epochs) / 
+                    temperature / temperature;
             }
+            
+            float number = num_spins * num_spins;
+            float energy_est = mean(_energies, runs);
+            float entropy_est = mean(_entropies, runs);
+            float free_energy_est = energy_est - temperature * entropy_est;
+            float heat_capacity_est = mean(_heat_capacities, runs);
 
-            float energy_err = sqrt(variance(_energies, energy_est, epochs)) / number;
-            float entropy_err = sqrt(variance(_entropies, entropy_est, epochs)) / number;
-            float free_energy_err = sqrt(variance(_free_energies, free_energy_est, epochs)) / number;
-            float heat_capacity_err = (energies[temp - 1][1][num_spin] + energy_err) / step;
+            float energy_err = sqrt(variance(_energies, energy_est, runs) / runs);
+            float entropy_err = sqrt(variance(_entropies, entropy_est, runs) / runs);
+            float free_energy_err = energy_err + temperature * entropy_err;
+            float heat_capacity_err = sqrt(variance(_heat_capacities, heat_capacity_est, runs) / runs);
 
-            energies[temp][1][num_spin] = energy_err;
+            energies[temp][1][num_spin] = energy_err / number;
             energies[temp][0][num_spin] = energy_est / number;
-            entropies[temp][1][num_spin] = entropy_err;
+            entropies[temp][1][num_spin] = entropy_err / number;
             entropies[temp][0][num_spin] = entropy_est / number;
-            free_energies[temp][1][num_spin] = free_energy_err;
+            free_energies[temp][1][num_spin] = free_energy_err / number;
             free_energies[temp][0][num_spin] = free_energy_est / number;
-            heat_capacities[temp][0][num_spin] = heat_capacity_est;
-            heat_capacities[temp][1][num_spin] = heat_capacity_err;
+            heat_capacities[temp][0][num_spin] = heat_capacity_est / number;
+            heat_capacities[temp][1][num_spin] = heat_capacity_err / number;
         }
     }
+
+    for (int run = 0; run < runs; run++)
+    {
+        free_ising_2d(systems[run]);
+    }
+
+    free(systems);
 
 	// Writing the data to the file
 	FILE* data = fopen(save_file_name, "w");

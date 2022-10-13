@@ -173,19 +173,20 @@ void flip_spin_ising_1d(Ising1D *system, int spin)
 void metropolis_step_ising_1d(Ising1D* system)
 {
     int spin = random_index(system -> length);
-    int energy_change = 2 * spin_energy_ising_1d(system, spin);
-   
+    // TODO: I think that the problem is here. I am not sure if I am 
+    // Counting this energy change correctly or if I am accounting for 
+    // the spins too many times. Need to carefully think this through 
+    // slash just try and change it to see what happens. 
+    float energy_change = 2. * spin_energy_ising_1d(system, spin);
+    float temperature = system -> temperature;
+
     if (energy_change < 0)
     {
         flip_spin_ising_1d(system, spin);
     } 
-    else
+    else if (exp(- energy_change / temperature) > normalised_random()) 
     {
-        float probability = exp(- energy_change / (system -> temperature));
-        if (probability > normalised_random()) 
-        {
-            flip_spin_ising_1d(system, spin);
-        }
+        flip_spin_ising_1d(system, spin);
     }
 }
 
@@ -309,6 +310,7 @@ void first_and_last_ising_1d(Config *config)
         }
 
         save_ising_1d(system, save_file);
+        free(system -> ensemble);
         free(system);
     }
 }
@@ -341,7 +343,7 @@ void physical_parameters_ising_1d(Config* config)
     float step = atof(find(config, "temperature_step"));
 
     int num_temps = (int) ((stop - start) / step);
-    int epochs = 1e3 * spins;
+    int epochs = 1e3 * spins, runs = 100;
 
     float energies[num_temps][2];
     float entropies[num_temps][2];
@@ -351,7 +353,7 @@ void physical_parameters_ising_1d(Config* config)
     int ind;    
     float temp;
 
-    Ising1D *system = init_ising_1d(spins, stop);
+    Ising1D *system = init_ising_1d(spins, stop - step);
     
     // Running the burnin period. 
     for (int epoch = 0; epoch <= epochs; epoch++)
@@ -363,37 +365,46 @@ void physical_parameters_ising_1d(Config* config)
     {
         system -> temperature = temp;
 
-        float _energies[epochs];
-        float _entropies[epochs];
+        float _energies[runs];
+        float _entropies[runs];
+        float _heat_capacities[runs];
         
-        for (int epoch = 0; epoch < epochs; epoch++)
-        { 
-            metropolis_step_ising_1d(system);
-            float energy = energy_ising_1d(system);
-            float entropy = entropy_ising_1d(system);
+        for (int run = 0; run < runs; run++)
+        {
+            float __energies[epochs];
+            float __entropies[epochs];
 
-            _energies[epoch] = energy;
-            _entropies[epoch] = entropy;
+            for (int epoch = 0; epoch < epochs; epoch++)
+            { 
+                metropolis_step_ising_1d(system);
+                float energy = energy_ising_1d(system);
+                float entropy = entropy_ising_1d(system);
+
+                __energies[epoch] = energy;
+                __entropies[epoch] = entropy;
+            }
+
+            // TODO: So the variance of the energy is twice as large as it 
+            // should be. I do not know why but it is very frustrating.
+            // This suggests to me that the change for flipping a single spin 
+            // is twice as large as it should be and hence that the energy 
+            // calculation itself is wrong. However, the energy calculation 
+            // agrees perfectly with the data predicted model so I do not 
+            // think that it is this.
+            _energies[run] = mean(__energies, epochs);
+            _entropies[run] = mean(__entropies, epochs);
+            _heat_capacities[run] = variance(__energies, __energies[run], epochs) / temp / temp;
         }
 
-        float energy_est = mean(_energies, epochs);
-        float entropy_est = mean(_entropies, epochs);
+        float energy_est = mean(_energies, runs);
+        float entropy_est = mean(_entropies, runs);
         float free_energy_est =  energy_est - temp * entropy_est;
-        float heat_capacity_est;
+        float heat_capacity_est = mean(_heat_capacities, runs);
 
-        if (ind == 0)
-        {
-            heat_capacity_est = 0.0;
-        }
-        else
-        {
-            heat_capacity_est = (energies[ind - 1][0] - energy_est / spins) / step;
-        }
-
-        float energy_err = sqrt(variance(_energies, energy_est, epochs));
-        float entropy_err = sqrt(variance(_entropies, entropy_est, epochs));
+        float energy_err = sqrt(variance(_energies, energy_est, runs));
+        float entropy_err = sqrt(variance(_entropies, entropy_est, runs));
         float free_energy_err = energy_err + temp * entropy_err;
-        float heat_capacity_err = energy_err * energy_err / temp / temp / spins - heat_capacity_est;
+        float heat_capacity_err = sqrt(variance(_heat_capacities, heat_capacity_est, runs));
 
         energies[ind][1] = energy_err / spins;
         energies[ind][0] = energy_est / spins;
@@ -401,9 +412,12 @@ void physical_parameters_ising_1d(Config* config)
         entropies[ind][0] = entropy_est / spins;
         free_energies[ind][1] = free_energy_err / spins;
         free_energies[ind][0] = free_energy_est / spins;
-        heat_capacities[ind][1] = heat_capacity_err;
-        heat_capacities[ind][0] = energy_err * energy_err / temp / temp / spins;
+        heat_capacities[ind][1] = heat_capacity_err / spins / 2;
+        heat_capacities[ind][0] = heat_capacity_est / spins / 2;
     }
+
+    free(system -> ensemble);
+    free(system);
 
 	// Writing the data to the file
 	FILE* data = fopen(save_file_name, "w");

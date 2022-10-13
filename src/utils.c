@@ -104,7 +104,7 @@ float variance(float* array, float mean, int length)
     float variance = 0;
     for (int entry = 0; entry < length; entry++)
     {
-        variance += pow((array[entry] - mean), 2);
+        variance += (array[entry] - mean) * (array[entry] - mean);
     }
     return variance / (length - 1);
 }

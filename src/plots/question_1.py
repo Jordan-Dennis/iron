@@ -110,10 +110,12 @@ def magnetisation(data_file: str, show: bool, save_file: str) -> None:
         plt.subplot(2, 3, temp + 1)
         plt.title(f"$N = 100, T={temp + 1}K$")
         plt.hist(data[:, temp])
+        plt.xlim([-0.5, 0.5])
 
         plt.subplot(2, 3, temp + 4)
         plt.title(f"$N = 500, T={temp + 1}K$")
         plt.hist(data[:, temp + 3])
+        plt.xlim([-0.5, 0.5])
 
     if show:
         plt.show()
