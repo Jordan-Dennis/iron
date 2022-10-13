@@ -99,6 +99,19 @@ def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
 
 
 def magnetisation(data_file: str, show: bool, save_file: str) -> None:
+    """
+    Plot the magnetisation of the 1D ising system as a function of the 
+    temperature and the number of spins. 
+
+    Parameters
+    ----------
+    data_file: str
+        The file which contains the data. 
+    show: bool
+        True if the figure is to be shown else false.
+    save_file: str
+        The file to save the figure to. 
+    """
     with open(f"pub/data/{data_file}") as frequencies:
         next(frequencies)
         data = np.array([

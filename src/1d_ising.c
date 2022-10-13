@@ -474,7 +474,7 @@ void magnetisation_vs_temperature_ising_1d(Config* config)
         float temp;
         int num_epochs = 1e3 * num_spins[number];
 
-        Ising1D *system = init_ising_1d(num_spins[number], stop);
+        Ising1D *system = init_ising_1d(num_spins[number], stop - step);
 
         // Running the burnin period. 
         for (int epoch = 0; epoch <= num_epochs; epoch++)
@@ -484,6 +484,8 @@ void magnetisation_vs_temperature_ising_1d(Config* config)
 
         for (temp = stop - step, ind = 0; temp >= start; temp -= step, ind++)
         {
+            system -> temperature = temp;
+
             for (int rep = 0; rep < reps_per_temp; rep++)
             {
                 // Running the simulation 
@@ -499,7 +501,11 @@ void magnetisation_vs_temperature_ising_1d(Config* config)
                 magnetisations[ind][rep][number] = mean_magnetisation;
             }
         }
+
+        free(system -> ensemble);
+        free(system);
     }
+
 
     // Opening the data file. 
     FILE* data = fopen(save_file_name, "w");

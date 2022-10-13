@@ -1,4 +1,4 @@
-reps_per_temp = 100
+reps_per_temp = 1000
 save_file = pub/data/magnetisation_ising_1d.csv
 lowest_temperature = 1.0
 highest_temperature = 4.0
