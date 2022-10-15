@@ -11,13 +11,18 @@
 typedef struct ising_t 
 {
     float temperature;
+    float epsilon;
     float magnetic_field;
     int length;
     int **ensemble;
 } ising_t;
 
 
-ising_t *init_ising_t(float temperature, float magnetic_field, int length)
+ising_t *init_ising_t(
+    float temperature, 
+    float magnetic_field, 
+    float epsilon, 
+    int length)
 {
     int **ensemble = (int**) calloc(length, sizeof(int*));
 
@@ -50,55 +55,32 @@ void free_ising_t(ising_t *system)
 }
 
 
-static inline float spin_energy_ising_t(ising_t *system, int row, int col)
-{
-    float magnetic_field = system -> magnetic_field;
-    int **ensemble = system -> ensemble;
-    int length = system -> length;
-    float neighbours = 0.0;
-    neighbours += ensemble[modulo(row + 1, length)][col];
-    neighbours += ensemble[modulo(row - 1, length)][col];
-    neighbours += ensemble[row][modulo(col + 1, length)];
-    neighbours += ensemble[row][modulo(col - 1, length)];
-    return (neighbours + magnetic_field) * ensemble[row][col]; 
-}
-
-
-float energy_ising_t(ising_t *system)
-{
-    int length = system -> length;
-    int row, col;
-    float energy = 0.;
-
-    for (row = 0; row < length; row++)
-        for (col = 0; col < length; col++)
-            energy += (float) spin_energy_ising_t(system, row, col);
-
-    return energy / 2.;
-}
-
-
-static inline int should_flip(float change, float temperature)
-{
-    return (change < 0) || (normalised_random() < exp(- change / temperature));
-}
-
-
-static inline void flip(ising_t *system, int row, int col)
-{
-    system -> ensemble[row][col] *= -1;
-}
-
-
 void metropolis_step_ising_t(ising_t *system)
 {
     int length = system -> length;
+    int **ensemble = system -> ensemble;
+    float epsilon = system -> epsilon;
+    float temperature = system -> temperature;
+
     int row = random_index(length);
     int col = random_index(length);
-    float change = 2 * spin_energy_ising_t(system, row, col);
-    float temperature = system -> temperature;
-    if (should_flip(change, temperature)) 
-        flip(system, row, col); 
+
+    int spin = ensemble[row][col];
+    int neighbours = 
+        ensemble[modulo(row + 1, length)][col] + 
+        ensemble[modulo(row - 1, length)][col] + 
+        ensemble[row][modulo(col + 1, length)] + 
+        ensemble[row][modulo(col - 1, length)];
+
+    float magnetic_change = -2 * spin * magnetic_field;
+    float interaction_change = -2 * neighbours * spin;
+    float energy_change = magnetic_change + interaction_change;
+
+    if ((energy_change < 0) || 
+        (exp(- energy_change / temperature) > normalised_random()))
+    {
+        system -> ensemble[row][col] *= -1;
+    }
 }
 
 
@@ -119,13 +101,25 @@ float magnetisation_ising_t(ising_t *system)
 float energy_ising_t(ising_t *system)
 {
     int length = system -> length;
-    float energy = 0;
+    int **ensemble = system -> ensemble;
+    float epislon = system -> epsilon;
+    float magnetic_field = system -> magnetic_field;
+    float neighbours = 0;
 
     for (int row = 0; row < length; row++)
+    {
         for (int col = 0; col < length; col++)
-            energy -= spin_energy_ising_2d(system, row, col);
+        {
+            neighbours += ensemble[modulo(row + 1, length)][col];
+            neighbours += ensemble[modulo(row - 1, length)][col];
+            neighbours += ensemble[row][modulo(col + 1, length)];
+            neighbours += ensemble[row][modulo(col - 1, length)];
+        }
+    }
 
-    return energy / 2.;
+    float interactions = neighbours * epsilon * ensemble[row][col];
+    float magnetic = ensemble[row][col] * magnetic_field;
+    return interactions / 2. + magnetic;
 }
 
 
@@ -164,6 +158,7 @@ void print_ising_t(ising_t *system)
 
     printf("Temperature: %f\n", system -> temperature);
     printf("Magnetic Field: %f\n", system -> magnetic_field);
+    printf("Epsilon: %f\n", system -> epsilon);
 
     for (row = 0; row < length; row++)
     {
@@ -182,47 +177,76 @@ int main(void)
     // parameters of the system at multiple different magnetisations and
     // plot these in a contour like way on the chart. Also need to add in 
     // The magnetic susceptibility to make this proper lit. 
-    int size = 5;
-    int length = 20;
-    int epochs = length * 1e3;
-    int temperature, magnetic_field;
-    float _temperature, _magnetic_field;
-    float magnetisations[size][size], energies[size][size];
-    float _magnetisations[epochs], _energies[epochs];
-    float magnetisation, energy, ratio;
-    float critical_temperature = 2 / log(1 + sqrt(2));
-    float maximum_temperature = 2. * critical_temperature;
-    ising_t *system = init_ising_t(2. * critical_temperature, 0., length);
+    const int runs = 5;
+    const int length = 20;
+    const int epochs = length * 1e3;
+    const int num_temps = 10;
+    const int num_fields = 3;
+    const int num_epsilons = 3
 
-    for (int _ = 0; _ < length * 1e3; _++)
-        metropolis_step_ising_t(system);
+    float energies[num_temps][num_fields][num_epsilons];
+    float free_energies[num_temps][num_fields][num_epsilons];
+    float magnetisations[num_temps][num_fields][num_epsilons];
+    float heat_capacities[num_temps][num_fields][num_epsilons]; 
 
-    for (temperature = 0; temperature < size; temperature++)
+
+    // TODO: So I need to finish programming the loops but then I can run this 
+    // and I should be done. Then I just need to type up the report. Sweet. 
+    // I think that this will all work out. Just gotta check the due date one 
+    // more time. 
+    #pragma omp parallel for num_threads(3)
+    for (float epsilon = -1.0; epsilon <= 1.0; epsilon++)
     {
-        ratio = ((float) temperature / (float) size);
-        _temperature = maximum_temperature - ratio * maximum_temperature;
-        system -> temperature = _temperature;
-
-        for (magnetic_field = 0; magnetic_field < size; magnetic_field++)
+        for (float magnetic_field = 0.0; magnetic_field < 3.0; magnetic_field++)
         {
-            _magnetic_field = 2. * magnetic_field / size; 
-            system -> magnetic_field = _magnetic_field;       
-
-            for (int _ = 0; _ < epochs; _++) 
+            ising_t *system = init_ising_t(3., magnetic_field, epsilon, length);
+    
+            // Running the burn-in
+            for (int epoch = 0; epoch < epochs; epoch++)
             {
                 metropolis_step_ising_t(system);
-                _magnetisations[_] = magnetisation_ising_t(system);
-                _energies[_] = energy_ising_t(system);
             }
 
-            magnetisation = mean(_magnetisations, length);
-            energy = mean(_energies, length);
-            magnetisations[temperature][magnetic_field] = magnetisation; 
-            energies[temperature][magnetic_field] = energy;
+            for (float temperature = 3.0; temperature > 0.0; temperature -= 0.2)
+            {
+                system -> temperature = temperature;
+
+                float _energies[runs];
+                float _entropies[runs];
+                float _free_energies[runs];
+                float _magnetisations[runs];
+                float _heat_capacities[runs];
+                
+                for (int run = 0; run < runs; run++)
+                {
+                   float __energies[epochs];
+                   float __entropies[epochs];
+                   float __magnetisations[epochs];
+
+                    for (int epoch = 0; epoch < epochs; epoch++)
+                    {
+                        metropolis_step_ising_t(system);
+                        __energies[epoch] = energy_ising_t(system);
+                        __entropies[epoch] = entropy_ising_t(system);
+                        __magnetisations[epoch] = magnetisation_ising_t(system);
+                    }
+
+                    _energies[run] = mean(__energies, epochs);
+                    _entropies[run] = mean(__entropies, epochs);
+                    _magnetisations[run] = mean(__magnetisations, epochs);
+                    _heat_capacities[run] = 
+                        variance(__energies, _energies[run], epochs) / 
+                        temperature / temperature;
+                }
+
+                energies[_temperature][_field][_epsilon] = mean(_energies, runs);
+                entropies[_temperature][_field][_epsilon] = mean(_entropies, runs);
+                magnetisations[_temperature][_field][_epsilon] = mean(_magnetisations, runs);
+                heat_capacities[_temperature][_field][_epsilon] = mean(_heat_capacities, runs);
+            }
         }
     }
-
-    free(system); 
+    
 
     char *save_file_name = "pub/data/external_field.csv";
     FILE *save_file = fopen(save_file_name, "w");
