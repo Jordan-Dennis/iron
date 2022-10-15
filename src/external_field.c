@@ -38,6 +38,18 @@ ising_t *init_ising_t(float temperature, float magnetic_field, int length)
 }
 
 
+void free_ising_t(ising_t *system)
+{
+    int length = system -> length;
+
+    for (int row = 0; row < length; row++)
+        free(system -> ensemble[row]);
+
+    free(system -> ensemble);
+    free(system);
+}
+
+
 static inline float spin_energy_ising_t(ising_t *system, int row, int col)
 {
     float magnetic_field = system -> magnetic_field;
@@ -104,6 +116,48 @@ float magnetisation_ising_t(ising_t *system)
 }
 
 
+float energy_ising_t(ising_t *system)
+{
+    int length = system -> length;
+    float energy = 0;
+
+    for (int row = 0; row < length; row++)
+        for (int col = 0; col < length; col++)
+            energy -= spin_energy_ising_2d(system, row, col);
+
+    return energy / 2.;
+}
+
+
+float entropy_ising_t(ising_t *system)
+{
+    int len = system -> length;
+    int **ensemble = system -> ensemble; 
+    int up = 0;
+
+    for (int row = 0; row < len; row++)
+    {
+        for (int col = 0; col < len; col++)
+        {
+            up += ensemble[row][col] == ensemble[modulo(row + 1, len)][col];
+            up += ensemble[row][col] == ensemble[row][modulo(col + 1, len)];
+        }
+    }
+        
+    int total = 2 * len * len;
+    int down = total - up;
+
+    if (up == 0 || up == total)
+    {
+        return log(2);
+    }
+    else
+    {
+        return total * log(total) - up * log(up) - down * log(down);
+    }
+}
+
+
 void print_ising_t(ising_t *system)
 {
     int row, col, length = system -> length, **ensemble = system -> ensemble;
@@ -124,6 +178,10 @@ void print_ising_t(ising_t *system)
 
 int main(void)
 {
+    // TODO: So I want to redo this entirely, I collect all of the physical 
+    // parameters of the system at multiple different magnetisations and
+    // plot these in a contour like way on the chart. Also need to add in 
+    // The magnetic susceptibility to make this proper lit. 
     int size = 5;
     int length = 20;
     int epochs = length * 1e3;

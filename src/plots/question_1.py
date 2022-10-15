@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl 
 import sys
+
+
+mpl.rcParams["text.usetex"] = True
+
 
 def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
     """
@@ -76,19 +81,23 @@ def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
 
     plt.figure(figsize=(10, 10))
     plt.subplot(2, 2, 1)
-    plt.title(r"$\epsilon$")
+    plt.ylabel(r"$\epsilon$")
+    plt.xlabel(r"$\tau$")
     plt.errorbar(data[:, 0], data[:, 1], data[:, 2])
     plt.plot(temperatures, energy(temperatures))
     plt.subplot(2, 2, 2)
-    plt.title(r"$\sigma$")
+    plt.ylabel(r"$\sigma$")
+    plt.xlabel(r"$\tau$")
     plt.errorbar(data[:, 0], data[:, 3], data[:, 4])
     plt.plot(temperatures, entropy(temperatures))
     plt.subplot(2, 2, 3)
-    plt.title(r"$F$")
+    plt.ylabel(r"$F$")
+    plt.xlabel(r"$\tau$")
     plt.errorbar(data[:, 0], data[:, 5], data[:, 6])
     plt.plot(temperatures, free_energy(temperatures))
     plt.subplot(2, 2, 4)
-    plt.title(r"$C_{V}$")
+    plt.ylabel(r"$C_{V}$")
+    plt.xlabel(r"$\tau$")
     plt.errorbar(data[:, 0], data[:, 7], np.abs(data[:, 8]))
     plt.plot(temperatures, heat_capacity(temperatures))
 
