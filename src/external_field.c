@@ -61,6 +61,7 @@ void metropolis_step_ising_t(ising_t *system)
     int **ensemble = system -> ensemble;
     float epsilon = system -> epsilon;
     float temperature = system -> temperature;
+    float magnetic_field = system -> magnetic_field;
 
     int row = random_index(length);
     int col = random_index(length);
@@ -102,9 +103,11 @@ float energy_ising_t(ising_t *system)
 {
     int length = system -> length;
     int **ensemble = system -> ensemble;
-    float epislon = system -> epsilon;
+    float epsilon = system -> epsilon;
     float magnetic_field = system -> magnetic_field;
-    float neighbours = 0;
+    float magnetic = 0.0;
+    float neighbours = 0.0;
+    float interactions = 0.0;
 
     for (int row = 0; row < length; row++)
     {
@@ -114,11 +117,12 @@ float energy_ising_t(ising_t *system)
             neighbours += ensemble[modulo(row - 1, length)][col];
             neighbours += ensemble[row][modulo(col + 1, length)];
             neighbours += ensemble[row][modulo(col - 1, length)];
+
+            magnetic += ensemble[row][col] * magnetic_field;
+            interactions += neighbours * epsilon * ensemble[row][col];
         }
     }
 
-    float interactions = neighbours * epsilon * ensemble[row][col];
-    float magnetic = ensemble[row][col] * magnetic_field;
     return interactions / 2. + magnetic;
 }
 
@@ -171,6 +175,14 @@ void print_ising_t(ising_t *system)
 }
 
 
+//void main(void)
+//{
+//    for (int _epsilon = 0; _epsilon < 3; _epsilon++)
+//    {
+//        for (int _magnetic_field = 0; _magnetic_field < 3; _epsilon++)
+//}
+
+
 int main(void)
 {
     // TODO: So I want to redo this entirely, I collect all of the physical 
@@ -182,12 +194,13 @@ int main(void)
     const int epochs = length * 1e3;
     const int num_temps = 10;
     const int num_fields = 3;
-    const int num_epsilons = 3
+    const int num_epsilons = 3;
 
-    float energies[num_temps][num_fields][num_epsilons];
-    float free_energies[num_temps][num_fields][num_epsilons];
-    float magnetisations[num_temps][num_fields][num_epsilons];
-    float heat_capacities[num_temps][num_fields][num_epsilons]; 
+    float energies[num_temps][num_fields][num_epsilons][2];
+    float entropies[num_temps][num_fields][num_epsilons][2];
+    float free_energies[num_temps][num_fields][num_epsilons][2];
+    float magnetisations[num_temps][num_fields][num_epsilons][2];
+    float heat_capacities[num_temps][num_fields][num_epsilons][2];
 
 
     // TODO: So I need to finish programming the loops but then I can run this 
@@ -195,10 +208,12 @@ int main(void)
     // I think that this will all work out. Just gotta check the due date one 
     // more time. 
     #pragma omp parallel for num_threads(3)
-    for (float epsilon = -1.0; epsilon <= 1.0; epsilon++)
+    for (int _epsilon = 0; _epsilon < 3; _epsilon++)
     {
-        for (float magnetic_field = 0.0; magnetic_field < 3.0; magnetic_field++)
+        float epsilon = (float) _epsilon - 1.0;
+        for (int _field = 0; _field < 3; _field++)
         {
+            float magnetic_field = (float) _field;
             ising_t *system = init_ising_t(3., magnetic_field, epsilon, length);
     
             // Running the burn-in
@@ -207,8 +222,9 @@ int main(void)
                 metropolis_step_ising_t(system);
             }
 
-            for (float temperature = 3.0; temperature > 0.0; temperature -= 0.2)
+            for (int _temperature = 0; _temperature < num_temps; _temperature++)
             {
+                float temperature = 3.0 - (3.0 / (float) num_temps) * (float)  _temperature;
                 system -> temperature = temperature;
 
                 float _energies[runs];
@@ -239,14 +255,34 @@ int main(void)
                         temperature / temperature;
                 }
 
-                energies[_temperature][_field][_epsilon] = mean(_energies, runs);
-                entropies[_temperature][_field][_epsilon] = mean(_entropies, runs);
-                magnetisations[_temperature][_field][_epsilon] = mean(_magnetisations, runs);
-                heat_capacities[_temperature][_field][_epsilon] = mean(_heat_capacities, runs);
+                float energy = mean(_energies, runs);
+                float entropy = mean(_entropies, runs);
+                float free_energy = energy - temperature * entropy;
+                float heat_capacity = mean(_heat_capacities, runs); 
+                float magnetisation = mean(_magnetisations, runs);
+
+                energies[_temperature][_field][_epsilon][0] = energy;
+                entropies[_temperature][_field][_epsilon][0] = entropy;
+                free_energies[_temperature][_field][_epsilon][0] = free_energy;
+                magnetisations[_temperature][_field][_epsilon][0] = magnetisation;
+                heat_capacities[_temperature][_field][_epsilon][0] = heat_capacity;
+
+                float energy_err = variance(_energies, energy, runs);
+                float entropy_err = variance(_entropies, entropy, runs);
+                float free_energy_err = energy_err + temperature * entropy_err;
+                float heat_capacity_err = variance(_heat_capacities, heat_capacity, runs); 
+                float magnetisation_err = variance(_magnetisations, magnetisation, runs);
+
+                energies[_temperature][_field][_epsilon][1] = energy_err;
+                entropies[_temperature][_field][_epsilon][1] = entropy_err;
+                free_energies[_temperature][_field][_epsilon][1] = free_energy_err;
+                magnetisations[_temperature][_field][_epsilon][1] = magnetisation_err;
+                heat_capacities[_temperature][_field][_epsilon][1] = heat_capacity_err;
             }
+
+            free_ising_t(system);
         }
-    }
-    
+    } 
 
     char *save_file_name = "pub/data/external_field.csv";
     FILE *save_file = fopen(save_file_name, "w");
@@ -257,18 +293,34 @@ int main(void)
         exit(1);
     }
 
-    fprintf(save_file, "tau, B, m, U\n");
-    for (temperature = 0; temperature < size; temperature++)
+    fprintf(save_file, "epsilon, magnetic_field, tau, ");
+    fprintf(save_file, "energy, energy_err, entropy, ");
+    fprintf(save_file, "entropy_err, free_energy, free_energy_err, ");
+    fprintf(save_file, "magnetisation, magnetisation_err, ");
+    fprintf(save_file, "heat_capacity, heat_capacity_err\n");
+
+    for (int _epsilon = 0; _epsilon < num_epsilons; _epsilon++)
     {
-        ratio = ((float) temperature / (float) size);
-        _temperature = maximum_temperature - ratio * maximum_temperature;
-        for (magnetic_field = 0; magnetic_field < size; magnetic_field++)
+        for (int __field = 0; __field < num_fields; __field++)
         {
-            _magnetic_field = 2. * magnetic_field / size;
-            fprintf(save_file, "%f,", _temperature);
-            fprintf(save_file, "%f,", _magnetic_field);
-            fprintf(save_file, "%f,", magnetisations[temperature][magnetic_field]);
-            fprintf(save_file, "%f\n", energies[temperature][magnetic_field]);
+            for (int _temperature = 0; _temperature < num_temps; _temperature++)
+            {
+                float epsilon = (float) _epsilon - 1.0;
+                float _field = (float) _field;
+                float temperature = 3.0 - (3.0 / num_temps) * _temperature;
+
+                fprintf(save_file, "%f, %f, %f, ", epsilon, _field, temperature);
+                fprintf(save_file, "%f, ", energies[_epsilon][__field][_temperature][0]);
+                fprintf(save_file, "%f, ", energies[_epsilon][__field][_temperature][1]);
+                fprintf(save_file, "%f, ", entropies[_epsilon][__field][_temperature][0]);
+                fprintf(save_file, "%f, ", entropies[_epsilon][__field][_temperature][1]);
+                fprintf(save_file, "%f, ", free_energies[_epsilon][__field][_temperature][0]);
+                fprintf(save_file, "%f, ", free_energies[_epsilon][__field][_temperature][1]);
+                fprintf(save_file, "%f, ", magnetisations[_epsilon][__field][_temperature][0]);
+                fprintf(save_file, "%f, ", magnetisations[_epsilon][__field][_temperature][1]);
+                fprintf(save_file, "%f, ", heat_capacities[_epsilon][__field][_temperature][0]);
+                fprintf(save_file, "%f\n", heat_capacities[_epsilon][__field][_temperature][1]);
+            }
         }
     }
 

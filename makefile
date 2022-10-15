@@ -1,6 +1,6 @@
 OUT_DIR = out
 CC = gcc
-CFLAGS = -lm -O3
+CFLAGS = -lm -O3 -fopenmp
 
 external_magnetic_field: src/external_field.c src/utils.c
 	$(CC) -o $(OUT_DIR)/$@ $? $(CFLAGS)
