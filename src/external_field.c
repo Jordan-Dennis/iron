@@ -37,6 +37,7 @@ ising_t *init_ising_t(
     system -> magnetic_field = magnetic_field;
     system -> temperature = temperature;
     system -> ensemble = ensemble;
+    system -> epsilon = epsilon;
     system -> length = length;
 
     return system;
@@ -158,32 +159,86 @@ float entropy_ising_t(ising_t *system)
 
 void print_ising_t(ising_t *system)
 {
-    int row, col, length = system -> length, **ensemble = system -> ensemble;
+    int length = system -> length;
+    int **ensemble = system -> ensemble;
 
+    printf("Epsilon: %f\n", system -> epsilon);
     printf("Temperature: %f\n", system -> temperature);
     printf("Magnetic Field: %f\n", system -> magnetic_field);
-    printf("Epsilon: %f\n", system -> epsilon);
 
-    for (row = 0; row < length; row++)
+    for (int row = 0; row < length; row++)
     {
-        for (col = 0; col < length; col++)
+        for (int col = 0; col < length; col++)
         {
             printf("%i,", ensemble[row][col] > 0);
         }
         printf("\n");
     }
+
+    printf("Energy: %f\n", energy_ising_t(system));
+    printf("Entropy: %f\n", entropy_ising_t(system));
+    printf("Magnetisation: %f\n", magnetisation_ising_t(system));
 }
 
 
-//void main(void)
-//{
-//    for (int _epsilon = 0; _epsilon < 3; _epsilon++)
-//    {
-//        for (int _magnetic_field = 0; _magnetic_field < 3; _epsilon++)
-//}
+void save_ising_t(FILE *save_file, ising_t *system)
+{
+    int length = system -> length;
+    int **ensemble = system -> ensemble;
+
+    fprintf(save_file, "Epsilon: %f\n", system -> epsilon);
+    fprintf(save_file, "Temperature: %f\n", system -> temperature);
+    fprintf(save_file, "Magnetic Field: %f\n", system -> magnetic_field);
+
+    for (int row = 0; row < length; row++)
+    {
+        for (int col = 0; col < length; col++)
+        {
+            fprintf(save_file, "%i,", ensemble[row][col]);
+        }
+        fprintf(save_file, "\n");
+    }
+}
 
 
-int main(void)
+void main(void)
+{
+    int length = 20;
+    int epochs = length * length * 1e3;
+    FILE *save_file = fopen("pub/data/external_field.txt", "w");
+
+    for (int _epsilon = 0; _epsilon < 3; _epsilon++)
+    {
+        for (int _field = 0; _field < 3; _field++)
+        {
+            for (int _temperature = 0; _temperature < 3; _temperature++)
+            {
+                float epsilon = (float) _epsilon - 1.0;
+                float magnetic_field = (float) _field;
+                float temperature = (float) _temperature + 1.0;
+
+                ising_t *system = init_ising_t(temperature, magnetic_field, epsilon, length);
+
+                save_ising_t(save_file, system);
+
+                for (int epoch = 0; epoch < epochs; epoch++)
+                {
+                    metropolis_step_ising_t(system);
+                }
+
+                save_ising_t(save_file, system);
+                print_ising_t(system);
+                free_ising_t(system);
+                printf("\n");
+            }
+        }
+    }
+
+    fclose(save_file);
+}
+
+
+int run(void)
 {
     // TODO: So I want to redo this entirely, I collect all of the physical 
     // parameters of the system at multiple different magnetisations and
@@ -301,25 +356,25 @@ int main(void)
 
     for (int _epsilon = 0; _epsilon < num_epsilons; _epsilon++)
     {
-        for (int __field = 0; __field < num_fields; __field++)
+        for (int _field = 0; _field < num_fields; _field++)
         {
             for (int _temperature = 0; _temperature < num_temps; _temperature++)
             {
                 float epsilon = (float) _epsilon - 1.0;
-                float _field = (float) _field;
+                float magnetic_field = (float) _field;
                 float temperature = 3.0 - (3.0 / num_temps) * _temperature;
 
-                fprintf(save_file, "%f, %f, %f, ", epsilon, _field, temperature);
-                fprintf(save_file, "%f, ", energies[_epsilon][__field][_temperature][0]);
-                fprintf(save_file, "%f, ", energies[_epsilon][__field][_temperature][1]);
-                fprintf(save_file, "%f, ", entropies[_epsilon][__field][_temperature][0]);
-                fprintf(save_file, "%f, ", entropies[_epsilon][__field][_temperature][1]);
-                fprintf(save_file, "%f, ", free_energies[_epsilon][__field][_temperature][0]);
-                fprintf(save_file, "%f, ", free_energies[_epsilon][__field][_temperature][1]);
-                fprintf(save_file, "%f, ", magnetisations[_epsilon][__field][_temperature][0]);
-                fprintf(save_file, "%f, ", magnetisations[_epsilon][__field][_temperature][1]);
-                fprintf(save_file, "%f, ", heat_capacities[_epsilon][__field][_temperature][0]);
-                fprintf(save_file, "%f\n", heat_capacities[_epsilon][__field][_temperature][1]);
+                fprintf(save_file, "%f, %f, %f, ", epsilon, magnetic_field, temperature);
+                fprintf(save_file, "%f, ", energies[_epsilon][_field][_temperature][0]);
+                fprintf(save_file, "%f, ", energies[_epsilon][_field][_temperature][1]);
+                fprintf(save_file, "%f, ", entropies[_epsilon][_field][_temperature][0]);
+                fprintf(save_file, "%f, ", entropies[_epsilon][_field][_temperature][1]);
+                fprintf(save_file, "%f, ", free_energies[_epsilon][_field][_temperature][0]);
+                fprintf(save_file, "%f, ", free_energies[_epsilon][_field][_temperature][1]);
+                fprintf(save_file, "%f, ", magnetisations[_epsilon][_field][_temperature][0]);
+                fprintf(save_file, "%f, ", magnetisations[_epsilon][_field][_temperature][1]);
+                fprintf(save_file, "%f, ", heat_capacities[_epsilon][_field][_temperature][0]);
+                fprintf(save_file, "%f\n", heat_capacities[_epsilon][_field][_temperature][1]);
             }
         }
     }
