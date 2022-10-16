@@ -1,5 +1,6 @@
 #include<math.h>
 #include<stdio.h>
+#include<string.h>
 #include<stdlib.h>
 #include"include/utils.h"
 
@@ -201,7 +202,7 @@ void save_ising_t(FILE *save_file, ising_t *system)
 }
 
 
-void main(void)
+void snapshots(void)
 {
     int length = 20;
     int epochs = length * length * 1e3;
@@ -234,7 +235,7 @@ void main(void)
 }
 
 
-int run(void)
+int physical_parameters(void)
 {
     // TODO: So I want to redo this entirely, I collect all of the physical 
     // parameters of the system at multiple different magnetisations and
@@ -254,11 +255,6 @@ int run(void)
     float heat_capacities[num_temps][num_fields][num_epsilons][2];
 
 
-    // TODO: So I need to finish programming the loops but then I can run this 
-    // and I should be done. Then I just need to type up the report. Sweet. 
-    // I think that this will all work out. Just gotta check the due date one 
-    // more time. 
-    #pragma omp parallel for num_threads(3)
     for (int _epsilon = 0; _epsilon < 3; _epsilon++)
     {
         float epsilon = (float) _epsilon - 1.0;
@@ -329,6 +325,17 @@ int run(void)
                 free_energies[_temperature][_field][_epsilon][1] = free_energy_err;
                 magnetisations[_temperature][_field][_epsilon][1] = magnetisation_err;
                 heat_capacities[_temperature][_field][_epsilon][1] = heat_capacity_err;
+
+// TODO: These numbers are actually looking pretty fucking good. What I 
+// need to do is divide them by the number to normalise them correctly. 
+//                printf("Epsilon: %f\n", epsilon);
+//                printf("Temperature: %f\n", temperature);
+//                printf("Magnetic Field: %f\n", magnetic_field);
+//                printf("Energy: %f\n", energy);
+//                printf("Entropy: %f\n", entropy);
+//                printf("Magnetisation: %f\n", magnetisation);
+//                printf("Free Energies: %f\n", free_energy);
+//                printf("Heat Capacities: %f\n\n", heat_capacity);
             }
 
             free_ising_t(system);
@@ -376,4 +383,27 @@ int run(void)
     }
 
     fclose(save_file);
+}
+
+
+int main(int num_args, char **args)
+{
+    if (num_args != 2)
+    {
+        printf("Error: Please provided the task name. You options are:\n");
+        printf("    - snapshots\n");
+        printf("    - physical_parameters\n");
+        exit(1);
+    }
+
+    if (strcmp(args[1], "snapshots") == 0)
+    {
+        snapshots();
+    }
+    else if (strcmp(args[1], "physical_parameters") == 0)
+    {
+        physical_parameters();
+    }
+
+    return 0;
 }
