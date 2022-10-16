@@ -75,7 +75,7 @@ void metropolis_step_ising_t(ising_t *system)
         ensemble[row][modulo(col - 1, length)];
 
     float magnetic_change = -2 * spin * magnetic_field;
-    float interaction_change = -2 * neighbours * spin;
+    float interaction_change = -2 * epsilon * neighbours * spin;
     float energy_change = magnetic_change + interaction_change;
 
     if ((energy_change < 0) || 
@@ -120,7 +120,7 @@ float energy_ising_t(ising_t *system)
             neighbours += ensemble[row][modulo(col - 1, length)];
 
             magnetic += ensemble[row][col] * magnetic_field;
-            interactions += neighbours * epsilon * ensemble[row][col];
+            interactions -= neighbours * epsilon * ensemble[row][col];
         }
     }
 
@@ -219,17 +219,13 @@ void main(void)
 
                 ising_t *system = init_ising_t(temperature, magnetic_field, epsilon, length);
 
-                save_ising_t(save_file, system);
-
                 for (int epoch = 0; epoch < epochs; epoch++)
                 {
                     metropolis_step_ising_t(system);
                 }
 
                 save_ising_t(save_file, system);
-                print_ising_t(system);
                 free_ising_t(system);
-                printf("\n");
             }
         }
     }

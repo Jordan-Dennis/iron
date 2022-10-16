@@ -2,8 +2,10 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt 
 
-mpl.rcParams['text.usetex'] = True
-
+mpl.rcParams["text.usetex"] = True
+mpl.rcParams["figure.figsize"] = (8, 10)
+mpl.rcParams["figure.subplot.hspace"] = 0.1
+mpl.rcParams["figure.subplot.wspace"] = 0.0
 
 def _print_tensor(tensor: list) -> None:
     def _tensor_depth(tensor: list) -> int:
@@ -49,6 +51,7 @@ def _parse_ising_system(file: str) -> list:
                 magnetic_fields.append(line.split(":")[-1].strip())
         else:
             system.append([int(i) for i in line.strip().strip(",").split(",")])
+    systems.append(system)
     
     return systems, epsilons, temperatures, magnetic_fields
 
@@ -59,19 +62,22 @@ with open("pub/data/external_field.txt") as field:
 
 index = 0
 for epsilon in range(3):
+    figure, axes = plt.subplots(3, 3)
+    plt.subplots_adjust(wspace=0.0)
+    figure.suptitle(r"$\epsilon = {0:.2f}$".format(float(epsilons[index])))
     for magnetic_field in range(3):
-        figure, axes = plt.subplots(3, 2, figsize=(10, 15))
         for temperature in range(3):
-            axes[temperature][0].set_title(r"$\epsilon = {}, B = {}, \tau = {}$".format(
-                epsilons[index], magnetic_fields[index], temperatures[index]))
-            axes[temperature][0].imshow(systems[index])
+            if magnetic_field == 0:
+                ytitle = r"$\tau = {0:.2f}$".format(float(temperatures[index]))
+                axes[temperature][magnetic_field].set_ylabel(ytitle)
 
+            if temperature == 2:
+                xtitle = r"$B = {0:.2f}$".format(float(magnetic_fields[index]))
+                axes[temperature][magnetic_field].set_xlabel(xtitle)
+
+            axes[temperature][magnetic_field].imshow(systems[index])
+            axes[temperature][magnetic_field].set_xticks([])
+            axes[temperature][magnetic_field].set_yticks([])
             index += 1
-
-            axes[temperature][1].set_title(r"$\epsilon = {}, B = {}, \tau = {}$".format(
-                epsilons[index], magnetic_fields[index], temperatures[index]))
-            axes[temperature][1].imshow(systems[index])
-
-            index += 1
-        plt.show()
+    plt.show()
 
