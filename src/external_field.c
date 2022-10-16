@@ -75,7 +75,7 @@ void metropolis_step_ising_t(ising_t *system)
         ensemble[row][modulo(col - 1, length)];
 
     float magnetic_change = -2 * spin * magnetic_field;
-    float interaction_change = -2 * epsilon * neighbours * spin;
+    float interaction_change = 2 * epsilon * neighbours * spin;
     float energy_change = magnetic_change + interaction_change;
 
     if ((energy_change < 0) || 

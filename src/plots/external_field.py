@@ -7,6 +7,7 @@ mpl.rcParams["figure.figsize"] = (8, 10)
 mpl.rcParams["figure.subplot.hspace"] = 0.1
 mpl.rcParams["figure.subplot.wspace"] = 0.0
 
+
 def _print_tensor(tensor: list) -> None:
     def _tensor_depth(tensor: list) -> int:
         def __tensor_depth(tensor: list, depth: int) -> int:
@@ -55,29 +56,45 @@ def _parse_ising_system(file: str) -> list:
     
     return systems, epsilons, temperatures, magnetic_fields
 
-with open("pub/data/external_field.txt") as field:
-    systems, epsilons, temperatures, magnetic_fields = _parse_ising_system(field)
 
 
 
-index = 0
-for epsilon in range(3):
-    figure, axes = plt.subplots(3, 3)
-    plt.subplots_adjust(wspace=0.0)
-    figure.suptitle(r"$\epsilon = {0:.2f}$".format(float(epsilons[index])))
-    for magnetic_field in range(3):
-        for temperature in range(3):
-            if magnetic_field == 0:
-                ytitle = r"$\tau = {0:.2f}$".format(float(temperatures[index]))
-                axes[temperature][magnetic_field].set_ylabel(ytitle)
+def snapshots(data_file: str, show: bool, save_file: list = None) -> None:
+    with open(f"pub/data/{data_file}") as field:
+        systems, epsilons, temperatures, magnetic_fields = _parse_ising_system(field)
 
-            if temperature == 2:
-                xtitle = r"$B = {0:.2f}$".format(float(magnetic_fields[index]))
-                axes[temperature][magnetic_field].set_xlabel(xtitle)
+    index = 0
+    for epsilon in range(3):
+        figure, axes = plt.subplots(3, 3)
+        plt.subplots_adjust(wspace=0.0)
+        figure.suptitle(r"$\epsilon = {0:.2f}$".format(float(epsilons[index])))
+        for magnetic_field in range(3):
+            for temperature in range(3):
+                if magnetic_field == 0:
+                    ytitle = r"$\tau = {0:.2f}$".format(float(temperatures[index]))
+                    axes[temperature][magnetic_field].set_ylabel(ytitle)
 
-            axes[temperature][magnetic_field].imshow(systems[index])
-            axes[temperature][magnetic_field].set_xticks([])
-            axes[temperature][magnetic_field].set_yticks([])
-            index += 1
-    plt.show()
+                if temperature == 2:
+                    xtitle = r"$B = {0:.2f}$".format(float(magnetic_fields[index]))
+                    axes[temperature][magnetic_field].set_xlabel(xtitle)
 
+                axes[temperature][magnetic_field].imshow(systems[index])
+                axes[temperature][magnetic_field].set_xticks([])
+                axes[temperature][magnetic_field].set_yticks([])
+                index += 1
+
+        if show:
+            plt.show()
+
+        if save_file:
+            if not isinstance(save_file, list):
+                raise ValueError("Three save files must be provided")
+
+            if len(save_file) != 3:
+                raise ValueError("Three save files must be provided")
+
+            figure.savefig("pub/figures/{save_file[epsilon]}")
+
+save_files = ["external_field_epsilon_minus_one.pdf", 
+    "external_field_epsilon_zero.pdf", "external_field_epsilon_one.pdf"]
+snapshots("external_field.txt", True, save_files)
