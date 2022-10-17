@@ -243,6 +243,7 @@ int physical_parameters(void)
     // The magnetic susceptibility to make this proper lit. 
     const int runs = 5;
     const int length = 20;
+    const int num = length * length;
     const int epochs = length * 1e3;
     const int num_temps = 10;
     const int num_fields = 3;
@@ -308,34 +309,23 @@ int physical_parameters(void)
                 float heat_capacity = mean(_heat_capacities, runs); 
                 float magnetisation = mean(_magnetisations, runs);
 
-                energies[_temperature][_field][_epsilon][0] = energy;
-                entropies[_temperature][_field][_epsilon][0] = entropy;
-                free_energies[_temperature][_field][_epsilon][0] = free_energy;
-                magnetisations[_temperature][_field][_epsilon][0] = magnetisation;
-                heat_capacities[_temperature][_field][_epsilon][0] = heat_capacity;
+                energies[_temperature][_field][_epsilon][0] = energy / num;
+                entropies[_temperature][_field][_epsilon][0] = entropy / num;
+                free_energies[_temperature][_field][_epsilon][0] = free_energy / num;
+                magnetisations[_temperature][_field][_epsilon][0] = magnetisation / num;
+                heat_capacities[_temperature][_field][_epsilon][0] = heat_capacity / num;
 
-                float energy_err = variance(_energies, energy, runs);
-                float entropy_err = variance(_entropies, entropy, runs);
-                float free_energy_err = energy_err + temperature * entropy_err;
+                float energy_err = sqrt(variance(_energies, energy, runs) / runs);
+                float entropy_err = sqrt(variance(_entropies, entropy, runs) / runs);
+                float free_energy_err = sqrt(energy_err + temperature * entropy_err / runs);
                 float heat_capacity_err = variance(_heat_capacities, heat_capacity, runs); 
-                float magnetisation_err = variance(_magnetisations, magnetisation, runs);
+                float magnetisation_err = sqrt(variance(_magnetisations, magnetisation, runs) / runs);
 
-                energies[_temperature][_field][_epsilon][1] = energy_err;
-                entropies[_temperature][_field][_epsilon][1] = entropy_err;
-                free_energies[_temperature][_field][_epsilon][1] = free_energy_err;
-                magnetisations[_temperature][_field][_epsilon][1] = magnetisation_err;
-                heat_capacities[_temperature][_field][_epsilon][1] = heat_capacity_err;
-
-// TODO: These numbers are actually looking pretty fucking good. What I 
-// need to do is divide them by the number to normalise them correctly. 
-//                printf("Epsilon: %f\n", epsilon);
-//                printf("Temperature: %f\n", temperature);
-//                printf("Magnetic Field: %f\n", magnetic_field);
-//                printf("Energy: %f\n", energy);
-//                printf("Entropy: %f\n", entropy);
-//                printf("Magnetisation: %f\n", magnetisation);
-//                printf("Free Energies: %f\n", free_energy);
-//                printf("Heat Capacities: %f\n\n", heat_capacity);
+                energies[_temperature][_field][_epsilon][1] = energy_err / num;
+                entropies[_temperature][_field][_epsilon][1] = entropy_err / num;
+                free_energies[_temperature][_field][_epsilon][1] = free_energy_err / num;
+                magnetisations[_temperature][_field][_epsilon][1] = magnetisation_err / num;
+                heat_capacities[_temperature][_field][_epsilon][1] = heat_capacity_err / num;
             }
 
             free_ising_t(system);
@@ -367,17 +357,18 @@ int physical_parameters(void)
                 float magnetic_field = (float) _field;
                 float temperature = 3.0 - (3.0 / num_temps) * _temperature;
 
+                // RODO: I need to fix these so that it is _temperature, _field, _epsilon 
                 fprintf(save_file, "%f, %f, %f, ", epsilon, magnetic_field, temperature);
-                fprintf(save_file, "%f, ", energies[_epsilon][_field][_temperature][0]);
-                fprintf(save_file, "%f, ", energies[_epsilon][_field][_temperature][1]);
-                fprintf(save_file, "%f, ", entropies[_epsilon][_field][_temperature][0]);
-                fprintf(save_file, "%f, ", entropies[_epsilon][_field][_temperature][1]);
-                fprintf(save_file, "%f, ", free_energies[_epsilon][_field][_temperature][0]);
-                fprintf(save_file, "%f, ", free_energies[_epsilon][_field][_temperature][1]);
-                fprintf(save_file, "%f, ", magnetisations[_epsilon][_field][_temperature][0]);
-                fprintf(save_file, "%f, ", magnetisations[_epsilon][_field][_temperature][1]);
-                fprintf(save_file, "%f, ", heat_capacities[_epsilon][_field][_temperature][0]);
-                fprintf(save_file, "%f\n", heat_capacities[_epsilon][_field][_temperature][1]);
+                fprintf(save_file, "%f, ", energies[_temperature][_field][_epsilon][0]);
+                fprintf(save_file, "%f, ", energies[_temperature][_field][_epsilon][1]);
+                fprintf(save_file, "%f, ", entropies[_temperature][_field][_epsilon][0]);
+                fprintf(save_file, "%f, ", entropies[_temperature][_field][_epsilon][1]);
+                fprintf(save_file, "%f, ", free_energies[_temperature][_field][_epsilon][0]);
+                fprintf(save_file, "%f, ", free_energies[_temperature][_field][_epsilon][1]);
+                fprintf(save_file, "%f, ", magnetisations[_temperature][_field][_epsilon][0]);
+                fprintf(save_file, "%f, ", magnetisations[_temperature][_field][_epsilon][1]);
+                fprintf(save_file, "%f, ", heat_capacities[_temperature][_field][_epsilon][0]);
+                fprintf(save_file, "%f\n", heat_capacities[_temperature][_field][_epsilon][1]);
             }
         }
     }
