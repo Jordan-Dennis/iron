@@ -5,10 +5,19 @@
 #include"include/utils.h"
 
 
-// TODO: So this is clearly not working because the line along 0 magnetic 
-// field is not behaving as I would expect. 
-
-
+/*
+ * ising_t
+ * -------
+ * Represents an arbitrary ising spin lattice in two dimensions. 
+ *
+ * parameters
+ * ----------
+ * float temperature: The temperature of the lattice.
+ * float epsilon: The coupling coefficient of the spins.
+ * float magnetic_field: The external magentic field the system is in.
+ * int length: The length along one side of the system.
+ * int **ensemble: A pointer to the array of spins that represents the system. 
+ */
 typedef struct ising_t 
 {
     float temperature;
@@ -19,6 +28,23 @@ typedef struct ising_t
 } ising_t;
 
 
+/*
+ * init_ising_t
+ * ------------
+ * Construct an ising system. 
+ *
+ * parameters
+ * ----------
+ * float temperature: The temperature of the system. 
+ * float magnetic_field: The magnetic field of the system.
+ * float epsilon: The coupling coefficient of the system. 
+ * int length: The length along one side of the system. 
+ *
+ * returns 
+ * -------
+ * ising_t *system: A system so that the spin lattice has been randomly 
+ *      initialised.
+ */
 ising_t *init_ising_t(
     float temperature, 
     float magnetic_field, 
@@ -45,6 +71,15 @@ ising_t *init_ising_t(
 }
 
 
+/*
+ * free_ising_t
+ * ------------
+ * A destructor for the memory that is occupied by the ising system. 
+ * 
+ * parameters
+ * ----------
+ * ising_t *system: The system to clear from memory.
+ */
 void free_ising_t(ising_t *system)
 {
     int length = system -> length;
@@ -57,6 +92,17 @@ void free_ising_t(ising_t *system)
 }
 
 
+/*
+ * metropolis_step_ising_t
+ * -----------------------
+ * Evolve the system according to a randomly weighted spin flip that 
+ * compares the probability of the two states based on the Boltzmann 
+ * distribution of the two systems. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to evolve. 
+ */
 void metropolis_step_ising_t(ising_t *system)
 {
     int length = system -> length;
@@ -87,6 +133,15 @@ void metropolis_step_ising_t(ising_t *system)
 }
 
 
+/*
+ * magnetisation_ising_t
+ * ---------------------
+ * Calculate the net magnetisation of the ising system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure.
+ */
 float magnetisation_ising_t(ising_t *system)
 {
     int **ensemble = system -> ensemble;
@@ -101,6 +156,15 @@ float magnetisation_ising_t(ising_t *system)
 }
 
 
+/*
+ * energy_ising_t
+ * --------------
+ * Calculate the energy of the isingn system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure. 
+ */
 float energy_ising_t(ising_t *system)
 {
     int length = system -> length;
@@ -129,6 +193,15 @@ float energy_ising_t(ising_t *system)
 }
 
 
+/*
+ * entropy_ising_t
+ * --------------
+ * Calculate the entropy of the ising system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure. 
+ */
 float entropy_ising_t(ising_t *system)
 {
     int len = system -> length;
@@ -158,6 +231,16 @@ float entropy_ising_t(ising_t *system)
 }
 
 
+/*
+ * print_ising_t
+ * -------------
+ * A usefull debugging function to print the system as it is now 
+ * including measurements of its physical parameters.
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure. 
+ */
 void print_ising_t(ising_t *system)
 {
     int length = system -> length;
@@ -182,6 +265,16 @@ void print_ising_t(ising_t *system)
 }
 
 
+/*
+ * save_ising_t
+ * ------------
+ * Save the current spin configuration to a file. 
+ *
+ * parameters
+ * ----------
+ * FILE *save_file: The file to save the system to.
+ * ising_t *system: The system to save.
+ */
 void save_ising_t(FILE *save_file, ising_t *system)
 {
     int length = system -> length;
@@ -202,6 +295,12 @@ void save_ising_t(FILE *save_file, ising_t *system)
 }
 
 
+/*
+ * snapshots
+ * ---------
+ * Take snapshots of a configuration of spins at different temperatures 
+ * and magnetic field strengths. 
+ */
 void snapshots(void)
 {
     int length = 20;
@@ -235,12 +334,14 @@ void snapshots(void)
 }
 
 
-int physical_parameters(void)
+/*
+ * physical_parameters
+ * -------------------
+ * Measure the physical parameters of the system for various temperatures,
+ * coupling coefficients and magnetic_field strengths.
+ */
+void physical_parameters(void)
 {
-    // TODO: So I want to redo this entirely, I collect all of the physical 
-    // parameters of the system at multiple different magnetisations and
-    // plot these in a contour like way on the chart. Also need to add in 
-    // The magnetic susceptibility to make this proper lit. 
     const int runs = 5;
     const int length = 20;
     const int num = length * length;
