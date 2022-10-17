@@ -326,6 +326,12 @@ int physical_parameters(void)
                 free_energies[_temperature][_field][_epsilon][1] = free_energy_err / num;
                 magnetisations[_temperature][_field][_epsilon][1] = magnetisation_err / num;
                 heat_capacities[_temperature][_field][_epsilon][1] = heat_capacity_err / num;
+
+
+                if (epsilon == 1.0)
+                {
+                    printf("Energy: %f\n", energy);
+                }
             }
 
             free_ising_t(system);
