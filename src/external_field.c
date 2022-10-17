@@ -108,13 +108,13 @@ float energy_ising_t(ising_t *system)
     float epsilon = system -> epsilon;
     float magnetic_field = system -> magnetic_field;
     float magnetic = 0.0;
-    float neighbours = 0.0;
     float interactions = 0.0;
 
     for (int row = 0; row < length; row++)
     {
         for (int col = 0; col < length; col++)
         {
+            float neighbours = 0.0;
             neighbours += ensemble[modulo(row + 1, length)][col];
             neighbours += ensemble[modulo(row - 1, length)][col];
             neighbours += ensemble[row][modulo(col + 1, length)];
@@ -331,6 +331,7 @@ int physical_parameters(void)
                 if (epsilon == 1.0)
                 {
                     printf("Energy: %f\n", energy);
+                    print_ising_t(system);
                 }
             }
 
