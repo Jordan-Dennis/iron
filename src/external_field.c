@@ -503,6 +503,11 @@ int main(int num_args, char **args)
     {
         physical_parameters();
     }
+    else
+    {
+        printf("Error: Invalid mode specified!\n");
+        exit(1);
+    }
 
     return 0;
 }

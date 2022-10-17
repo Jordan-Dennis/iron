@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt 
@@ -93,8 +94,30 @@ def snapshots(data_file: str, show: bool, save_file: list = None) -> None:
             if len(save_file) != 3:
                 raise ValueError("Three save files must be provided")
 
-            figure.savefig("pub/figures/{save_file[epsilon]}")
+            figure.savefig(f"pub/figures/{save_file[epsilon]}")
 
-save_files = ["external_field_epsilon_minus_one.pdf", 
-    "external_field_epsilon_zero.pdf", "external_field_epsilon_one.pdf"]
-snapshots("external_field.txt", True, save_files)
+
+def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
+    with open(f"pub/data/{data_file}") as parameters:
+        headers = next(parameters)
+        data = [[float(i) for i in line.strip().split(",")] for line in parameters]
+        data = [list(x) for x in zip(*data)]
+        data = dict(zip(headers, data))
+
+    fig, axes = plt.subplots(5, 3)
+    # So along the first axes[0] I want to do 
+    axes[0][0]
+
+
+
+def main(mode: str) -> None:
+    if mode == "snapshots":
+        save_files = ["external_field_epsilon_minus_one.pdf", 
+            "external_field_epsilon_zero.pdf", "external_field_epsilon_one.pdf"]
+        snapshots("external_field.txt", True, save_files)
+
+    elif mode == "physical_parameters":
+        physical_parameters("external_field.csv", True, "physical_parameters_external_field.pdf")
+
+option = sys.argv[1]
+main(option)
