@@ -4,10 +4,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt 
 
 mpl.rcParams["text.usetex"] = True
-mpl.rcParams["figure.figsize"] = (8, 10)
-mpl.rcParams["figure.subplot.hspace"] = 0.1
-mpl.rcParams["figure.subplot.wspace"] = 0.0
-
 
 def _print_tensor(tensor: list) -> None:
     def _tensor_depth(tensor: list) -> int:
@@ -61,6 +57,10 @@ def _parse_ising_system(file: str) -> list:
 
 
 def snapshots(data_file: str, show: bool, save_file: list = None) -> None:
+    mpl.rcParams["figure.figsize"] = (8, 10)
+    mpl.rcParams["figure.subplot.hspace"] = 0.1
+    mpl.rcParams["figure.subplot.wspace"] = 0.0
+
     with open(f"pub/data/{data_file}") as field:
         systems, epsilons, temperatures, magnetic_fields = _parse_ising_system(field)
 
@@ -101,13 +101,34 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     with open(f"pub/data/{data_file}") as parameters:
         headers = next(parameters)
         data = [[float(i) for i in line.strip().split(",")] for line in parameters]
-        data = [list(x) for x in zip(*data)]
-        data = dict(zip(headers, data))
+        data = np.array(data)
 
-    fig, axes = plt.subplots(5, 3)
-    # So along the first axes[0] I want to do 
-    axes[0][0]
-
+    fig, axes = plt.subplots(5, 3, sharex = "col", sharey = "row")
+    for _epsilon in range(3):
+        epsilon = _epsilon - 1
+        epsilon_cond = data[:, 0] == epsilon
+        for magnetic_field in range(3):
+            field_cond = data[:, 1] == magnetic_field
+            subset = data[epsilon_cond & field_cond, :]
+            axes[0][_epsilon].errorbar(subset[:, 2], subset[:, 3], subset[:, 4])
+            axes[1][_epsilon].errorbar(subset[:, 2], subset[:, 5], subset[:, 6])
+            axes[2][_epsilon].errorbar(subset[:, 2], subset[:, 7], subset[:, 8])
+            axes[3][_epsilon].errorbar(subset[:, 2], subset[:, 9], subset[:, 10])
+            axes[4][_epsilon].plot(subset[:, 2], subset[:, 11])
+            
+    axes[0][0].set_ylabel(r"$\textrm{Energy} (J)$")
+    axes[1][0].set_ylabel(r"$\textrm{Entropy} (JK^{-1})$")
+    axes[2][0].set_ylabel(r"$\textrm{Free Energy} (J)$")
+    axes[3][0].set_ylabel(r"$\textrm{Magnetisation}$")
+    axes[4][0].set_ylabel(r"$\textrm{Heat Capacity} (JK^{-1})$")
+    axes[4][0].set_xlabel(r"$\textrm{Temperature} (J)$")
+    axes[4][1].set_xlabel(r"$\textrm{Temperature} (J)$")
+    axes[4][2].set_xlabel(r"$\textrm{Temperature} (J)$")
+    axes[0][0].set_title(r"$\epsilon = -1$")
+    axes[0][1].set_title(r"$\epsilon = 0$")
+    axes[0][2].set_title(r"$\epsilon = 1$")
+    fig.legend(["$B = 0$", "$B = 1$", "$B = 2$"])
+    plt.show()
 
 
 def main(mode: str) -> None:

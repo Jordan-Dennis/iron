@@ -6,80 +6,273 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{multicol}
+\def\citation{{\bfseries (Annon, dd/mm/yyyy)}}
 \begin{document}
-
     \begin{multicols}{2}
-        Given the partition function \(Z = (2\cosh(\epsilon / \tau))^{N}\), we 
-        calculated the internal energy using,
+    \section*{Introduction}
+        The study of magnetic materials is an area of academic %
+        and industrial interest \citation. For example, magnetic %
+        technologies are important in the ongoing development of %
+        quantum computers, superconducting circuits and other %
+        examples in electronics \citation. At a fundamental level %
+        magnetisation is a well understood phenomenon, yet it is %
+        difficult to theoretically model. One simple model of magnetic %
+        materials is the Ising model. 
+
+
+        The Ising model is the simplest model of a ferro-magnet \citation. %
+        Despite the simplicity of the Ising model it displays rich %
+        physical behaviour and has analytic solutions in one and %
+        two dimensions \citation.  The Ising model is the simplest model %
+        to account for inter-molecular interactions and contain a phase %
+        transition. This makes it an excellent medium for studying %
+        magnetic phenomenon \citation. 
+
+
+        By modifying the basic Ising model we can simulate many %
+        phenomenon including glasses \citation. The Ising model %
+        has broader significance and can be used to construct very %
+        simple neural networks called Boltzmann machines \citation. We tested %
+        one and two dimension Ising models and confirmed that they %
+        matched theoretical predictions.
+
+
+    \section*{Theory}
+        Materials have internal interactions. As physicists we like %
+        to ignore these where possible but often these approximations %
+        limit the accuracies of our models \citation. Magnetic %
+        phenomenon are no different. To understand how spins interact %
+        in a magnet it helps to first construct the simplest possible %
+        model without interactions; a para-magnet.
+
+
+        Consider our magnet as a one-dimensional chain of atomic spins. %
+        For the moment ignore any external magnetic field and just %
+        consider the spins in isolation. Now lets limit the spins to %
+        be fixed up or down along one axis. If there are no interactions %
+        between the spins the energy is fixed. If we add an external %
+        magnetic field then we would expect the ensemble to develop a %
+        net magnetisation.
+
+
+        If the system has thermal energy we would expect some of the %
+        spins to align themselves anti-parallel to the magnetic field. %
+        We can see this affect by considering the partition function %
+        for a single spin in the ensemble. If the spin is aligned with %
+        the magnetic field then the energy is \(-sB\), where \(s\) is %
+        the unit of magnetisation carried by the single spin and \(B\) %
+        is the strength of the external magnetic field. If the spin is %
+        anti-aligned with the field then the energy is \(sB\). 
+
+
+        This is a simple two level system and the partition function %
+        is given by, 
         %
         \begin{align}
-            U &= \tau^{2}\partial_{\tau}\ln(Z)\label{EQN1}\\
-                &= \tau^{2}\partial_{\tau}
-                    \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)^{N}\right)
-                    \nonumber \\
-                &= N\tau^{2}\partial_{\tau}
-                    \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
-                    \nonumber \\
-                &= N\tau^{2}\partial_{\tau}
-                    \left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
-                    \frac{1}{2\cosh\left(\frac{\epsilon}{\tau}\right)}
-                    \nonumber \\
-                &= N\tau^{2}\partial_{\tau}\left(\frac{\epsilon}{\tau}\right)
-                    \frac{\sinh\left(\frac{\epsilon}{\tau}\right)}
-                    {\cosh\left(\frac{\epsilon}{\tau}\right)}\nonumber \\
-                &= -\epsilon N\tanh\left(\frac{\epsilon}{\tau}\right)
-                    \label{EQN2}.
+            Z &= \sum_{s = \pm 1}\exp\left(-\frac{sB}{\tau}\right)\nonumber\\
+                &= \exp\left(-\frac{sB}{\tau}\right) + 
+                    \exp\left(\frac{sB}{\tau}\right)\nonumber\\
+                &= 2\cosh\left(\frac{sB}{\tau}\right),
+            \label{eqn:1}
         \end{align}
         %
-        We calculated the free energy of the system using,
+        where, \(\tau = kT\) is the temperature in units of energy. %
+        The probability of the spins being anti-aligned with the %
+        field is therefore, 
         %
         \begin{align}
-            F &= -\tau\ln Z \label{EQN3}\\
-                &= -\tau\ln\left(\left(
-                    2\cosh\left(\frac{\epsilon}{\tau}\right)\right)^{N}\right) 
-                    \nonumber \\
-                &= -N\tau\ln\left(
-                    2\cosh\left(\frac{\epsilon}{\tau}\right)\right) 
-                    \nonumber \\
-                &= -N\tau\ln\left(
-                    \exp\left(\frac{\epsilon}{\tau}\right) + 
-                    \exp\left(-\frac{\epsilon}{\tau}\right)\right) \nonumber \\
-                &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)
-                    \left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
-                    \right)\nonumber \\
-                &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)\right)
-                    - N\tau\ln\left(1 + 
-                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right) \nonumber \\
-                &= -N\epsilon - N\tau\ln\left(1 + 
-                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right)\label{EQN4}. 
+            P &= \frac{\exp\left(-\frac{sB}{\tau}\right)}
+                    {2\cosh\left(\frac{sB}{\tau}\right)}.
+            \label{eqn:2}
         \end{align}
         %
-        The entropy followed from the combination of Equation \ref{EQN4} and %
-        Equation \ref{EQN2} using Equation \ref{EQN5},
+        Hence, as the temperature increase we expect the number of %
+        anti-aligned spins to increase and as we increase the %
+        magnetic field we expect the number of anti-aligned spins %
+        to decrease. 
+
+
+        Since each of the spins in a para-magnetic system is independent %
+        the partition function of an ensemble of \(N\) spins is just %
+        the product of \(N\) partition functions for the single spin %
+        case. However, since the spins are indistinguishable we must %
+        also divide by a Gibbs correction factor of \(N!\). %
+        The probability of finding a particular state however, %
+        is a case that is worth studying, since it indicates a %
+        diveregence between the Ising model of a ferro-magnet and %
+        a para-magnet in a magnetic field. First we need to define %
+        our state. 
+
+
+        % TODO: These need fixing to include the gibbs correction 
+        % factor. 
+        The energy of the system, and any other physical %
+        parameters, only depend on the number of spins that are %
+        aligned with the magnetic field and not specifically %
+        which spins are aligned with the field. Naively we might %
+        expect that the probability of having \(N_{\uparrow}\) %
+        spins aligned with the field would be,
         %
         \begin{align}
-            \tau\sigma &= F - U \label{EQN5} \\
-                &= -N\epsilon\tanh\left(\frac{\epsilon}{\tau}\right) + 
-                    N\epsilon + N\tau\ln\left(1 + 
-                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right)\nonumber \\
-            \sigma &= \frac{\epsilon}{\tau}\left(1 - 
-                    \tanh\left(\frac{\epsilon}{\tau}\right)\right) +
-                    \ln\left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
-                    \label{EQN6}.
-        \end{align} 
+            P(N_{\uparrow}) &= \frac{
+                    \exp\left(-\frac{sN_{\uparrow}B}{\tau}\right)
+                    \exp\left(\frac{s(N - N_{\uparrow})B}{\tau}\right)}{
+                    \cosh\left(\frac{sB}{\tau}\right)^{N}}.
+            \label{eqn:3}
+        \end{align}
         %
-        Finally, we determined the specific heat using Equation \ref{EQN7} %
-        and Equation \ref{EQN2},
+        However, equation \ref{eqn:3} has failed to account for the %
+        multiple micro-states that occupy this macro-state. We can %
+        account for this by multiplying by the multiplicity, which %
+        can be found using the chose function,
         %
         \begin{align}
-            C &= \partial_{\tau}U\label{EQN7}\\
-                &= \partial_{\tau}\left(-N\epsilon\tanh\left(
-                    \frac{\epsilon}{\tau}\right)\right)\nonumber\\
-                &= -N\epsilon\partial_{\tau}\left(\frac{\epsilon}{\tau}\right)
-                    \frac{1}{\cosh^{2}\left(\frac{\epsilon}{\tau}\right)}
-                    \nonumber\\
-                &= \frac{N\epsilon^{2}}{\tau^{2}\cosh^{2}\left(
-                    \frac{\epsilon}{\tau}\right)}\label{EQN8}.
-        \end{align}    
-    \end{multicols}
+            P(N_{\uparrow}) &= \frac{N!}{N_{\uparrow}!(N - N_{\uparrow})!}
+                    \frac{\exp\left(-\frac{sN_{\uparrow}B}{\tau}\right)
+                    \exp\left(\frac{s(N - N_{\uparrow})B}{\tau}\right)}{
+                    \cosh\left(\frac{sB}{\tau}\right)^{N}}.
+            \label{eqn:4}
+        \end{align}
+        %
+        Equation \ref{eqn:4} is the correct expression for the probability.
+
+
+        % TODO: I need to complete the goals that I outline in this 
+        % paragraph. 
+        We can also determine the energy of the system and the entropy. %
+        Using the free energy we can also find the equilibrium state and %
+        hence determine the equilibrium properties of the system as a %
+        function of the temperature.
+
+
+        % TODO: For no external magnetic field is there a theoretical 
+        % derivation that I can do for the anti-ferromagnetic case?
+
+
+        Para-magnets are a useful toy model but from our experience %
+        with natural and manufactured magnets we know that it is %
+        possibe to construct systems that are magnetic without external %
+        fields. The one-dimensional Ising model is a simple model of %
+        such systems. The Ising model is a natural extension of the %
+        paramagnetic model that we discussed, and operates on the same %
+        spin lattice. 
+
+
+        The Ising model differs because it adds very simple interactions %
+        between neighbouring spins. This interaction favours pairs that %
+        are aligned by reducing the energy of this scenario. Representing %
+        up spins as \(+1\) and down spins as \(-1\) we can represent this %
+        mutal interaction as \(\Delta \epsilon = \varepsilon s_{i}s_{i + 1}\), %
+        where \(\Delta \epsilon\) is the energy contribution of the %
+        interaction, \(\varepsilon\) is a scaling factor that represents %
+        the strength of the interaction and \(s_{i}\) is the \(i^{th}\) %
+        spin in the chain. 
+
+
+        % TODO: Add the case where there is an external magnetic field and 
+        % see if I can solve it. This will be cool to do. 
+        An obvious way that this differs from the para-magnetic model %
+        is that each spin can be independently resolved, and hence %
+        the Gibbs correction function is no longer needed. Let's isolate %
+        the case we are considering from a magnetic field as this simplifies %
+        the calculations. Again we start be considering the partition %
+        function of an individual spin, 
+        \end{multicols}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%        Given the partition function \(Z = (2\cosh(\epsilon / \tau))^{N}\), we 
+%        calculated the internal energy using,
+%        %
+%        \begin{align}
+%            U &= \tau^{2}\partial_{\tau}\ln(Z)\label{EQN1}\\
+%                &= \tau^{2}\partial_{\tau}
+%                    \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)^{N}\right)
+%                    \nonumber \\
+%                &= N\tau^{2}\partial_{\tau}
+%                    \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
+%                    \nonumber \\
+%                &= N\tau^{2}\partial_{\tau}
+%                    \left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
+%                    \frac{1}{2\cosh\left(\frac{\epsilon}{\tau}\right)}
+%                    \nonumber \\
+%                &= N\tau^{2}\partial_{\tau}\left(\frac{\epsilon}{\tau}\right)
+%                    \frac{\sinh\left(\frac{\epsilon}{\tau}\right)}
+%                    {\cosh\left(\frac{\epsilon}{\tau}\right)}\nonumber \\
+%                &= -\epsilon N\tanh\left(\frac{\epsilon}{\tau}\right)
+%                    \label{EQN2}.
+%        \end{align}
+%        %
+%        We calculated the free energy of the system using,
+%        %
+%        \begin{align}
+%            F &= -\tau\ln Z \label{EQN3}\\
+%                &= -\tau\ln\left(\left(
+%                    2\cosh\left(\frac{\epsilon}{\tau}\right)\right)^{N}\right) 
+%                    \nonumber \\
+%                &= -N\tau\ln\left(
+%                    2\cosh\left(\frac{\epsilon}{\tau}\right)\right) 
+%                    \nonumber \\
+%                &= -N\tau\ln\left(
+%                    \exp\left(\frac{\epsilon}{\tau}\right) + 
+%                    \exp\left(-\frac{\epsilon}{\tau}\right)\right) \nonumber \\
+%                &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)
+%                    \left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
+%                    \right)\nonumber \\
+%                &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)\right)
+%                    - N\tau\ln\left(1 + 
+%                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right) \nonumber \\
+%                &= -N\epsilon - N\tau\ln\left(1 + 
+%                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right)\label{EQN4}. 
+%        \end{align}
+%        %
+%        The entropy followed from the combination of Equation \ref{EQN4} and %
+%        Equation \ref{EQN2} using Equation \ref{EQN5},
+%        %
+%        \begin{align}
+%            \tau\sigma &= F - U \label{EQN5} \\
+%                &= -N\epsilon\tanh\left(\frac{\epsilon}{\tau}\right) + 
+%                    N\epsilon + N\tau\ln\left(1 + 
+%                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right)\nonumber \\
+%            \sigma &= \frac{\epsilon}{\tau}\left(1 - 
+%                    \tanh\left(\frac{\epsilon}{\tau}\right)\right) +
+%                    \ln\left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
+%                    \label{EQN6}.
+%        \end{align} 
+%        %
+%        Finally, we determined the specific heat using Equation \ref{EQN7} %
+%        and Equation \ref{EQN2},
+%        %
+%        \begin{align}
+%            C &= \partial_{\tau}U\label{EQN7}\\
+%                &= \partial_{\tau}\left(-N\epsilon\tanh\left(
+%                    \frac{\epsilon}{\tau}\right)\right)\nonumber\\
+%                &= -N\epsilon\partial_{\tau}\left(\frac{\epsilon}{\tau}\right)
+%                    \frac{1}{\cosh^{2}\left(\frac{\epsilon}{\tau}\right)}
+%                    \nonumber\\
+%                &= \frac{N\epsilon^{2}}{\tau^{2}\cosh^{2}\left(
+%                    \frac{\epsilon}{\tau}\right)}\label{EQN8}.
+%        \end{align}    
+%    \end{multicols}
 \end{document}
