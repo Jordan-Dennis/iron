@@ -176,103 +176,125 @@
         the Gibbs correction function is no longer needed. Let's isolate %
         the case we are considering from a magnetic field as this simplifies %
         the calculations. Again we start be considering the partition %
-        function of an individual spin, 
-        \end{multicols}
+        function of an individual pair. Similarly to the para-magnetic case %
+        this is a two level system; either the pair are aligned or they %
+        are anti-aligned with the corresponding energies.
+        %
+        \begin{align}
+            Z_{i} &= \sum_{s_{i} = \pm 1}
+                    \exp\left(-\frac{\varepsilon s_{i}s_{i+1}}{\tau}\right)
+                    \nonumber\\
+                &= \exp\left(-\frac{\varepsilon}{\tau}\right) +
+                    \exp\left(\frac{\varepsilon}{\tau}\right)
+                    \nonumber\\
+                &= 2\cosh\left(\frac{\varepsilon}{\tau}\right).
+           \label{eqn:5}
+        \end{align}
+        %
+        It is worth noting the strong similarity between equations %
+        \ref{eqn:5} and \ref{eqn:1}. 
 
 
+        Similarly to the para-magnetic case we can multiply the system %
+        partition functions of single constituents together to get the %
+        partition function of the entire system. However, the condition %
+        to do this was that the constiutuents were independent, but the %
+        Ising model contains interactions. In the case of the Ising model %
+        the constituents that are independent are the pairs, not the %
+        individual spins. You may think think then that we only consider %
+        \(N / 2\) unique pairs but this is not the case. In a chain each %
+        spin is counted in two pairs so the power is still \(N\). 
 
 
+        A small detail that I skipped was what happens at the boundary. %
+        The two spins on the end of the chains are not (neccessarily) %
+        counted twice. In the limit of a very large chain of spins we %
+        can see that the boundary affect will not matter however, we %
+        got about this nuance in a much more interesting way by considering %
+        cyclic boundary conditions. That is to say that the spin on the %
+        far end of the chain is a neighbour to the spin at the start of the %
+        chain and vice versa. 
 
 
+        Given the partition function \(Z = (2\cosh(\varepsilon / \tau))^{N}\), we 
+        calculated the internal energy using,
+        %
+        \begin{align}
+            U &= \tau^{2}\partial_{\tau}\ln(Z)\label{EQN1}\\
+                &= \tau^{2}\partial_{\tau}
+                    \ln\left(2\cosh\left(\frac{\varepsilon}{\tau}\right)^{N}\right)
+                    \nonumber \\
+                &= N\tau^{2}\partial_{\tau}
+                    \ln\left(2\cosh\left(\frac{\varepsilon}{\tau}\right)\right)
+                    \nonumber \\
+                &= N\tau^{2}\partial_{\tau}
+                    \left(2\cosh\left(\frac{\varepsilon}{\tau}\right)\right)
+                    \frac{1}{2\cosh\left(\frac{\varepsilon}{\tau}\right)}
+                    \nonumber \\
+                &= N\tau^{2}\partial_{\tau}\left(\frac{\varepsilon}{\tau}\right)
+                    \frac{\sinh\left(\frac{\varepsilon}{\tau}\right)}
+                    {\cosh\left(\frac{\varepsilon}{\tau}\right)}\nonumber \\
+                &= -\varepsilon N\tanh\left(\frac{\varepsilon}{\tau}\right)
+                    \label{EQN2}.
+        \end{align}
+        %
+        We calculated the free energy of the system using,
+        %
+        \begin{align}
+            F &= -\tau\ln Z \label{EQN3}\\
+                &= -\tau\ln\left(\left(
+                    2\cosh\left(\frac{\varepsilon}{\tau}\right)\right)^{N}\right) 
+                    \nonumber \\
+                &= -N\tau\ln\left(
+                    2\cosh\left(\frac{\varepsilon}{\tau}\right)\right) 
+                    \nonumber \\
+                &= -N\tau\ln\left(
+                    \exp\left(\frac{\varepsilon}{\tau}\right) + 
+                    \exp\left(-\frac{\varepsilon}{\tau}\right)\right) \nonumber \\
+                &= -N\tau\ln\left(\exp\left(\frac{\varepsilon}{\tau}\right)
+                    \left(1 + \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)
+                    \right)\nonumber \\
+                &= -N\tau\ln\left(\exp\left(\frac{\varepsilon}{\tau}\right)\right)
+                    - N\tau\ln\left(1 + 
+                    \exp\left(-2\frac{\varepsilon}{\tau}\right)\right) \nonumber \\
+                &= -N\varepsilon - N\tau\ln\left(1 + 
+                    \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)\label{EQN4}. 
+        \end{align}
+        %
+        The entropy followed from the combination of Equation \ref{EQN4} and %
+        Equation \ref{EQN2} using Equation \ref{EQN5},
+        %
+        \begin{align}
+            \tau\sigma &= F - U \label{EQN5} \\
+                &= -N\varepsilon\tanh\left(\frac{\varepsilon}{\tau}\right) + 
+                    N\varepsilon + N\tau\ln\left(1 + 
+                    \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)\nonumber \\
+            \sigma &= \frac{\varepsilon}{\tau}\left(1 - 
+                    \tanh\left(\frac{\varepsilon}{\tau}\right)\right) +
+                    \ln\left(1 + \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)
+                    \label{EQN6}.
+        \end{align} 
+        %
+        Finally, we determined the specific heat using Equation \ref{EQN7} %
+        and Equation \ref{EQN2},
+        %
+        \begin{align}
+            C &= \partial_{\tau}U\label{EQN7}\\
+                &= \partial_{\tau}\left(-N\varepsilon\tanh\left(
+                    \frac{\varepsilon}{\tau}\right)\right)\nonumber\\
+                &= -N\varepsilon\partial_{\tau}\left(\frac{\varepsilon}{\tau}\right)
+                    \frac{1}{\cosh^{2}\left(\frac{\varepsilon}{\tau}\right)}
+                    \nonumber\\
+                &= \frac{N\varepsilon^{2}}{\tau^{2}\cosh^{2}\left(
+                    \frac{\varepsilon}{\tau}\right)}\label{EQN8}.
+        \end{align}    
+        
 
+        :x
+        We have spent a lot of time discussing the one-dimensional scenario %
+        but real systems are typically higher dimensional. There is an %
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%        Given the partition function \(Z = (2\cosh(\epsilon / \tau))^{N}\), we 
-%        calculated the internal energy using,
-%        %
-%        \begin{align}
-%            U &= \tau^{2}\partial_{\tau}\ln(Z)\label{EQN1}\\
-%                &= \tau^{2}\partial_{\tau}
-%                    \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)^{N}\right)
-%                    \nonumber \\
-%                &= N\tau^{2}\partial_{\tau}
-%                    \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
-%                    \nonumber \\
-%                &= N\tau^{2}\partial_{\tau}
-%                    \left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
-%                    \frac{1}{2\cosh\left(\frac{\epsilon}{\tau}\right)}
-%                    \nonumber \\
-%                &= N\tau^{2}\partial_{\tau}\left(\frac{\epsilon}{\tau}\right)
-%                    \frac{\sinh\left(\frac{\epsilon}{\tau}\right)}
-%                    {\cosh\left(\frac{\epsilon}{\tau}\right)}\nonumber \\
-%                &= -\epsilon N\tanh\left(\frac{\epsilon}{\tau}\right)
-%                    \label{EQN2}.
-%        \end{align}
-%        %
-%        We calculated the free energy of the system using,
-%        %
-%        \begin{align}
-%            F &= -\tau\ln Z \label{EQN3}\\
-%                &= -\tau\ln\left(\left(
-%                    2\cosh\left(\frac{\epsilon}{\tau}\right)\right)^{N}\right) 
-%                    \nonumber \\
-%                &= -N\tau\ln\left(
-%                    2\cosh\left(\frac{\epsilon}{\tau}\right)\right) 
-%                    \nonumber \\
-%                &= -N\tau\ln\left(
-%                    \exp\left(\frac{\epsilon}{\tau}\right) + 
-%                    \exp\left(-\frac{\epsilon}{\tau}\right)\right) \nonumber \\
-%                &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)
-%                    \left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
-%                    \right)\nonumber \\
-%                &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)\right)
-%                    - N\tau\ln\left(1 + 
-%                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right) \nonumber \\
-%                &= -N\epsilon - N\tau\ln\left(1 + 
-%                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right)\label{EQN4}. 
-%        \end{align}
-%        %
-%        The entropy followed from the combination of Equation \ref{EQN4} and %
-%        Equation \ref{EQN2} using Equation \ref{EQN5},
-%        %
-%        \begin{align}
-%            \tau\sigma &= F - U \label{EQN5} \\
-%                &= -N\epsilon\tanh\left(\frac{\epsilon}{\tau}\right) + 
-%                    N\epsilon + N\tau\ln\left(1 + 
-%                    \exp\left(-2\frac{\epsilon}{\tau}\right)\right)\nonumber \\
-%            \sigma &= \frac{\epsilon}{\tau}\left(1 - 
-%                    \tanh\left(\frac{\epsilon}{\tau}\right)\right) +
-%                    \ln\left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
-%                    \label{EQN6}.
-%        \end{align} 
-%        %
-%        Finally, we determined the specific heat using Equation \ref{EQN7} %
-%        and Equation \ref{EQN2},
-%        %
-%        \begin{align}
-%            C &= \partial_{\tau}U\label{EQN7}\\
-%                &= \partial_{\tau}\left(-N\epsilon\tanh\left(
-%                    \frac{\epsilon}{\tau}\right)\right)\nonumber\\
-%                &= -N\epsilon\partial_{\tau}\left(\frac{\epsilon}{\tau}\right)
-%                    \frac{1}{\cosh^{2}\left(\frac{\epsilon}{\tau}\right)}
-%                    \nonumber\\
-%                &= \frac{N\epsilon^{2}}{\tau^{2}\cosh^{2}\left(
-%                    \frac{\epsilon}{\tau}\right)}\label{EQN8}.
-%        \end{align}    
-%    \end{multicols}
+    \section*{Method}
+        
+    \end{multicols}
 \end{document}
