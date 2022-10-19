@@ -478,9 +478,48 @@ function calc_entropy
         identity,
         %
         \begin{align}
-            C_{V} &= \frac{\textrm{var(U)}{\tau^{2}}
+            C_{V} &= \frac{\textrm{var(U)}{\tau^{2}}.
             \label{eqn:15}
         \end{align}
-        
+        %
+        A large part of the computational expense came from estimating the %
+        uncertainty in the physical parameters. It did not make sense to %
+        initialise the system randomly at every temperature and then wait %
+        for it to equilibrate before taking measurements. Instead we %
+        initialised the system at a high temperature where the random %
+        configuration is a good approximation to the equilibrium %
+        configuration and equilibrated it. 
+
+
+        From this higher temperature %
+        we allowed the system to evolve for \(1000N\) steps measuring %
+        the physical properties at every step. We then cooled the system %
+        by a small incremement and without re-equilibrating the system %
+        evolved it for \(1000N\) steps taking measurements every step. %
+        In this way we halved the amount of CPU time required by each run %
+        but introduced a small error by starting the system at a slightly %
+        out of equilibrium state. Given the large number of runs we believe %
+        that this error is negligible, although it is visible at lower %
+        temperatures as the heat capacity becomes over-estiamted. 
+
+
+        Another flaw of running the simulation this way was that it %
+        serialised the loops (i.e. made the next iteration depend on the %
+        state of the previous one). This prevented us from making efficient %
+        parallelisation of the inner loop, however, the outer loop was %
+        not serial and could be efficiently paralellised. After each run %
+        of \(1000N\) the average was taken for each physical parameter. 
+
+
+
+        Please note that we did not use the standard error of the %
+        \(1000N\) trials as the error. It does not make sense to do %
+        so because each state is deterministically dependent on the %
+        previous one and the sample gridding is much too fine. Instead %
+        we repeated the entire process a fixed number of times \(100\) for %
+        the one-dimensional case and used the standard error of the means %
+        from these 100 trials as the estimate of our uncertainty. Note that %
+        we defined the standard error as \(\sqrt{\textrm{Var}{N}}\). %
+
     \end{multicols}
 \end{document}
