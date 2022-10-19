@@ -104,8 +104,6 @@
         our state. 
 
 
-        % TODO: These need fixing to include the gibbs correction 
-        % factor. 
         The energy of the system, and any other physical %
         parameters, only depend on the number of spins that are %
         aligned with the magnetic field and not specifically %
@@ -137,16 +135,43 @@
         Equation \ref{eqn:4} is the correct expression for the probability.
 
 
-        % TODO: I need to complete the goals that I outline in this 
-        % paragraph. 
-        We can also determine the energy of the system and the entropy. %
-        Using the free energy we can also find the equilibrium state and %
-        hence determine the equilibrium properties of the system as a %
-        function of the temperature.
-
-
-        % TODO: For no external magnetic field is there a theoretical 
-        % derivation that I can do for the anti-ferromagnetic case?
+        It is informative to calculate the internal energy and free %
+        energy of the system. Starting with the internal energy,
+        %
+        \begin{align}
+            U &= \tau^{2}\partial_{\tau}\ln Z\nonumber\\
+                &= \tau^{2}\partial_{\tau}\ln\left(2^{N}\cosh^{N}
+                    \left(\frac{sB}{\tau}\right)\right)\nonumber\\
+                &= -NsB\tanh\left(\frac{sB}{\tau}\right).
+            \label{eqn:5}
+        \end{align}
+        %
+        We can also calculate the free energy, but further calculations %
+        result in tedious analytical expressions so we have omitted them. %
+        %
+        \begin{align}
+            F &= -\tau\ln Z\nonumber\\
+                &= -\tau\ln\left(2^{N}\cosh^{N}\left(\frac{sB}{\tau}
+                    \right)\right)\nonumber\\
+                &= -NsB - N\tau\ln\left(1 + \exp\left(-\frac{2sB}{\tau}\right)
+                    \right).
+            \label{eqn:7}
+        \end{align}
+        %
+        As we will see when we analyse the Ising model without an external %
+        field these results are general of any two level system. Using %
+        equation \ref{eqn:5} we can calculate the magnetisation as a function %
+        of the magnetic field and temperature, 
+        %
+        \begin{align}
+            U = mB &= -NsB\tanh\left(\frac{sB}{\tau}\right)\nonumber\\
+                m &= -Ns\tanh\left(\frac{sB}{\tau}\right).
+            \label{eqn:8}
+        \end{align}
+        %
+        Therefore, the net magnetisation system will decrease with %
+        temperature and increase with the magnetic field, much as we %
+        would expect. 
 
 
         Para-magnets are a useful toy model but from our experience %
@@ -169,8 +194,6 @@
         spin in the chain. 
 
 
-        % TODO: Add the case where there is an external magnetic field and 
-        % see if I can solve it. This will be cool to do. 
         An obvious way that this differs from the para-magnetic model %
         is that each spin can be independently resolved, and hence %
         the Gibbs correction function is no longer needed. Let's isolate %
@@ -288,13 +311,115 @@
                 &= \frac{N\varepsilon^{2}}{\tau^{2}\cosh^{2}\left(
                     \frac{\varepsilon}{\tau}\right)}\label{EQN8}.
         \end{align}    
+        %
+        You will immediately notice that in the absence of an external %
+        magnetic field the Ising model reduces to the model of the %
+        para-magnet. 
         
 
-        :x
+        What happens if we place the Ising model into an external magnetic %
+        field. Again we can break it down by considering a single pair %
+        in the chain as our constituent object. There are three energies %
+        that it is possible for this pair to have; parallel and aligned %
+        with the magnetic field, parallel and anti-aligned with the %
+        magnetic field and anti-parallel. However, the final state has a %
+        multiplicity of two since either of the spins could be aligned %
+        with the field. 
+
+
+        It is possible to compute the partition function for this the single %
+        pair and hence also the entrie system.
+        %
+        \begin{align}
+            Z_{1} &= \sum_{s}\exp\left(-\frac{\epsilon_{s}}{\tau}\right)
+                    \nonumber\\
+                &= \exp\left(\frac{-\epsilon - 2B}{\tau}\right) +
+                    2\exp\left(\frac{\epsilon}{\tau}\right) +
+                    \exp\left(\frac{-\epsilon + 2B}{\tau}\right)
+                    \nonumber\\
+                &= 2\exp\left(\frac{-\epsilon}{\tau}\right)
+                    \cosh\left(\frac{2B}{\tau}\right) + 
+                    2\exp\left(\frac{\epsilon}{\tau}\right).
+           \label{eqn:13}
+        \end{align}
+        %
+        From here we can compute all the physical properties of the system. %
+        Since each pair is independent the partition function is simply the %
+        product of \(N\) partition function by the same reasoning as in %
+        the case above when there was no magnetic field. We have not shown %
+        the calculation of the energy ect., because the expressions are %
+        complex and uninformative. 
+
+
+        Another interesting effect that can be explored using the Ising model %
+        is anti-ferro-magnetism. This phenomenon was only recently discovered %
+        in nature \citation and refers to and interaction between neighbouring %
+        spins that causes them to have lower energy when they are aligned %
+        anti-parallel rather than parallel. We do not need to cover any new %
+        equations in this case as an anti-ferro-magnet can be explored by %
+        letting \(\epsilon\) become negative. 
+
+
         We have spent a lot of time discussing the one-dimensional scenario %
-        but real systems are typically higher dimensional. There is an %
+        but real systems are typically higher dimensional. There is a %
+        an analytical solution to the two-dimensional ising model \citation. %
+        This solution is a tour de force and has comparatively little %
+        practical use due to its complexity. Multiple approximation methods %
+        have been developed for dealing with the two-dimensional case, %
+        most notably the mean field approximation. 
+
+
+        The mean field approximation treats a group of neighbours as an %
+        a single spin, parametrised by the mean. In this way we recover %
+        the two level system and arrive at a two level system that is %
+        very similar to what we have already covered for the para-magnet %
+        and the Ising model when there is no external magnetic field. %
+        Ultimately the mean field approximation is an approximation and %
+        its predictions are not always correct. 
+
+
+        Another aspect of higher dimensions that it is worth discussing %
+        is what counts as a neighbour. For example, in two-dimensions %
+        we could connet the spins together so that each spins is equally %
+        far from six other spins. This triangular Ising model will have %
+        markedly different behaviour than a square grid of spins \citation. %
+        For our analysis we have considered a square grid of spins since %
+        it is simpler to simulate. 
+
+
+        Without going into the complex analytical solutions we can still %
+        make useful qualitative guesses about the behaviour of the Ising %
+        model in higher dimensions based on its behaviour in lower %
+        dimensions. For example, we expect the spins will tend to align %
+        at lower temperatures and tend to disorder at higher temperatures. %
+        For the anti-ferro-magnetic case we expect the spins to become %
+        anti-aligned at low temperatures and tend to disorder at higher %
+        temperatures.
+
+
+        It is worth noting that in the presence of a magnetic field the %
+        qualitative behaviour of the anti-ferro-magnetic and ferro-magnetic %
+        Ising models becomes markedly different. The ferro-magnetic model %
+        results in a positive feedback loop as the magnetic field coerces %
+        spins to align with the field they also want to align with each other.
+        On the other hand the anti-ferro-magnet exerts a dampening effect %
+        for the opposite reason. 
+
 
     \section*{Method}
+        We started by simulating a one dimensional Ising model with no %
+        external magnetic field, which we compared to the analytic %
+        expressions derived in the theory. As we described in theory %
+        we used periodic boundary conditions and chose to implement %
+        our models using a lattice size of one-hundred spins for the %
+        most part. We chose to use one-hundred spins because it evaluated %
+        fast on our device and was large enough to be interesting. 
+
+
+        The Ising algorithm scales very non-linearly with the size of %
+        the lattice. This is because when taking a sample you want to run %
+        the system for enough iterations so that every spin has a chance %
+        to be visited many times and then average the result. 
         
     \end{multicols}
 \end{document}
