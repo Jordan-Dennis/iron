@@ -211,11 +211,11 @@
                     \exp\left(\frac{\varepsilon}{\tau}\right)
                     \nonumber\\
                 &= 2\cosh\left(\frac{\varepsilon}{\tau}\right).
-           \label{eqn:5}
+           \label{eqn:9}
         \end{align}
         %
         It is worth noting the strong similarity between equations %
-        \ref{eqn:5} and \ref{eqn:1}. 
+        \ref{eqn:9} and \ref{eqn:1}. 
 
 
         Similarly to the para-magnetic case we can multiply the system %
@@ -258,13 +258,13 @@
                     \frac{\sinh\left(\frac{\varepsilon}{\tau}\right)}
                     {\cosh\left(\frac{\varepsilon}{\tau}\right)}\nonumber \\
                 &= -\varepsilon N\tanh\left(\frac{\varepsilon}{\tau}\right)
-                    \label{EQN2}.
+                    \label{eqn:10}.
         \end{align}
         %
         We calculated the free energy of the system using,
         %
         \begin{align}
-            F &= -\tau\ln Z \label{EQN3}\\
+            F &= -\tau\ln Z \\
                 &= -\tau\ln\left(\left(
                     2\cosh\left(\frac{\varepsilon}{\tau}\right)\right)^{N}\right) 
                     \nonumber \\
@@ -281,35 +281,37 @@
                     - N\tau\ln\left(1 + 
                     \exp\left(-2\frac{\varepsilon}{\tau}\right)\right) \nonumber \\
                 &= -N\varepsilon - N\tau\ln\left(1 + 
-                    \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)\label{EQN4}. 
+                    \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)
+            \label{eqn:11}. 
         \end{align}
         %
-        The entropy followed from the combination of Equation \ref{EQN4} and %
-        Equation \ref{EQN2} using Equation \ref{EQN5},
+        The entropy followed from the combination of Equation \ref{eqn:11} and %
+        Equation \ref{eqn:10} using Equation \ref{eqn:12},
         %
         \begin{align}
-            \tau\sigma &= F - U \label{EQN5} \\
+            \tau\sigma &= F - U\\
                 &= -N\varepsilon\tanh\left(\frac{\varepsilon}{\tau}\right) + 
                     N\varepsilon + N\tau\ln\left(1 + 
                     \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)\nonumber \\
             \sigma &= \frac{\varepsilon}{\tau}\left(1 - 
                     \tanh\left(\frac{\varepsilon}{\tau}\right)\right) +
                     \ln\left(1 + \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)
-                    \label{EQN6}.
+            \label{eqn:12}.
         \end{align} 
         %
-        Finally, we determined the specific heat using Equation \ref{EQN7} %
-        and Equation \ref{EQN2},
+        Finally, we determined the specific heat using Equation \ref{eqn:13} %
+        and Equation \ref{eqn:10},
         %
         \begin{align}
-            C &= \partial_{\tau}U\label{EQN7}\\
+            C &= \partial_{\tau}U\\
                 &= \partial_{\tau}\left(-N\varepsilon\tanh\left(
                     \frac{\varepsilon}{\tau}\right)\right)\nonumber\\
                 &= -N\varepsilon\partial_{\tau}\left(\frac{\varepsilon}{\tau}\right)
                     \frac{1}{\cosh^{2}\left(\frac{\varepsilon}{\tau}\right)}
                     \nonumber\\
                 &= \frac{N\varepsilon^{2}}{\tau^{2}\cosh^{2}\left(
-                    \frac{\varepsilon}{\tau}\right)}\label{EQN8}.
+                    \frac{\varepsilon}{\tau}\right)}
+                \label{eqn:13}.
         \end{align}    
         %
         You will immediately notice that in the absence of an external %
@@ -340,7 +342,7 @@
                 &= 2\exp\left(\frac{-\epsilon}{\tau}\right)
                     \cosh\left(\frac{2B}{\tau}\right) + 
                     2\exp\left(\frac{\epsilon}{\tau}\right).
-           \label{eqn:13}
+           \label{eqn:14}
         \end{align}
         %
         From here we can compute all the physical properties of the system. %
@@ -477,7 +479,7 @@ function calc_entropy
         %
         \begin{align}
             C_{V} &= \frac{\textrm{var(U)}{\tau^{2}}
-            \label{eqn:14}
+            \label{eqn:15}
         \end{align}
         
     \end{multicols}
