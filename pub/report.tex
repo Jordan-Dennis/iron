@@ -439,17 +439,46 @@
         the following algorithm:
         %
         \begin{verbatim}
-Energy:
-    energy = 0;
-    for spin in length:
-        energy += ensemble[spin] * ensemble[spin + 1];
-        energy += ensemble[spin] * ensemble[spin - 1];
-    return energy;
+function calc_energy
+    energy = 0
+    for spin in 0:length
+        energy += ensemble[spin] * ensemble[spin + 1]
+    return energy
         \end{verbatim}
-        %
-        Similarly for the entropy we used:
+        
+
+        Similarly for the entropy we counted all of the aligned pairs. %
+        This works because as discussed in the theory the "base unit" %
+        of the Ising model is a pair of spins not an individual spin. %
+        As noted in the Theory there are \(N\) pairs of spins. Moreover, %
+        we ued Stirling's approximation in the logarithmic form, because %
+        we found that the program could not calculate numbers of the size %
+        \(100!\). This will have had negligible affects at higher %
+        temperatures where the system tends torward disorder, but at %
+        lower temperatures the approximation becomes less accurate. %
+        We were not too concerned with the loss of accuracy since the %
+        entropy tends to zero at low temperatures.
         %
         \begin{verbatim}
+function calc_entropy
+    up = 0
+    for spin in 0:length
+        up += ensemble[spin] == ensemble[spin + 1]
+    down = length - up
+    entropy = length * log(length) - up * log(up) - down * log(down)
+    return entropy
+        \end{verbatim}
+
+
+        The free energy was calculated using its definition, \(F = U - %
+        \tau\sigma\), where \(\tau = kT\) and \(\sigma\) is the entropy. %
+        The heat capacity was calculated using the thermodynamic %
+        identity,
+        %
+        \begin{align}
+            C_{V} &= \frac{\textrm{var(U)}{\tau^{2}}
+            \label{eqn:14}
+        \end{align}
         
     \end{multicols}
 \end{document}
