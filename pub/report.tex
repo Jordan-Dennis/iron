@@ -1,11 +1,17 @@
 \documentclass[a4paper]{article}
-\hoffset=-1in
-\voffset=-1in
-\textwidth=175mm
-\textheight=250mm
+\setlength{\textwidth}{150mm}
+\setlength{\textheight}{250mm}
+\setlength{\parindent}{0mm}
+\setlength{\parskip}{5mm}
+\setlength{\oddsidemargin}{0pc}
+\setlength{\marginparwidth}{20mm}
+\setlength{\topmargin}{-2.5pc}
+\setlength{\headsep}{20pt}
+\setlength{\columnsep}{2mm}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{multicol}
+\usepackage{marginnote}
 \def\citation{{\bfseries (Annon, dd/mm/yyyy)}}
 \begin{document}
     \begin{multicols}{2}
@@ -478,7 +484,7 @@ function calc_entropy
         identity,
         %
         \begin{align}
-            C_{V} &= \frac{\textrm{var(U)}{\tau^{2}}.
+            C_{V} &= \frac{\textrm{var(U)}{\tau^{2}}}.
             \label{eqn:15}
         \end{align}
         %
@@ -530,6 +536,24 @@ function calc_entropy
         increased.
 
 
+        Once we were satisfied with the one-dimensional ising model we %
+        repeated a similar analysis for the two-dimensional model. %
+        First we tested the time required for equilibration by initialising %
+        the model and running it for \(1000N^{2}\) where \(N\) is the width %
+        of the grid. 
+
+
+        Satisfied with the equilibration time we employed the same techniques %
+        described for the one-dimensional case to the two-dimensional case %
+        to measure the physical parameters. In short, we incrementally cooled %
+        the system measuring every iteration and recording the mean. We %
+        repeated this process a fixed number of times and used the standard %
+        error as our uncertainty estimate. The energy calculation is %
+        clearly modified, so we have included the relevant pseudocode %
+        below:
+        %
+
+
     \section*{Results}
         We noticed that the net magnetisation set in at lower temperatures for %
         the larger \(N\). This tells us that there is no phase transition %
@@ -539,6 +563,5 @@ function calc_entropy
         \(0K\) in the infinite case because it we increase the latticed %
         temperature to infinity then the temperature of net magnetisation %
         should decrease below \(0K\). 
-
     \end{multicols}
 \end{document}
