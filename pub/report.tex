@@ -419,7 +419,37 @@
         The Ising algorithm scales very non-linearly with the size of %
         the lattice. This is because when taking a sample you want to run %
         the system for enough iterations so that every spin has a chance %
-        to be visited many times and then average the result. 
+        to be visited many times and then average the result. In addition, %
+        operations such as finding the energy, require that you visit every %
+        spin and hence have linear time complexity independently. 
+
+
+        Starting with our one dimensional model we equilibrated the %
+        system for multiple different temperatures and settled on %
+        using \(1000N\) as the length of the loop. This was likely %
+        too many but we found that for low temperatures when the %
+        probability of a flip becomes small, a larger number of %
+        steps was required. For each temperature we started the chain %
+        of spins at a random temperature. 
+
+
+        Once we had determined the numberic details of our simulations %
+        we proceeded to measure the physical properties of the system. %
+        To calculate the energy of the one dimensional case we employed %
+        the following algorithm:
+        %
+        \begin{verbatim}
+Energy:
+    energy = 0;
+    for spin in length:
+        energy += ensemble[spin] * ensemble[spin + 1];
+        energy += ensemble[spin] * ensemble[spin - 1];
+    return energy;
+        \end{verbatim}
+        %
+        Similarly for the entropy we used:
+        %
+        \begin{verbatim}
         
     \end{multicols}
 \end{document}
