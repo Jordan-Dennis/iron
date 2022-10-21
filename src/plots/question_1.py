@@ -29,16 +29,25 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
 
         data = np.array(data)
 
-    plt.figure(figsize=(10, 10))
+    mpl.rcParams["figure.subplot.hspace"] = 0.01
+
+    figure = plt.figure()
+    figures = figure.subfigures(3, 1)
     for ind, temperature in enumerate(range(0, 6, 2)):
-        plt.subplot(3, 1, ind + 1)
-        plt.title(temperature)
-        plt.imshow(data[temperature:temperature + 2, :])
+        axes[temperature].set_title(r"$T = {:.2f} \epsilon/k$".format(ind + 1.))
+        axes[temperature].imshow(data[temperature, :].reshape((1, -1)), 
+            aspect = 2)
+        axes[temperature].set_xticks([])
+        axes[temperature].set_yticks([])
+        axes[temperature + 1].imshow(data[temperature + 1, :].reshape((1, -1)), 
+            aspect = 2)
+        axes[temperature + 1].set_xticks([])
+        axes[temperature + 1].set_yticks([])
     
     if show:
         plt.show()
     if save_file:
-        plt.savefig(f"pub/figures/{save_file}")
+        figure.savefig(f"pub/figures/{save_file}")
 
 
 # TODO: I need to write of the analytical expression and plot them alongside.
@@ -142,5 +151,5 @@ def magnetisation(data_file: str, show: bool, save_file: str) -> None:
 
 
 option = sys.argv[1]
-exec(f"{option}('{option}_ising_1d.csv', False, '{option}_ising_1d.pdf')")
+exec(f"{option}('{option}_ising_1d.csv', True, '{option}_ising_1d.pdf')")
     

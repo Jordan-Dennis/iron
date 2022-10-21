@@ -21,8 +21,27 @@
             % So we selected three different temperatures and for each 
             % system we initialised it in a random configuration. OK 
             % so I need to include the metropolis_step_ising_1d code in 
-            % this part. How do I want to do that? Check out the listings 
-            % package documentation perhaps. 
+            % this part using the listings package. I also need to make 
+            % sure that I talk about the amount of time that it takes 
+            % for the system to reach equilibrium. I could back this up 
+            % with plots of the physical parameters at each point in 
+            % time but I think that I will just come at it from a 
+            % qualitative point of view. It will be good to say that 
+            % you can do this to check the equilibration times. 
+            I selected three different temperatures, \(1.0, 2.0\) and %
+            \(3.0 \epsilon / k\), and ran the metropolis algorithm for %
+            \(1000N\) steps. At each of these temperatures the system %
+            was initialised in a random state and allowed to equilibrate. 
+            %
+            \begin{figure}[h]
+                \centering
+                \includegraphics%
+                    [width=0.5\textwidth]%
+                    {pub/figures/first_and_last_ising_1d.pdf}
+                \caption{}
+            \end{figure}
+
+
         \subsection*{Question 1 b) - Analytic Solutions in 1D}
 
         \subsection*{Question 1 c) - Numeric Solutions in 1D}
