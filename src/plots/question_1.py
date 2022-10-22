@@ -108,8 +108,9 @@ def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
 
     if show:
         plt.show()
+
     if save_file:
-        plt.savefig(f"pub/figures/{save_file}")
+        figure.savefig(f"pub/figures/{save_file}")
 
 
 def magnetisation(data_file: str, show: bool, save_file: str) -> None:

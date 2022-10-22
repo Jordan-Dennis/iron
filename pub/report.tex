@@ -13,7 +13,11 @@
 \usepackage{multicol}
 \usepackage{caption}
 \usepackage{listings}
-\lstset{language=C, keywordstyle=\bfseries, basicstyle=\ttfamily}
+\lstset{
+    language=C, 
+    literate={\ \ }{{\ }}1, 
+    keywordstyle=\bfseries, 
+    basicstyle=\ttfamily}
 \def\ttdefault{pcr}
 \def\citation{{\bfseries (Annon, dd/mm/yyyy)}}
 \begin{document}
@@ -248,17 +252,113 @@ fast on my device and was large enough to be interesting.
 Starting with our one dimensional model we equilibrated the %
 system for multiple different temperatures and settled on %
 using \(1000N\) as the length of the loop. This was likely %
-too many but we found that for low temperatures when the %
+too many but I found that for low temperatures when the %
 probability of a flip becomes small, a larger number of %
-steps was required. For each temperature we started the chain %
-of spins at a random temperature. 
+steps was required. 
 
 
-Once we had determined the numberic details of our simulations %
-we proceeded to measure the physical properties of the system. %
-To calculate the energy of the one dimensional case we employed %
-the following algorithm:
+I chose to sample the temperatures over the range \(0.0 - 4.0 %
+\epsilon / k\) incrementing by \(0.2 \epsilon / k\). I %
+initialised the system only once at the highest temperature %
+that we sampled, \(3.8 \epsilon / k\). I equilibrated the %
+system at this temperature by evolving it for \(1000N\) %
+and then started to cool the system taking measurements %
+at each new system. 
 
+
+The alternative model was to randomly initialise the system %
+at every temperature. This would require approximately %
+twice the number of steps since the system would have to %
+be equilibrated at every temperature. I realize that the %
+cooling method has a side affect of leading to "overflow". %
+By "overflow" I mean that the first few measurements of %
+each temperature are slightly out of equilibrium at the %
+higher temperature. 
+
+
+To calculate the energy of the system I used the following %
+algorithm, 
+
+\begin{lstlisting}
+/*
+ * energy_ising_t
+ * --------------
+ * Calculate the energy of the system.
+ *
+ * parameters
+ * ----------
+ * ising_t *system: A struct 
+ *     enscapulating the information 
+ *     related to the system. 
+ *
+ * returns
+ * -------
+ * float energy: The energy of the
+ *     system in Joules. 
+ */
+float energy_ising_t(ising_t *system)
+{
+    int length = system->length;
+    int *ensemble = system->ensemble;
+    float energy = 0.;
+
+    for(int spin=0; spin<length; spin++)
+    {
+        energy -= ensemble[spin] *  
+            ensemble[modulo(spin+1,length)];
+    }
+
+    return energy;
+}
+\end{lstlisting}
+
+
+You may notice that I am only counting the righthand neighbour %
+of each spin. I chose this method because it is more optimal. %
+If I was to count each neighbour then every pair would be %
+counted twice and we would have to divide the final result by %
+\verb!2.!. By only counting one of the neighbours I have %
+halved the number of computations. 
+
+
+A pair of spins is the \emph{base unit} of the ising model %
+so to calculate the entropy I counted the number of aligned %
+pairs and then used the \emph{chose} function to calculate %
+the multiplicity. However, it was not quite this simples %
+since \(100!\) is \(\sim 10^{157}\), which overflows an %
+integer in the programs memory. 
+
+
+To fix this problem I used the stirling approximation to %
+compute the entropy directly. This implies that the %
+entropy should be less accurate at lower temperatures %
+where the entropy is low and the Stirling approximation %
+diverges from the actual entropy. The code that I used %
+to calculate the entropy was,
+
+\begin{lstlisting}
+/*
+ * entropy_ising_t
+ * ---------------
+ * Calculate the entropy of a 
+ * configuration. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: A struct 
+ *     enscapulating the information 
+ *     related to the system. 
+ *
+ * returns
+ * -------
+ * float entropy: The entropy of the
+ *     system in natural units. 
+ */
+float entropy_ising_t(ising_t *system)
+{
+
+}
+\end{lstlisting}
 
 \subsection*{Question 1 d)}
 
