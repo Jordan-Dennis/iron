@@ -10,8 +10,6 @@
 \setlength{\columnsep}{4mm}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage{multicol}
-\usepackage{caption}
 \usepackage{listings}
 \lstset{
     language=C, 
@@ -57,16 +55,16 @@ I selected three different temperatures, \(1.0, 2.0\) and %
 \(1000N\) steps. At each of these temperatures the system %
 was initialised in a random state and allowed to equilibrate. 
 
-\begin{centering}
+\begin{figure}[h]
     \includegraphics%
         [width=0.5\textwidth]%
         {pub/figures/first_and_last_ising_1d.pdf}
-    \captionof{figure}[]{Each vertical pair of lines %
+    \caption{Each vertical pair of lines %
         represents the spin state. The top one is %
         the random initial state and the bottom one %
         is the equilibrated final state.}
     \label{fig:1}
-\end{centering}
+\end{figure}
 
 We noticed that at lower temperatures the spin chunks were %
 much larger than at higher temperatures. This is particularly %
@@ -239,7 +237,7 @@ and Equation \ref{eqn:3},
     \includegraphics%
         [width=0.5\textwidth]%
         {pub/figures/physical_parameters_ising_1d.pdf}
-    \captionof{figure}[]{The top left is the energy and the %
+    \caption{The top left is the energy and the %
         top right is the entropy. The bottom left is the %
         free energy and the bottom right is the heat capacity.}
     \label{fig:2}
@@ -278,6 +276,52 @@ cooling method has a side affect of leading to "overflow". %
 By "overflow" I mean that the first few measurements of %
 each temperature are slightly out of equilibrium at the %
 higher temperature. 
+
+
+The entire \emph{measured} cooling process was performed %
+by the program \(1000\) times. At each temperature in the %
+\emph{measured cooling} loop the energy and entropy %
+were measured by taking the average of all \(1000 N\) %
+iterations. The heat capacity was also measured by taking %
+the variance of the energy and applying,
+%
+\begin{equation}
+    C_{v} = \frac{\textrm{var}(\epsilon)}{\tau^{2}}
+    \label{eqn:6}
+\end{equation}
+
+
+The energy and entropy were re-averaged over the outer %
+\emph{fixed size} loop. I chose to re-average then on %
+the outer loop because I was certain that the trials were %
+statistically independent. This does not matter so much %
+for the mean value estimate since the \(1000N\) inner %
+loop allows the system to explore the equilibrium space %
+but I think that it does matter for the error estimate. 
+
+
+I belive that it matters for the error estimate because %
+the state of the system is highly correlated to the %
+past state of the system within some \emph{correlation %
+length}. This \emph{correlation length} is roughly the %
+same amount of time that the system requires to explore %
+the equilibrium state, or \(1000N\).
+
+
+By running multiple simulations for the \emph{correlation %
+length} and averaging these results I have guaranteed %
+robust results. I estimated the error using the \emph{standard %
+error} of the independent \emph{correlation length} simulations. %
+This means that the error presented in figure \ref{fig:2} is %
+given by equation \ref{eqn:7}.
+%
+\begin{equation}
+    \Delta\hat{\beta} = \sqrt{\frac{\textrm{var}(\beta)}{N}},
+    \label{eqn:7}
+\end{equation}
+%
+where, \(\hat{\beta}\) is the parameter estimate, \(\beta\) is a %
+vector of measurements and \(N\) is the number of measurements. 
 
 
 To calculate the energy of the system I used the following %
@@ -380,6 +424,9 @@ float entropy_ising_t(ising_t *system)
 \end{lstlisting}
 
 
+
+
+
 \subsection*{Question 1 d)}
 Consider the energy depicted in figure \ref{fig:2}. We see that %
 the energy is a decreasing function of the temperature. This %
@@ -388,9 +435,91 @@ This makes sense because the Boltzmann factor for the lower state %
 becomes more favoured. Similarly the entropy is a increasing %
 function of the temperature. As the spins tend to align at lower %
 temperatures the number of ways to arrange the state becomes %
-smaller and hence the entropy decreasing, 
-\subsection*{Question 1 e)}
+smaller, decreasing the entropy. 
 
+
+The heat capacity, also shown %
+in figure \ref{fig:2} is interesting because it increases %
+repidly before assymptotically decreasing. If it was discontinuous %
+then we would expect a phase transition however it is continuous. %
+so we know that there is no phase transition. We know it is continuous %
+because of equation \ref{eqn:5}. 
+
+
+\subsection*{Question 1 e)}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{pub/figures/magnetisation_ising_1d.pdf}
+    \caption{Histograms of the magnetisation for two ising %
+        systems of sizes \(N = 100\) and \(N = 500\). The %
+        temperatures are labelled in the titles and the %
+        \(y\)-axis is a unitless count.}
+    \label{fig:3}
+\end{figure}
+
+
+Figure \ref{fig:3} showed me that the magnetisation was not zero %
+as it was predicted to be at \(0 \epsilon / k\). I am not concerned %
+because the distribution of samples, which roughly corresponds to %
+a time average is symmetrically distributed around zero implying %
+that the time average is identically zero. I would expect some %
+variation of the results around zero as spins randomly flipped. %
+
+
+Since magnetisation sets in at a lower temperature for the larger %
+sample I concluded that there was no phase transition. I %
+decided this because the phase transition should occur at the %
+same temperature for all lattice sizes. Taking the limit of %
+a decreasing function presumably reduces to zero implying that %
+there is no spontaneous magnetisation for the one-dimensional %
+ising model. This means that there is no phase transition. 
+
+
+\subsection*{Question 2 a)}
+For \(\tau = 1.0 \epsilon / k\) the random lattice very quickly %
+relaxed into large \emph{domains} of up and down spins. Over time %
+the boundaries of the \emph{domains} moved around the lattice %
+cohenrently. I am/will using/use \emph{coherent motion} to refer %
+to a blob transporting across the network. For example, a group %
+of down spins may start in the top right corner and remaining %
+a single blob move to the middle of the system. 
+
+
+I noticed that given enough time the \(\tau = 1.0 \epsilon / k\) lattice %
+relaxed until it was entirely one color. This is not shown in figure %
+\ref{fig:4} simply because the lattice was not allowed to evolve %
+for enough time. I used the same evolution time for the two %
+dimensional ising model that I used for the one dimensional %
+ising model, that is \(1000N^{2}\) where I will use \(N\) to %
+represent the side length of the system. 
+
+
+This is important because at lower temperatures the system took longer %
+to equilibrate. As I saw for the one-dimensional case the %
+\emph{coherent domains} have a \emph{meta-stable} lifetime before decaying. %
+The shape of this domain influences the lifetime. The size %
+seems to be a direct predictor of lifetime with the largest %
+domain nearly always coming out on top. Another important %
+feature that we noticed was that the coherent domains became %
+particularly \emph{meta-stable} if they formed rings. 
+
+
+The ring structures were \emph{meta-stable} because of the cyclic %
+boundary conditions. In a ring structure there are only two edges %
+that are exposed to the other \emph{meta-stable} state meaning %
+that the anti-aligned interactions at the boundary are minimised. %
+Additionally since the interaction depth of the Ising model is %
+only nearest neighbour the \emph{meta-stable} ring could exit %
+in a band of just five spins. \emph{The spins on the boundary %
+have no idea how large their respective domains are}.
+
+
+A final point to address for the \(\tau = 1.0\epsilon / k\) model %
+is the \emph{time speckling} 
+
+
+Heating the lattice to \(\tau = 2.0 \epsilon / k\) we see some %
+much more interesting behaviour. 
         
 %\newpage
 %\section*{Introduction}
