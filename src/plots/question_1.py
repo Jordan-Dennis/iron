@@ -53,22 +53,6 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
 
 
 # TODO: I need to write of the analytical expression and plot them alongside.
-def energy(temperature: float) -> float:
-   return - np.tanh(1 / temperature)
-
-
-def entropy(temperature: float) -> float:
-    return 1 / temperature * (1 - np.tanh(1 / temperature)) + np.log(1 + np.exp(-2 / temperature))
-
-
-def free_energy(temperature: float) -> float:
-    return - 1 - temperature * np.log(1 + np.exp(-2 / temperature))
-
-
-def heat_capacity(temperature: float) -> float:
-    return 1 / temperature ** 2 / np.cosh(1 / temperature) ** 2
-
-
 def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
     """
     Plot the physical parameters against there analytical solutions. 
@@ -88,29 +72,39 @@ def physical_parameters(data_file: str, show: bool, save_file: str) -> None:
             [float(entry) for entry in line.strip().split(",")] 
             for line in physical_parameters])
 
+    def energy(temperature: float) -> float:
+       return - np.tanh(1 / temperature)
+
+    def entropy(temperature: float) -> float:
+        return 1 / temperature * (1 - np.tanh(1 / temperature)) + \
+            np.log(1 + np.exp(-2 / temperature))
+
+    def free_energy(temperature: float) -> float:
+        return - 1 - temperature * np.log(1 + np.exp(-2 / temperature))
+
+    def heat_capacity(temperature: float) -> float:
+        return 1 / temperature ** 2 / np.cosh(1 / temperature) ** 2
+
     temperatures = np.linspace(data[:, 0].min(), data[:, 0].max(), 1000)
 
-    plt.figure(figsize=(10, 10))
-    plt.subplot(2, 2, 1)
-    plt.ylabel(r"$\epsilon$")
-    plt.xlabel(r"$\tau$")
-    plt.errorbar(data[:, 0], data[:, 1], data[:, 2])
-    plt.plot(temperatures, energy(temperatures))
-    plt.subplot(2, 2, 2)
-    plt.ylabel(r"$\sigma$")
-    plt.xlabel(r"$\tau$")
-    plt.errorbar(data[:, 0], data[:, 3], data[:, 4])
-    plt.plot(temperatures, entropy(temperatures))
-    plt.subplot(2, 2, 3)
-    plt.ylabel(r"$F$")
-    plt.xlabel(r"$\tau$")
-    plt.errorbar(data[:, 0], data[:, 5], data[:, 6])
-    plt.plot(temperatures, free_energy(temperatures))
-    plt.subplot(2, 2, 4)
-    plt.ylabel(r"$C_{V}$")
-    plt.xlabel(r"$\tau$")
-    plt.errorbar(data[:, 0], data[:, 7], np.abs(data[:, 8]))
-    plt.plot(temperatures, heat_capacity(temperatures))
+    figure, axes = plt.subplots(2, 2)
+    axes[0][0].set_ylabel(r"$\epsilon (J)$")
+    axes[0][0].set_xlabel(r"$\tau (J)$")
+    axes[0][0].errorbar(data[:, 0], data[:, 1], data[:, 2])
+    axes[0][0].plot(temperatures, energy(temperatures))
+    axes[0][1].set_ylabel(r"$\sigma$")
+    axes[0][1].set_xlabel(r"$\tau (J)$")
+    axes[0][1].errorbar(data[:, 0], data[:, 3], data[:, 4])
+    axes[0][1].plot(temperatures, entropy(temperatures))
+    axes[1][0].set_ylabel(r"$F (J)$")
+    axes[1][0].set_xlabel(r"$\tau (J)$")
+    axes[1][0].errorbar(data[:, 0], data[:, 5], data[:, 6])
+    axes[1][0].plot(temperatures, free_energy(temperatures))
+    axes[1][1].set_ylabel(r"$C_{V} (JK^{-1})$")
+    axes[1][1].set_xlabel(r"$\tau (J)$")
+    axes[1][1].errorbar(data[:, 0], data[:, 7], np.abs(data[:, 8]))
+    axes[1][1].plot(temperatures, heat_capacity(temperatures))
+    figure.tight_layout()
 
     if show:
         plt.show()
