@@ -239,6 +239,10 @@ and Equation \ref{eqn:3},
     \includegraphics%
         [width=0.5\textwidth]%
         {pub/figures/physical_parameters_ising_1d.pdf}
+    \captionof{figure}[]{The top left is the energy and the %
+        top right is the entropy. The bottom left is the %
+        free energy and the bottom right is the heat capacity.}
+    \label{fig:2}
 \end{figure}        
 
 I started by simulating a one dimensional Ising model with no %
@@ -355,13 +359,36 @@ to calculate the entropy was,
  *     system in natural units. 
  */
 float entropy_ising_t(ising_t *system)
-{
+{ 
+    int length = system->length;
+    int *ensemble = system->ensemble; 
+    int up = 0;
 
+    for (int spin=0; spin<length; spin++)
+    {
+        up += ensemble[spin] == 
+            ensemble[modulo(spin+1,length)];
+    }
+
+    int down = length - up;
+
+    float entropy = length * log(length) - 
+        up * log(up) - down * log(down);
+    
+    return entropy;   
 }
 \end{lstlisting}
 
-\subsection*{Question 1 d)}
 
+\subsection*{Question 1 d)}
+Consider the energy depicted in figure \ref{fig:2}. We see that %
+the energy is a decreasing function of the temperature. This %
+implies that the spins tend to align as the temperature decreases. %
+This makes sense because the Boltzmann factor for the lower state %
+becomes more favoured. Similarly the entropy is a increasing %
+function of the temperature. As the spins tend to align at lower %
+temperatures the number of ways to arrange the state becomes %
+smaller and hence the entropy decreasing, 
 \subsection*{Question 1 e)}
 
         

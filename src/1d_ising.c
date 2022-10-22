@@ -126,7 +126,7 @@ float entropy_ising_1d(Ising1D* system)
 
 
 /*
- * free_energy
+  free_energy
  * -----------
  * The free energy of the ensamble of spins.
  * 
