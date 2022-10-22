@@ -30,19 +30,21 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
         data = np.array(data)
 
     mpl.rcParams["figure.subplot.hspace"] = 0.01
+    mpl.rcParams["figure.subplot.wspace"] = 0.01
 
     figure = plt.figure()
     figures = figure.subfigures(3, 1)
     for ind, temperature in enumerate(range(0, 6, 2)):
-        axes[temperature].set_title(r"$T = {:.2f} \epsilon/k$".format(ind + 1.))
-        axes[temperature].imshow(data[temperature, :].reshape((1, -1)), 
-            aspect = 2)
-        axes[temperature].set_xticks([])
-        axes[temperature].set_yticks([])
-        axes[temperature + 1].imshow(data[temperature + 1, :].reshape((1, -1)), 
-            aspect = 2)
-        axes[temperature + 1].set_xticks([])
-        axes[temperature + 1].set_yticks([])
+        axes = figures[ind].subplots(2, 1)
+        figures[ind].suptitle(r"$T = {:.2f} \epsilon/k$".format(ind + 1.))
+        axes[0].set_ylabel(r"$\textrm{Initial}$")
+        axes[0].imshow(data[temperature, :].reshape((1, -1)), aspect=2)
+        axes[0].set_xticks([])
+        axes[0].set_yticks([])
+        axes[1].set_ylabel(r"$\textrm{Final}$")
+        axes[1].imshow(data[temperature + 1, :].reshape((1, -1)), aspect=2)
+        axes[1].set_xticks([])
+        axes[1].set_yticks([])
     
     if show:
         plt.show()
