@@ -229,9 +229,11 @@ def magnetisation(data_file: str, show: bool, save_file: str = None) -> None:
     pos_mag_est = data[:, 4] / numbers ** 2
     pos_mag_err = data[:, 5] / numbers ** 2
  
-    figure = plt.figure(figsize = (10, 10))
+    figure = plt.figure()
     axes = plt.axes()
     axes.set_title(r"$\textrm{Magnetisation vs Temperature}$")
+    axes.set_ylabel(r"$m$")
+    axes.set_xlabel(r"$\tau (\epsilon / k)$")
 
     for number in np.unique(numbers):
         cond = numbers == number

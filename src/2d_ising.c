@@ -397,6 +397,8 @@ void physical_parameters_ising_2d(Config* config)
             float _entropies[runs];
             float _heat_capacities[runs];
 
+            printf("Temperature: %.2f\n", temperature);
+
             for (int run = 0; run < runs; run++)
             {
                 systems[run] -> temperature = temperature;
@@ -404,6 +406,9 @@ void physical_parameters_ising_2d(Config* config)
 
             for (int run = 0; run < runs; run++)
             {
+                printf("\r");
+                printf("Run: %i", run);
+                fflush(stdout);
                 float __energies[epochs];
                 float __entropies[epochs];
               
@@ -423,6 +428,8 @@ void physical_parameters_ising_2d(Config* config)
                 _heat_capacities[run] = variance(__energies, _energies[run], epochs) / 
                     temperature / temperature;
             }
+
+            printf("\n");
             
             float number = num_spins * num_spins;
             float energy_est = mean(_energies, runs);

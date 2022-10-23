@@ -650,27 +650,29 @@ void metropolis_step(ising_t *system)
     int length = system->length;
     int **ensemble = system->ensemble;
     float epsilon = system->epsilon;
-    float temperature = system->temperature;
-    float magnetic_field = system->magnetic_field;
+    float temp = system->temperature;
+    float field = system->magnetic_field;
 
     int row = random_index(length);
     int col = random_index(length);
 
     int spin = ensemble[row][col];
     int neighbours = 
-        ensemble[modulo(row + 1, length)][col] + 
-        ensemble[modulo(row - 1, length)][col] + 
-        ensemble[row][modulo(col + 1, length)] + 
-        ensemble[row][modulo(col - 1, length)];
+        ensemble[modulo(row+1,length)][col] + 
+        ensemble[modulo(row-1,length)][col] + 
+        ensemble[row][modulo(col+1,length)] + 
+        ensemble[row][modulo(col-1,length)];
 
-    float magnetic_change = -2 * spin * magnetic_field;
-    float interaction_change = 2 * epsilon * neighbours * spin;
-    float energy_change = magnetic_change + interaction_change;
+    float magnetic_change=-2*spin*field;
+    float interaction_change=2*epsilon*
+        neighbours*spin;
+    float change=magnetic_change+
+        interaction_change;
 
     if ((energy_change < 0) || 
-        (exp(- energy_change / temperature) > normalised_random()))
+        (exp(-change/temperature) > randn())))
     {
-        system -> ensemble[row][col] *= -1;
+        ensemble[row][col] *= -1;
     }
 }
 \end{lstlisting}
@@ -688,6 +690,26 @@ was set to one.
     \caption{}
     \label{fig:7}
 \end{figure}
+I noticed that the heat capacity \emph{spike} increased in %
+height as I increased the size of the crystal. This suggests %
+that the infinite Ising model will have an infinitely tall %
+heat capacity \emph{spike} at the critical temperature. I also %
+noticed that at the critical temperature all of the physical %
+parameters changed the fastest. 
+
+
+This makes sense because a phase transition is loosely defined %
+
+
+
+\subsection*{Question 2 d)}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{pub/figures/magnetisation_ising_2d.pdf}
+    \caption{}
+    \label{fig:8}
+\end{figure}
+
 %\newpage
 %\section*{Introduction}
 %The study of magnetic materials is an area of academic %
