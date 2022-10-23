@@ -277,7 +277,16 @@ void save_ising_2d(Ising2D *system, FILE *save_file)
 }
 
 
-// TODO: Needs documentation. 
+/*
+ * first_and_last_ising_2d
+ * -----------------------
+ * Simulate an Ising system at multiple temperatures allowing them 
+ * to relax to equilibrium. 
+ *
+ * parameters
+ * ----------
+ * Config *config: The configuration of the simulation.
+ */
 void first_and_last_ising_2d(Config *config)
 {
     int num_spins = atoi(find(config, "number_of_spins"));
@@ -289,6 +298,7 @@ void first_and_last_ising_2d(Config *config)
     free(config);
 
     int num_temps = (int) ((stop - start) / step);
+    int epochs = num_spins * num_spins * 1e3;
     FILE *save_file = fopen(save_file_name, "w");
 
     int ind;
@@ -301,7 +311,7 @@ void first_and_last_ising_2d(Config *config)
         save_ising_2d(system, save_file);
 
         // Running the metropolis algorithm over the system. 
-        for (int epoch = 0; epoch <= num_spins * 1e3; epoch++)
+        for (int epoch = 0; epoch < epochs; epoch++)
         { 
             metropolis_step_ising_2d(system);
         }
