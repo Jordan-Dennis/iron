@@ -627,7 +627,67 @@ macroscopic behaviours.
 I acknowledge that although I wanted to use the \verb!qt! frame work %
 to create my own \verb!gui! I ran out of time. Instead I used the %
 free online applet created by Daniel V. Schroeder for Weber state %
-university to make the higher level observations. 
+university to make the higher level observations. The code that I used %
+to evolve the two dimensional system was, 
+
+\begin{lstlisting}
+/*
+ * metropolis_step_ising_t
+ * -----------------------
+ * Evolve the system according to a 
+ * randomly weighted spin flip that 
+ * compares the probability of the 
+ * two states based on the Boltzmann 
+ * distribution of the two systems. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to 
+ *     evolve. 
+ */
+void metropolis_step(ising_t *system)
+{
+    int length = system->length;
+    int **ensemble = system->ensemble;
+    float epsilon = system->epsilon;
+    float temperature = system->temperature;
+    float magnetic_field = system->magnetic_field;
+
+    int row = random_index(length);
+    int col = random_index(length);
+
+    int spin = ensemble[row][col];
+    int neighbours = 
+        ensemble[modulo(row + 1, length)][col] + 
+        ensemble[modulo(row - 1, length)][col] + 
+        ensemble[row][modulo(col + 1, length)] + 
+        ensemble[row][modulo(col - 1, length)];
+
+    float magnetic_change = -2 * spin * magnetic_field;
+    float interaction_change = 2 * epsilon * neighbours * spin;
+    float energy_change = magnetic_change + interaction_change;
+
+    if ((energy_change < 0) || 
+        (exp(- energy_change / temperature) > normalised_random()))
+    {
+        system -> ensemble[row][col] *= -1;
+    }
+}
+\end{lstlisting}
+
+
+\textbf{Note}: The \verb!magnetic_field! was set to zero in the %
+provided simulation and discussion, while the \verb!epsilon! %
+was set to one. 
+
+
+\subsection*{Question 2 c)}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{pub/figures/physical_parameters_ising_2d.pdf}
+    \caption{}
+    \label{fig:7}
+\end{figure}
 %\newpage
 %\section*{Introduction}
 %The study of magnetic materials is an area of academic %
