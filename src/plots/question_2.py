@@ -115,20 +115,21 @@ def first_and_last(data_file: str, show: bool, save_file: str = None) -> None:
 
     images = np.array(images, dtype=int)           
     number = images.shape[0]
-    figure, axes = plt.subplots(2, number // 2, figsize=(15, 10))
+    figure, axes = plt.subplots(2, number // 2)
     for subplot, index in enumerate(range(0, number, 2)):
         axes[0][subplot].imshow(images[index])
         axes[0][subplot].set_title(f"$T = {temperatures[index]}$")
         axes[0][subplot].set_xticks([])
         axes[0][subplot].set_yticks([])
         axes[1][subplot].imshow(images[index + 1])
-        axes[1][subplot].set_title(f"$T = {temperatures[index + 1]}$")
         axes[1][subplot].set_xticks([])
         axes[1][subplot].set_yticks([])
+    figure.tight_layout()
 
     if show:
         plt.show()
-    else:
+
+    if save_file:
         figure.savefig(f"pub/figures/{save_file}")
 
 
@@ -264,4 +265,4 @@ def heating_and_cooling(data_file: str, show: bool, save_file: str = None) -> No
 
 
 option = sys.argv[1]
-exec(f"{option}('{option}_ising_2d.csv', False, '{option}_ising_2d.pdf')")
+exec(f"{option}('{option}_ising_2d.csv', True, '{option}_ising_2d.pdf')")

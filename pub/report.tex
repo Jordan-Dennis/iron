@@ -41,7 +41,7 @@ It is possible to implement this in a single \verb!struct! %
 using \verb!union ensemble {int *1d, int **2d};!, but in the %
 code available on my \verb!github! I have used two separate %
 \verb!struct!s resulting in code duplication for many of the %
-methods. I made this descision because I had not used \verb!c! %
+methods. I made this decision because I had not used \verb!c! %
 prior to this project and was unaware of the \verb!union! %
 keyword and its uses. I am describing this because you may %
 notice discrepancies in the code snippets that I have include %
@@ -578,9 +578,56 @@ destroyed and not even microscopic domains are able to form.
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{pub/figures/first_and_last_ising_2d.pdf}
-    \caption{}
+    \caption{Snapshots of the Ising system at multiple temperatures %
+        given a random initial starting position (top). You will %
+        notice that \(\tau = 1.0 \epsilon / k\) and \(\tau = 2.0 \epsilon %
+        /2\) have similar net magnetisation, but that \(\tau = 2.0 %
+        \epsilon / k\) has stronger \emph{speckling} than \(\tau = %
+        1.0 \epsilon / k\). You will notice that there is not net %
+        magnetisation for \(\tau = 3.0 \epsilon / k\) and that the %
+        \emph{zonation} I described above is occurring.}
     \label{fig:5}
 \end{figure}
+
+
+\subsection*{Question 2 b)}
+Smoothly varying the temperature using I found that the \emph{speckling} %
+and \emph{zonation} seems to dominate above \(\sim 2.3 \epsilon / k\) %
+while below this \emph{domains} start to form and given enough time %
+the entire crystal becomes magnetised. The transition is smooth %
+with respect to the \emph{speckles}, which at very low temperatures %
+are very small and isolated with out a lifetime. 
+
+
+As I increased the temperature the \emph{speckles} increases in size and %
+in lifetime. A \emph{speckle} is differentiated from a \emph{zone} rather %
+arbitrarily, the two main differences being transport and lifetime. The %
+\emph{zones} have a lifetime of long enough that they are able to %
+\emph{coherently move} across the crystal. On the other hand a \emph{speckle} %
+tends to die where it started and very quickly. 
+
+
+As we approach the critical temperature from below the \emph{speckles} %
+increase in size and disrupt the domains more quickly but, the system %
+is still able to fully magnetise. At the critical temperature the %
+\emph{speckles} become so disruptive that the magnetisation cannot occur %
+macroscopically but it still occurs locally in the form of the \emph{zones} %
+which outlive the now very active \emph{speckles}. 
+
+
+Increasing the temperature further still the coherent \emph{zones} %
+disappear (visually) entirely and the speckles become the dominant %
+behaviour. As a final note it is worth noting that these behaviours %
+I have described were visible to me in part because of the settings %
+of my simulation. I found it was best to run them with many steps %
+per frame \(5000 \sim 10000\) because it allows you to see the %
+macroscopic behaviours. 
+
+
+I acknowledge that although I wanted to use the \verb!qt! frame work %
+to create my own \verb!gui! I ran out of time. Instead I used the %
+free online applet created by Daniel V. Schroeder for Weber state %
+university to make the higher level observations. 
 %\newpage
 %\section*{Introduction}
 %The study of magnetic materials is an area of academic %
