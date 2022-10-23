@@ -158,18 +158,26 @@ void print_ising_2d(Ising2D *system)
  */
 void metropolis_step_ising_2d(Ising2D *system)
 {
-    int row = random_index(system -> length);
-    int col = random_index(system -> length);
-    int energy_change = 2 * spin_energy_ising_2d(system, row, col);
+    int length = system -> length;
+    int **ensemble = system -> ensemble;
     float temperature = system -> temperature;
-   
-    if (energy_change < 0)
+
+    int row = random_index(length);
+    int col = random_index(length);
+
+    int spin = ensemble[row][col];
+    int neighbours = 
+        ensemble[modulo(row + 1, length)][col] + 
+        ensemble[modulo(row - 1, length)][col] + 
+        ensemble[row][modulo(col + 1, length)] + 
+        ensemble[row][modulo(col - 1, length)];
+
+    float energy_change = 2 * neighbours * spin;
+
+    if ((energy_change < 0) || 
+        (exp(- energy_change / temperature) > normalised_random()))
     {
-        flip_spin_ising_2d(system, row, col);
-    } 
-    else if (normalised_random() < exp(- energy_change / temperature))
-    {
-        flip_spin_ising_2d(system, row, col);
+        ensemble[row][col] *= -1;
     }
 }
 
@@ -674,7 +682,7 @@ void heating_and_cooling_ising_2d(Config *config)
     float stop = atof(find(config, "highest_temperature"));
     float step = atof(find(config, "temperature_step"));
     int length = (int) ((stop - start) / step);
-    int epochs = num_spins * num_spins * 1e4;
+    int epochs = num_spins * num_spins * 1e3;
 
     Ising2D *system = init_ising_2d(num_spins, stop);
     FILE *save_file = fopen(save_file_name, "w");
