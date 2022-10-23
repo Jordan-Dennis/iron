@@ -424,9 +424,6 @@ float entropy_ising_t(ising_t *system)
 \end{lstlisting}
 
 
-
-
-
 \subsection*{Question 1 d)}
 Consider the energy depicted in figure \ref{fig:2}. We see that %
 the energy is a decreasing function of the temperature. This %
@@ -699,16 +696,149 @@ parameters changed the fastest.
 
 
 This makes sense because a phase transition is loosely defined %
+as a sudden discontinuity in the bulk properties of the sample. %
+Although the entropy and energy are not discontinuous over the %
+the critical temperature they do change very suddenly. The %
+discontinuity is in the heat capacity which is the derivative %
+of the energy with respect to temperature. Because a derivative %
+is the discontinuous quantity it implies that the phase transition %
+is second order. 
 
+
+To measure the energy of the two dimensional Ising system I %
+used a very similar piece of code to the one dimensional %
+scenario. 
+
+\begin{lstlisting}
+/*
+ * energy_ising_t
+ * --------------
+ * Calculate the energy of the 
+ * Ising system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to 
+ *     measure. 
+ */
+float energy(ising_t *system)
+{
+    int length = system->length;
+    int **ensemble = system->ensemble;
+    float epsilon = system->epsilon;
+    float field = system->magnetic_field;
+    float magnetic = 0.0;
+    float interactions = 0.0;
+
+    for (int row=0; row<length; row++)
+    {
+        for (int col=0; col<length; col++)
+        {
+            float neighbours = 
+                ensemble[modulo(row+1,length)][col] +
+                ensemble[modulo(row-1,length)][col] +
+                ensemble[row][modulo(col+1,length)] +
+                ensemble[row][modulo(col-1,length)];
+
+            magnetic -= ensemble[row][col] * 
+                field;
+            interactions -= neighbours * 
+                epsilon * ensemble[row][col];
+        }
+    }
+
+    return interactions / 2. + magnetic;
+}
+\end{lstlisting}
+
+For the entropy the calculation was also very similar. 
+
+\begin{lstlisting}
+/*
+ * entropy_ising_t
+ * --------------
+ * Calculate the entropy of the Ising 
+ * system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to 
+ *     measure. 
+ */
+float entropy_ising_t(ising_t *system)
+{
+    int len = system->length;
+    int **ensemble = system->ensemble; 
+    int up = 0;
+
+    for (int row=0; row<len; row++)
+    {
+        for (int col=0; col<len; col++)
+        {
+            up += ensemble[row][col] == 
+                ensemble[modulo(row+1,len)][col];
+            up += ensemble[row][col] == 
+                ensemble[row][modulo(col+1,len)];
+        }
+    }
+        
+    int total = 2 * len * len;
+    int down = total - up;
+
+    return total * log(total) - 
+        up * log(up) - down * log(down);
+}
+\end{lstlisting}
 
 
 \subsection*{Question 2 d)}
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{pub/figures/magnetisation_ising_2d.pdf}
-    \caption{}
+    \caption{The magnetisation of the Ising model as the %
+        temperature and number of spins is varied.}
     \label{fig:8}
 \end{figure}
+
+
+I noticed that the magnetisation began to diverge at the same %
+temperature irrespective of the size of the system. This is what %
+I would expect from a phase transition because it should not depend %
+on the size of the sample. To give a real world example iron melts %
+at the same temperature regardless of the size of the block. %
+We might more quickly melt a smaller block but that is just because %
+there is less of it and less self insulation. 
+
+
+As \(N\) increases the critical temperature will stay the same, %
+but the steepness of the transition appears to radically increase. %
+I was surprised to see this relationship and I believe it may %
+be because we are at the very low number end of the spectrum. %
+In this regime if one or two spins flip it becomes visible on %
+the graph. What I expect to see is that the lines smoothly %
+converge down to a step function at the critical temperature. 
+
+
+\subsection*{Question 2 e)}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{pub/figures/heating_and_cooling_ising_2d.pdf}
+    \caption{Heating and cooling an Ising system to change the %
+        magnetisation.}
+    \label{fig:9}
+\end{figure}
+
+I initialised the system randomly. This corresponds to the %
+equilibrium of a system that is at a high temperature. %
+Therefore, I first cooled the system to reach an equilibrium %
+that I would expect for a low temperature state. This was done %
+slowly letting the system equilibrate at each new temperature. %
+This technique avoids the \emph{meta-stable} rings from forming. 
+
+
+
+
+
 
 %\newpage
 %\section*{Introduction}

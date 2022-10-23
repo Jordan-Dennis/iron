@@ -52,8 +52,9 @@ int random_spin(void)
 int random_index(int length)
 {
     float norm_rand = normalised_random();
-    float range_rand = norm_rand * length - 0.5;
-    return (int) range_rand;
+    float range_rand = (int) (norm_rand * length);
+    if (range_rand == length) range_rand -= 1;
+    return range_rand;
 }
 
 

@@ -398,23 +398,23 @@ void physical_parameters_ising_2d(Config* config)
             float _heat_capacities[runs];
 
             printf("Temperature: %.2f\n", temperature);
-
             for (int run = 0; run < runs; run++)
             {
                 systems[run] -> temperature = temperature;
             }
 
+            printf("Running trials:\n");
             for (int run = 0; run < runs; run++)
             {
-                printf("\r");
-                printf("Run: %i", run);
-                fflush(stdout);
                 float __energies[epochs];
                 float __entropies[epochs];
               
                 for (int epoch = 0; epoch < epochs; epoch++)
                 { 
                     metropolis_step_ising_2d(systems[run]);
+                    printf("\r");
+                    printf("Run: %i", epoch);
+                    fflush(stdout);
                     float energy = energy_ising_2d(systems[run]);
                     float entropy = entropy_ising_2d(systems[run]);
 
@@ -451,11 +451,11 @@ void physical_parameters_ising_2d(Config* config)
             heat_capacities[temp][0][num_spin] = heat_capacity_est / number;
             heat_capacities[temp][1][num_spin] = heat_capacity_err / number;
         }
-    }
 
-    for (int run = 0; run < runs; run++)
-    {
-        free_ising_2d(systems[run]);
+        for (int run = 0; run < runs; run++)
+        {
+            free_ising_2d(systems[run]);
+        }
     }
 
     free(systems);
@@ -553,13 +553,14 @@ void magnetisation_vs_temperature_ising_2d(Config* config)
     for (int num = 0; num < 3; num++)
     {
         float sim_mags[length][num_reps];
+        int epochs = 1e3 * spin_nums[num] * spin_nums[num];
         
         for (int iter = 0; iter < num_reps; iter++)
         {
             system = init_ising_2d(spin_nums[num], stop - step);
             
             // Running the burnin-period.  
-            for (int epoch = 0; epoch < 1e3 * spin_nums[num]; epoch++)
+            for (int epoch = 0; epoch < epochs; epoch++)
             {
                 metropolis_step_ising_2d(system);
             }
@@ -617,6 +618,9 @@ void magnetisation_vs_temperature_ising_2d(Config* config)
             float neg_mag_est = mean(negatives, num_neg);
             float neg_mag_err = variance(negatives, neg_mag_est, num_neg);
 
+            free(positives);
+            free(negatives);
+
             // TODO: Improve the error by dividing by sqrt(reps)
             magnetisations[num][temp][0][0] = pos_mag_est;
             magnetisations[num][temp][0][1] = sqrt(pos_mag_err / (float) num_pos);
@@ -625,7 +629,7 @@ void magnetisation_vs_temperature_ising_2d(Config* config)
         }
     }
 
-    free(system);
+    free_ising_2d(system);
 
     FILE *save_file = fopen(save_file_name, "w");
 
@@ -670,6 +674,7 @@ void heating_and_cooling_ising_2d(Config *config)
     float stop = atof(find(config, "highest_temperature"));
     float step = atof(find(config, "temperature_step"));
     int length = (int) ((stop - start) / step);
+    int epochs = num_spins * num_spins * 1e4;
 
     Ising2D *system = init_ising_2d(num_spins, stop);
     FILE *save_file = fopen(save_file_name, "w");
@@ -677,7 +682,7 @@ void heating_and_cooling_ising_2d(Config *config)
     do
     {
         system -> temperature -= step;
-        for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+        for (int epoch = 0; epoch < epochs; epoch++)
         {
             metropolis_step_ising_2d(system);
         }
@@ -688,7 +693,7 @@ void heating_and_cooling_ising_2d(Config *config)
     while (system -> temperature < stop)
     {
         system -> temperature += step;
-        for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+        for (int epoch = 0; epoch < epochs; epoch++)
         {
             metropolis_step_ising_2d(system);
         }
@@ -699,7 +704,7 @@ void heating_and_cooling_ising_2d(Config *config)
     do
     {
         system -> temperature -= step;
-        for (int epoch = 0; epoch < 1e3 * num_spins; epoch++)
+        for (int epoch = 0; epoch < epochs; epoch++)
         {
             metropolis_step_ising_2d(system);
         }

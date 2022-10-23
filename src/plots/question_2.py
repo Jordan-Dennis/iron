@@ -235,15 +235,23 @@ def magnetisation(data_file: str, show: bool, save_file: str = None) -> None:
     axes.set_ylabel(r"$m$")
     axes.set_xlabel(r"$\tau (\epsilon / k)$")
 
+    lines = []
+
     for number in np.unique(numbers):
         cond = numbers == number
-        axes.errorbar(temperatures[cond], neg_mag_est[cond], neg_mag_err[cond])
-        axes.errorbar(temperatures[cond], pos_mag_est[cond], pos_mag_err[cond])
+        err_bar = axes.errorbar(
+            temperatures[cond], neg_mag_est[cond], neg_mag_err[cond])
+        color = err_bar[0].get_color()
+        axes.errorbar(temperatures[cond], 
+            pos_mag_est[cond], pos_mag_err[cond], color=color)
+        lines.append(err_bar)
+    figure.legend(lines, np.unique(numbers))
 
     if show:
         plt.show()
-    elif save_file:
-        figure.savefig(f"pub/data/{save_file}")
+    
+    if save_file:
+        figure.savefig(f"pub/figures/{save_file}")
 
 
 def heating_and_cooling(data_file: str, show: bool, save_file: str = None) -> None:
@@ -262,11 +270,13 @@ def heating_and_cooling(data_file: str, show: bool, save_file: str = None) -> No
     """
     images = _get_ising_image(f"pub/data/{data_file}")
 
-    figure, axes = plt.subplots(1, 3, figsize=(15, 5))
-
+    figure, axes = plt.subplots(1, 3)
+    figure.tight_layout()
     for index, image in enumerate(images):
         axes[index].imshow(image[1])
         axes[index].set_title(r"$\textrm{T = " + f"{image[0]}" + "}$")
+        axes[index].set_xticks([])
+        axes[index].set_yticks([])
 
     if show:
         plt.show()
