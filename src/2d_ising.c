@@ -374,7 +374,7 @@ void physical_parameters_ising_2d(Config* config)
     float step = atof(find(config, "temperature_step"));
 
     int length = (int) ((stop - start) / step);
-    int runs = 10;
+    int runs = 5;
 
     float energies[length][2][3];
     float entropies[length][2][3];
@@ -386,7 +386,7 @@ void physical_parameters_ising_2d(Config* config)
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
         int num_spins = spin_nums[num_spin];
-        int epochs = num_spins * num_spins * 1e3;
+        int epochs = num_spins * 1e3;
 
         for (int run = 0; run < runs; run++)
         {
@@ -411,18 +411,14 @@ void physical_parameters_ising_2d(Config* config)
                 systems[run] -> temperature = temperature;
             }
 
-            printf("Running trials:\n");
             for (int run = 0; run < runs; run++)
             {
-                float __energies[epochs];
-                float __entropies[epochs];
+                float *__energies = (float*) calloc(epochs, sizeof(float));
+                float *__entropies = (float*) calloc(epochs, sizeof(float));
               
                 for (int epoch = 0; epoch < epochs; epoch++)
                 { 
                     metropolis_step_ising_2d(systems[run]);
-                    printf("\r");
-                    printf("Run: %i", epoch);
-                    fflush(stdout);
                     float energy = energy_ising_2d(systems[run]);
                     float entropy = entropy_ising_2d(systems[run]);
 
@@ -430,15 +426,12 @@ void physical_parameters_ising_2d(Config* config)
                     __entropies[epoch] = entropy;
                 }
 
-
                 _energies[run] = mean(__energies, epochs);
                 _entropies[run] = mean(__entropies, epochs);
                 _heat_capacities[run] = variance(__energies, _energies[run], epochs) / 
                     temperature / temperature;
             }
 
-            printf("\n");
-            
             float number = num_spins * num_spins;
             float energy_est = mean(_energies, runs);
             float entropy_est = mean(_entropies, runs);

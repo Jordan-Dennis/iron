@@ -1,7 +1,7 @@
 save_file = pub/data/physical_parameters_ising_2d.csv
-low_number_of_spins = 4
-mid_number_of_spins = 50
-high_number_of_spins = 100
+low_number_of_spins = 10
+mid_number_of_spins = 20
+high_number_of_spins = 50
 lowest_temperature = 0.2
 highest_temperature = 5.0
 temperature_step = 0.2
