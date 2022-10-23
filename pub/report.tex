@@ -440,7 +440,7 @@ smaller, decreasing the entropy.
 
 The heat capacity, also shown %
 in figure \ref{fig:2} is interesting because it increases %
-repidly before assymptotically decreasing. If it was discontinuous %
+rapidly before asymptotically decreasing. If it was discontinuous %
 then we would expect a phase transition however it is continuous. %
 so we know that there is no phase transition. We know it is continuous %
 because of equation \ref{eqn:5}. 
@@ -472,14 +472,14 @@ decided this because the phase transition should occur at the %
 same temperature for all lattice sizes. Taking the limit of %
 a decreasing function presumably reduces to zero implying that %
 there is no spontaneous magnetisation for the one-dimensional %
-ising model. This means that there is no phase transition. 
+Ising model. This means that there is no phase transition. 
 
 
 \subsection*{Question 2 a)}
 For \(\tau = 1.0 \epsilon / k\) the random lattice very quickly %
 relaxed into large \emph{domains} of up and down spins. Over time %
 the boundaries of the \emph{domains} moved around the lattice %
-cohenrently. I am/will using/use \emph{coherent motion} to refer %
+coherently. I am/will using/use \emph{coherent motion} to refer %
 to a blob transporting across the network. For example, a group %
 of down spins may start in the top right corner and remaining %
 a single blob move to the middle of the system. 
@@ -489,8 +489,8 @@ I noticed that given enough time the \(\tau = 1.0 \epsilon / k\) lattice %
 relaxed until it was entirely one color. This is not shown in figure %
 \ref{fig:4} simply because the lattice was not allowed to evolve %
 for enough time. I used the same evolution time for the two %
-dimensional ising model that I used for the one dimensional %
-ising model, that is \(1000N^{2}\) where I will use \(N\) to %
+dimensional Ising model that I used for the one dimensional %
+Ising model, that is \(1000N^{2}\) where I will use \(N\) to %
 represent the side length of the system. 
 
 
@@ -515,12 +515,72 @@ have no idea how large their respective domains are}.
 
 
 A final point to address for the \(\tau = 1.0\epsilon / k\) model %
-is the \emph{time speckling} 
+is the \emph{time speckling}. As the system is allowed to evolve %
+in equilibrium spins at random locations will randomly flip. %
+This is a byproduct of the metropolis algorithm but it is important %
+because the \emph{speckles} almost always remain a single spin. %
+You will see later that this changes as the temperature is increased. 
 
 
-Heating the lattice to \(\tau = 2.0 \epsilon / k\) we see some %
-much more interesting behaviour. 
-        
+Heating the lattice to \(\tau = 2.0 \epsilon / k\) we see mush %
+of the same behaviour. \(\tau = 2.0 \epsilon / k\) is still less %
+than the critical temperature, so all of the same evolutionary %
+events occur. \emph{Meta-stable} domains form, move and die. %
+Even the more dangerous \emph{meta-stable} rings can form at %
+this temperature. I would like to say that the lifetime of the %
+\emph{domains} has declined but I have no evidence. 
+
+
+The key difference between the \(\tau  2.0 \epsilon / k\) and the %
+\(\tau = 1.0 \epsilon / k\) models is the \emph{speckling}. At %
+the higher temperatures the speckles occur more often and can %
+result in very local short lived domains. This is why I postulated %
+that the \emph{domains} are shorter lived. The system is more %
+active meaning that the spins on the boundary flip more readily. %
+Moreover, the rapid speckling assists in the destruction of the %
+\emph{domain} when it occurs on the boundary.
+
+
+Something worthy of note before we move above the condensation %
+temperature is that \emph{domains} die at there corners. This %
+is because the corners represent an interface where a spin has %
+more neighbours of one color than the other. This is another %
+factor that prolongs the life of the \emph{meta-stable} states, %
+since they have no corners and minimised contact. 
+
+
+The behaviour was markedly different for the \(\tau = 3.0 \epsilon %
+\ k\) model, because it is above the critical temperature. %
+For starters the activity of the system has increased significantly. %
+This means, among other things that the relaxation into equilibrium %
+is almost instantaneous compared with the lower temperature models. %
+In addition \emph{domains} do not form at this temperature. 
+
+
+I have been using \emph{domain} to refer to a structure that is %
+\emph{macroscopic} and \emph{semi-permanent}. \emph{Zonation} %
+does occur at \(\tau = 3.0 \epsilon / k\) bur it does not meet %
+these criteria. By this I mean that the zones are small \(\sim 10\) %
+spins maximum and temporary. Rather than considering the rapid %
+zonation to be the evolution of the \emph{domain} behaviour I %
+consider it the evolution of the \emph{speckling} behaviour.
+
+
+At \(\tau = 3.0 \epsilon / k\) we also loose the \emph{coherent} %
+end state. At both of the other temperatures the final state was %
+a completely magnetised block or a \emph{meta-stable} ring. %
+However, at \(\tau = 3.0 \epsilon / k\) there is no such state %
+and the \emph{zonation} appears to randomly move about the grid. %
+At higher temperatures still the \emph{zonation} is completely %
+destroyed and not even microscopic domains are able to form. 
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{pub/figures/first_and_last_ising_2d.pdf}
+    \caption{}
+    \label{fig:5}
+\end{figure}
 %\newpage
 %\section*{Introduction}
 %The study of magnetic materials is an area of academic %
