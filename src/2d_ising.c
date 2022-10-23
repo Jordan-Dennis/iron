@@ -378,10 +378,8 @@ void physical_parameters_ising_2d(Config* config)
     for (int num_spin = 0; num_spin < 3; num_spin++)
     {
         int num_spins = spin_nums[num_spin];
-        int epochs = num_spins * 1e3;
+        int epochs = num_spins * num_spins * 1e3;
 
-        #pragma omp parallel for num_threads(8) shared(systems) \
-            private(num_spins, stop, step, epochs)
         for (int run = 0; run < runs; run++)
         {
             systems[run] = init_ising_2d(num_spins, stop - step);
@@ -399,16 +397,11 @@ void physical_parameters_ising_2d(Config* config)
             float _entropies[runs];
             float _heat_capacities[runs];
 
-            printf("Temperature: %f\n", temperature);
-
             for (int run = 0; run < runs; run++)
             {
                 systems[run] -> temperature = temperature;
             }
 
-            #pragma omp parallel for num_threads(8) \
-                shared(systems, _energies, _entropies, _heat_capacities) \
-                private(runs, epochs)
             for (int run = 0; run < runs; run++)
             {
                 float __energies[epochs];
@@ -424,7 +417,6 @@ void physical_parameters_ising_2d(Config* config)
                     __entropies[epoch] = entropy;
                 }
 
-                printf("Run: %i\n", run);
 
                 _energies[run] = mean(__energies, epochs);
                 _entropies[run] = mean(__entropies, epochs);

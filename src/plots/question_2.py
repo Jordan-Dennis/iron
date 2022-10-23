@@ -161,6 +161,7 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     free_energy_est = data[:, 6]
     free_energy_err = data[:, 7]
     heat_capacity_est = data[:, 8]
+    heat_capacity_err = data[:, 9]
 
     figure, axes = plt.subplots(2, 2, figsize=(10, 10))
     axes[0][0].set_title("$\\textrm{Energy} (J)$")
@@ -185,10 +186,18 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
             free_energy_est[cond], 
             free_energy_err[cond])
 
-        axes[1][1].plot(
+        axes[1][1].errorbar(
             temperature[cond], 
-            heat_capacity_est[cond]) 
-   
+            heat_capacity_est[cond],
+            heat_capacity_err[cond]) 
+        
+        axes[0][0].legend(["20", "50", "100"])
+        axes[1][0].legend(["20", "50", "100"])
+        axes[0][1].legend(["20", "50", "100"])
+        axes[1][1].legend(["20", "50", "100"])
+
+
+
     if show:
         plt.show()
     if save_file:
