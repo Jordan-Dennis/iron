@@ -1098,5 +1098,178 @@ for the opposite reason.
 
 
 \section*{Hypothesis}
+We predicted that the anti-ferro-magnetic material would have a phase %
+transition at the same temperature as the ferro-magnetic material in %
+the absence of an external magnetic field. We came to this conclusion %
+because the type of interaction is the same and all that has changed is %
+the sign. The presence of an external field was expected to change %
+this phase transition, which we expected to be second order based on %
+the ferro-magnetic Ising model, to a first order phase transition. 
+
+
+We also predicted that the phase transition of the ferro-magnetic %
+Ising model would change from a second order phase transition to a first %
+order phase transition in the presence of an external magnetic field. %
+This prediction was based on the unequal weighting of the orientations %
+reducing the variability of the energy and hence smoothing out the %
+peak in the heat capacity. A corollary of this second hypothesis was %
+that the magnetic field would increase the critical temperature of %
+the model. 
+
+
+Finally we presented a number of equations predicting how the %
+para-magnetic material would evolve as the magnetic field was varied. %
+
+
 \section*{Method}
+We tested our the anti-ferro-magnetic phase transition hypothesis by %
+measuring the physical parameters at a number of different temperatures %
+and plotting the results. This allowed us to search for a suspected %
+discontinuity in the heat capacity which would indicate a second order %
+phase transition akin to the phase transition of the ferro-magnetic %
+substance. We repeated the same thing at three different strengths of %
+magnetic field noting how the peak in the heat capacity qualitatively %
+changed. As a result we were able to estimate the Neel temperature of %
+the lattice based on the location of the \(B = 0\) peak.
+
+
+We used the same method to test how the ferro-magnetic phase transition %
+was changed by the external magnetic field. However, we also tested %
+increasing the strength of the magnetic field once the system was %
+equilibrated below above and at the critical temperature. This gave %
+us the ability to look for a similar, but not the same phase transition %
+which we expected to be first order. 
+
+
+To test our predictions for the paramagnetic substance we simulated it %
+over a fine grid of temperatures and the same three magnetic fields as %
+the other simulations. We quantitatively assessed our models by calculating %
+the \(\chi^{2}\) statistics for each fit and the associated \(p\)-value. %
+
+
+My original code could not be used to test these predictions so I modified %
+it to accommodate the flexible \(\epsilon\) and \(B\) into the sub-routines. %
+Below I have included snapshots for the energy subroutine, entropy subroutine %
+and the monte-carlo step subroutine. 
+
+\begin{lstlisting}
+/*
+ * metropolis_step_ising_t
+ * -----------------------
+ * Evolve the system according to a randomly weighted spin flip that 
+ * compares the probability of the two states based on the Boltzmann 
+ * distribution of the two systems. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to evolve. 
+ */
+void metropolis_step_ising_t(ising_t *system)
+{
+    int length = system -> length;
+    int **ensemble = system -> ensemble;
+    float epsilon = system -> epsilon;
+    float temperature = system -> temperature;
+    float magnetic_field = system -> magnetic_field;
+
+    int row = random_index(length);
+    int col = random_index(length);
+
+    int spin = ensemble[row][col];
+    int neighbours = 
+        ensemble[modulo(row + 1, length)][col] + 
+        ensemble[modulo(row - 1, length)][col] + 
+        ensemble[row][modulo(col + 1, length)] + 
+        ensemble[row][modulo(col - 1, length)];
+
+    float magnetic_change = -2 * spin * magnetic_field;
+    float interaction_change = 2 * epsilon * neighbours * spin;
+    float energy_change = magnetic_change + interaction_change;
+
+    if ((energy_change < 0) || 
+        (exp(- energy_change / temperature) > normalised_random()))
+    {
+        system -> ensemble[row][col] *= -1;
+    }
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}
+/*
+ * energy_ising_t
+ * --------------
+ * Calculate the energy of the isingn system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure. 
+ */
+float energy_ising_t(ising_t *system)
+{
+    int length = system -> length;
+    int **ensemble = system -> ensemble;
+    float epsilon = system -> epsilon;
+    float magnetic_field = system -> magnetic_field;
+    float magnetic = 0.0;
+    float interactions = 0.0;
+
+    for (int row = 0; row < length; row++)
+    {
+        for (int col = 0; col < length; col++)
+        {
+            float neighbours = 0.0;
+            neighbours += ensemble[modulo(row + 1, length)][col];
+            neighbours += ensemble[modulo(row - 1, length)][col];
+            neighbours += ensemble[row][modulo(col + 1, length)];
+            neighbours += ensemble[row][modulo(col - 1, length)];
+
+            magnetic += ensemble[row][col] * magnetic_field;
+            interactions -= neighbours * epsilon * ensemble[row][col];
+        }
+    }
+
+    return interactions / 2. + magnetic;
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}
+/*
+ * entropy_ising_t
+ * --------------
+ * Calculate the entropy of the ising system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure. 
+ */
+float entropy_ising_t(ising_t *system)
+{
+    int len = system -> length;
+    int **ensemble = system -> ensemble; 
+    int up = 0;
+
+    for (int row = 0; row < len; row++)
+    {
+        for (int col = 0; col < len; col++)
+        {
+            up += ensemble[row][col] == ensemble[modulo(row + 1, len)][col];
+            up += ensemble[row][col] == ensemble[row][modulo(col + 1, len)];
+        }
+    }
+        
+    int total = 2 * len * len;
+    int down = total - up;
+
+    if (up == 0 || up == total)
+    {
+        return log(2);
+    }
+    else
+    {
+        return total * log(total) - up * log(up) - down * log(down);
+    }
+}
+\end{lstlisting}
 \end{document}
