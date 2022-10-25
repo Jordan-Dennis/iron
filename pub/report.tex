@@ -17,7 +17,6 @@
     keywordstyle=\bfseries, 
     basicstyle=\ttfamily}
 \def\ttdefault{pcr}
-\def\citation{{\bfseries (Annon, dd/mm/yyyy)}}
 \begin{document}
 \section*{Foreword}
 I used the \verb!c! programming language to complete this task. I %
@@ -888,36 +887,38 @@ temperature of iron is \(T_{c} = 1043K\), hence \(\epsilon = %
 \clearpage
 \section*{Introduction}
 The study of magnetic materials is an area of academic %
-and industrial interest \citation. For example, magnetic %
+and industrial interest \cite{Shroeder2021}. For example, magnetic %
 technologies are important in the ongoing development of %
 quantum computers, superconducting circuits and other %
-examples in electronics \citation. At a fundamental level %
+examples in electronics. At a fundamental level %
 magnetisation is a well understood phenomenon, yet it is %
 difficult to theoretically model. One simple model of magnetic %
 materials is the Ising model. 
 
 
-The Ising model is the simplest model of a ferro-magnet \citation. %
+The Ising model is a simple model of a ferro-magnet \cite{MacKay2003}. %
 Despite the simplicity of the Ising model it displays rich %
 physical behaviour and has analytic solutions in one and %
-two dimensions \citation.  The Ising model is the simplest model %
-to account for inter-molecular interactions and contain a phase %
+two dimensions \cite{MacKay2003, Schroeder2021}. The Ising model is the %
+simplest model to account for inter-molecular interactions and contain a phase %
 transition. This makes it an excellent medium for studying %
-magnetic phenomenon \citation. 
+magnetic phenomenon \cite{MacKay2003}. 
 
 
 By modifying the basic Ising model we can simulate many %
-phenomenon including glasses \citation. The Ising model %
+phenomenon including glasses \cite{McMillan1984}. The Ising model %
 has broader significance and can be used to construct very %
-simple neural networks called Boltzmann machines \citation. We tested %
-one and two dimension Ising models and confirmed that they %
-matched theoretical predictions.
+simple neural networks called Boltzmann machines \cite{MacKay2003}. We %
+used the Ising model to compare ferro-magnetic, para-magnetic and %
+anti-ferro-magnetic materials. Iron is a good example of a material %
+that is ferro-magnetic, whereas gold is para-magnetic and chromium %
+is anti-para-magnetic. 
 
 
 \section*{Theory}
 Materials have internal interactions. As physicists we like %
 to ignore these where possible but often these approximations %
-limit the accuracies of our models \citation. Magnetic %
+limit the accuracies of our models \cite{Schroeder2021, Kittel1969}. Magnetic %
 phenomenon are no different. To understand how spins interact %
 in a magnet it helps to first construct the simplest possible %
 model without interactions; a para-magnet.
@@ -946,11 +947,11 @@ This is a simple two level system and the partition function %
 is given by, 
 %
 \begin{align}
-Z &= \sum_{s = \pm 1}\exp\left(-\frac{sB}{\tau}\right)\nonumber\\
-    &= \exp\left(-\frac{sB}{\tau}\right) + 
-        \exp\left(\frac{sB}{\tau}\right)\nonumber\\
-    &= 2\cosh\left(\frac{sB}{\tau}\right),
-\label{eqn:1}
+    Z &= \sum_{s = \pm 1}\exp\left(-\frac{sB}{\tau}\right)\nonumber\\
+        &= \exp\left(-\frac{sB}{\tau}\right) + 
+            \exp\left(\frac{sB}{\tau}\right)\nonumber\\
+        &= 2\cosh\left(\frac{sB}{\tau}\right),
+    \label{eqn:18}
 \end{align}
 %
 where, \(\tau = kT\) is the temperature in units of energy. %
@@ -958,9 +959,9 @@ The probability of the spins being anti-aligned with the %
 field is therefore, 
 %
 \begin{align}
-P &= \frac{\exp\left(-\frac{sB}{\tau}\right)}
-        {2\cosh\left(\frac{sB}{\tau}\right)}.
-\label{eqn:2}
+    P &= \frac{\exp\left(-\frac{sB}{\tau}\right)}
+            {2\cosh\left(\frac{sB}{\tau}\right)}.
+    \label{eqn:9}
 \end{align}
 %
 Hence, as the temperature increase we expect the number of %
@@ -974,76 +975,44 @@ the partition function of an ensemble of \(N\) spins is just %
 the product of \(N\) partition functions for the single spin %
 case. However, since the spins are indistinguishable we must %
 also divide by a Gibbs correction factor of \(N!\). %
-The probability of finding a particular state however, %
-is a case that is worth studying, since it indicates a %
-diveregence between the Ising model of a ferro-magnet and %
-a para-magnet in a magnetic field. First we need to define %
-our state. 
-
-
 The energy of the system, and any other physical %
 parameters, only depend on the number of spins that are %
 aligned with the magnetic field and not specifically %
-which spins are aligned with the field. Naively we might %
-expect that the probability of having \(N_{\uparrow}\) %
-spins aligned with the field would be,
-%
-\begin{align}
-P(N_{\uparrow}) &= \frac{
-        \exp\left(-\frac{sN_{\uparrow}B}{\tau}\right)
-        \exp\left(\frac{s(N - N_{\uparrow})B}{\tau}\right)}{
-        \cosh\left(\frac{sB}{\tau}\right)^{N}}.
-\label{eqn:3}
-\end{align}
-%
-However, equation \ref{eqn:3} has failed to account for the %
-multiple micro-states that occupy this macro-state. We can %
-account for this by multiplying by the multiplicity, which %
-can be found using the chose function,
-%
-\begin{align}
-P(N_{\uparrow}) &= \frac{N!}{N_{\uparrow}!(N - N_{\uparrow})!}
-        \frac{\exp\left(-\frac{sN_{\uparrow}B}{\tau}\right)
-        \exp\left(\frac{s(N - N_{\uparrow})B}{\tau}\right)}{
-        \cosh\left(\frac{sB}{\tau}\right)^{N}}.
-\label{eqn:4}
-\end{align}
-%
-Equation \ref{eqn:4} is the correct expression for the probability.
+which spins are aligned with the field. 
 
 
 It is informative to calculate the internal energy and free %
 energy of the system. Starting with the internal energy,
 %
 \begin{align}
-U &= \tau^{2}\partial_{\tau}\ln Z\nonumber\\
-    &= \tau^{2}\partial_{\tau}\ln\left(2^{N}\cosh^{N}
-        \left(\frac{sB}{\tau}\right)\right)\nonumber\\
-    &= -NsB\tanh\left(\frac{sB}{\tau}\right).
-\label{eqn:5}
+    U &= \tau^{2}\partial_{\tau}\ln Z\nonumber\\
+        &= \tau^{2}\partial_{\tau}\ln\left(2^{N}\cosh^{N}
+            \left(\frac{sB}{\tau}\right)\right)\nonumber\\
+        &= -NsB\tanh\left(\frac{sB}{\tau}\right).
+    \label{eqn:10}
 \end{align}
 %
 We can also calculate the free energy, but further calculations %
 result in tedious analytical expressions so we have omitted them. %
 %
 \begin{align}
-F &= -\tau\ln Z\nonumber\\
-    &= -\tau\ln\left(2^{N}\cosh^{N}\left(\frac{sB}{\tau}
-        \right)\right)\nonumber\\
-    &= -NsB - N\tau\ln\left(1 + \exp\left(-\frac{2sB}{\tau}\right)
-        \right).
-\label{eqn:7}
+    F &= -\tau\ln Z\nonumber\\
+        &= -\tau\ln\left(2^{N}\cosh^{N}\left(\frac{sB}{\tau}
+            \right)\right)\nonumber\\
+        &= -NsB - N\tau\ln\left(1 + \exp\left(-\frac{2sB}{\tau}\right)
+            \right).
+    \label{eqn:11}
 \end{align}
 %
-As we will see when we analyse the Ising model without an external %
-field these results are general of any two level system. Using %
+Curiously this matches with the results we found for the Ising %
+model when there was no magnetic field. Using %
 equation \ref{eqn:5} we can calculate the magnetisation as a function %
 of the magnetic field and temperature, 
 %
 \begin{align}
-U = mB &= -NsB\tanh\left(\frac{sB}{\tau}\right)\nonumber\\
-    m &= -Ns\tanh\left(\frac{sB}{\tau}\right).
-\label{eqn:8}
+    U = mB &= -NsB\tanh\left(\frac{sB}{\tau}\right)\nonumber\\
+        m &= -Ns\tanh\left(\frac{sB}{\tau}\right).
+    \label{eqn:12}
 \end{align}
 %
 Therefore, the net magnetisation system will decrease with %
@@ -1064,13 +1033,11 @@ The Ising model differs because it adds very simple interactions %
 between neighbouring spins. This interaction favours pairs that %
 are aligned by reducing the energy of this scenario. Representing %
 up spins as \(+1\) and down spins as \(-1\) we can represent this %
-mutal interaction as \(\Delta \epsilon = \varepsilon s_{i}s_{i + 1}\), %
-where \(\Delta \epsilon\) is the energy contribution of the %
-interaction, \(\varepsilon\) is a scaling factor that represents %
+mutual interaction as \(\Delta U = \epsilon s_{i}s_{i + 1}\), %
+where \(\Delta U\) is the energy contribution of the %
+interaction, \(\epsilon\) is a scaling factor that represents %
 the strength of the interaction and \(s_{i}\) is the \(i^{th}\) %
 spin in the chain. 
-
-
 
 
 What happens if we place the Ising model into an external magnetic %
@@ -1083,74 +1050,42 @@ multiplicity of two since either of the spins could be aligned %
 with the field. 
 
 
-It is possible to compute the partition function for this the single %
-pair and hence also the entrie system.
-%
-\begin{align}
-Z_{1} &= \sum_{s}\exp\left(-\frac{\epsilon_{s}}{\tau}\right)
-        \nonumber\\
-    &= \exp\left(\frac{-\epsilon - 2B}{\tau}\right) +
-        2\exp\left(\frac{\epsilon}{\tau}\right) +
-        \exp\left(\frac{-\epsilon + 2B}{\tau}\right)
-        \nonumber\\
-    &= 2\exp\left(\frac{-\epsilon}{\tau}\right)
-        \cosh\left(\frac{2B}{\tau}\right) + 
-        2\exp\left(\frac{\epsilon}{\tau}\right).
-\label{eqn:14}
-\end{align}
-%
-From here we can compute all the physical properties of the system. %
-Since each pair is independent the partition function is simply the %
-product of \(N\) partition function by the same reasoning as in %
-the case above when there was no magnetic field. We have not shown %
-the calculation of the energy ect., because the expressions are %
-complex and uninformative. 
+Based on our analysis of the paramagnetic system we would expect %
+that the magnetic field would coerce spins into alignment by %
+decreasing there energy. This produces a positive reinforcement %
+loop because now the energy of the neighbouring spin is not %
+only decreased by \(sB\) when it aligns with the field but is %
+also decreased by \(\epsilon s_{i}s_{i + 1}\). We predict that %
+adding the external field will raise the critical temperature of %
+the system. 
+
+
+We expect the type of phase transition to change. In %
+general the spins will be flipping much less rapidly and as %
+a result the humpy in the heat capacity will be smoothed out %
+because the variance in the temperature will not peak as %
+largely. Since, we expect that the heat capacity will be %
+continuous this implies that the type of phase transition %
+is now first order, where the energy is getting provided by the %
+magnetic field. 
+
+
+Moreover, we expect that many of the rich behaviours we observed %
+in the absence of an external magnetic field will vanish. For %
+example, below the critical temperature we expect the lifetime %
+of \emph{domains} to be significantly shorter as the entire %
+crystal quickly condenses into the ground state. In addition, %
+we expect \emph{speckling} to be even rarer and slower because %
+the flip now has a weight lower be a factor of \(\exp(-sB)\). 
 
 
 Another interesting effect that can be explored using the Ising model %
 is anti-ferro-magnetism. This phenomenon was only recently discovered %
-in nature \citation and refers to and interaction between neighbouring %
+in nature and refers to and interaction between neighbouring %
 spins that causes them to have lower energy when they are aligned %
 anti-parallel rather than parallel. We do not need to cover any new %
 equations in this case as an anti-ferro-magnet can be explored by %
 letting \(\epsilon\) become negative. 
-
-
-We have spent a lot of time discussing the one-dimensional scenario %
-but real systems are typically higher dimensional. There is a %
-an analytical solution to the two-dimensional ising model \citation. %
-This solution is a tour de force and has comparatively little %
-practical use due to its complexity. Multiple approximation methods %
-have been developed for dealing with the two-dimensional case, %
-most notably the mean field approximation. 
-
-
-The mean field approximation treats a group of neighbours as an %
-a single spin, parametrised by the mean. In this way we recover %
-the two level system and arrive at a two level system that is %
-very similar to what we have already covered for the para-magnet %
-and the Ising model when there is no external magnetic field. %
-Ultimately the mean field approximation is an approximation and %
-its predictions are not always correct. 
-
-
-Another aspect of higher dimensions that it is worth discussing %
-is what counts as a neighbour. For example, in two-dimensions %
-we could connet the spins together so that each spins is equally %
-far from six other spins. This triangular Ising model will have %
-markedly different behaviour than a square grid of spins \citation. %
-For our analysis we have considered a square grid of spins since %
-it is simpler to simulate. 
-
-
-Without going into the complex analytical solutions we can still %
-make useful qualitative guesses about the behaviour of the Ising %
-model in higher dimensions based on its behaviour in lower %
-dimensions. For example, we expect the spins will tend to align %
-at lower temperatures and tend to disorder at higher temperatures. %
-For the anti-ferro-magnetic case we expect the spins to become %
-anti-aligned at low temperatures and tend to disorder at higher %
-temperatures.
 
 
 It is worth noting that in the presence of a magnetic field the %
@@ -1162,122 +1097,6 @@ On the other hand the anti-ferro-magnet exerts a dampening effect %
 for the opposite reason. 
 
 
+\section*{Hypothesis}
 \section*{Method}
-\begin{verbatim}
-function calc_energy
-energy = 0
-for spin in 0:length
-energy += ensemble[spin] * ensemble[spin + 1]
-return energy
-\end{verbatim}
-
-
-Similarly for the entropy we counted all of the aligned pairs. %
-This works because as discussed in the theory the "base unit" %
-of the Ising model is a pair of spins not an individual spin. %
-As noted in the Theory there are \(N\) pairs of spins. Moreover, %
-we ued Stirling's approximation in the logarithmic form, because %
-we found that the program could not calculate numbers of the size %
-\(100!\). This will have had negligible affects at higher %
-temperatures where the system tends torward disorder, but at %
-lower temperatures the approximation becomes less accurate. %
-We were not too concerned with the loss of accuracy since the %
-entropy tends to zero at low temperatures.
-%
-\begin{verbatim}
-function calc_entropy
-up = 0
-for spin in 0:length
-up += ensemble[spin] == ensemble[spin + 1]
-down = length - up
-entropy = length * log(length) - up * log(up) - down * log(down)
-return entropy
-\end{verbatim}
-
-
-The free energy was calculated using its definition, \(F = U - %
-\tau\sigma\), where \(\tau = kT\) and \(\sigma\) is the entropy. %
-The heat capacity was calculated using the thermodynamic %
-identity,
-%
-\begin{align}
-C_{V} &= \frac{\textrm{var(U)}{\tau^{2}}}.
-\label{eqn:15}
-\end{align}
-%
-A large part of the computational expense came from estimating the %
-uncertainty in the physical parameters. It did not make sense to %
-initialise the system randomly at every temperature and then wait %
-for it to equilibrate before taking measurements. Instead we %
-initialised the system at a high temperature where the random %
-configuration is a good approximation to the equilibrium %
-configuration and equilibrated it. 
-
-
-From this higher temperature %
-we allowed the system to evolve for \(1000N\) steps measuring %
-the physical properties at every step. We then cooled the system %
-by a small incremement and without re-equilibrating the system %
-evolved it for \(1000N\) steps taking measurements every step. %
-In this way we halved the amount of CPU time required by each run %
-but introduced a small error by starting the system at a slightly %
-out of equilibrium state. Given the large number of runs we believe %
-that this error is negligible, although it is visible at lower %
-temperatures as the heat capacity becomes over-estiamted. 
-
-
-Another flaw of running the simulation this way was that it %
-serialised the loops (i.e. made the next iteration depend on the %
-state of the previous one). This prevented us from making efficient %
-parallelisation of the inner loop, however, the outer loop was %
-not serial and could be efficiently paralellised. After each run %
-of \(1000N\) the average was taken for each physical parameter. 
-
-
-
-Please note that we did not use the standard error of the %
-\(1000N\) trials as the error. It does not make sense to do %
-so because each state is deterministically dependent on the %
-previous one and the sample gridding is much too fine. Instead %
-we repeated the entire process a fixed number of times \(100\) for %
-the one-dimensional case and used the standard error of the means %
-from these 100 trials as the estimate of our uncertainty. Note that %
-we defined the standard error as \(\sqrt{\textrm{Var}{N}}\). %
-
-
-We noticed that the infinite one-dimensional Ising model is predicted %
-to have no net magnetisation at \(0K\). To test this hypothesis, %
-we created histograms of the magnetisation at \(\tau = 0.5J, 1.0J\) %
-and \(2.0J\) for \(N = 100\) and \(N = 500\). We expected the %
-histograms to be narrower as the number of spins in the system was %
-increased.
-
-
-Once we were satisfied with the one-dimensional ising model we %
-repeated a similar analysis for the two-dimensional model. %
-First we tested the time required for equilibration by initialising %
-the model and running it for \(1000N^{2}\) where \(N\) is the width %
-of the grid. 
-
-
-Satisfied with the equilibration time we employed the same techniques %
-described for the one-dimensional case to the two-dimensional case %
-to measure the physical parameters. In short, we incrementally cooled %
-the system measuring every iteration and recording the mean. We %
-repeated this process a fixed number of times and used the standard %
-error as our uncertainty estimate. The energy calculation is %
-clearly modified, so we have included the relevant pseudocode %
-below:
-%
-
-
-\section*{Results}
-We noticed that the net magnetisation set in at lower temperatures for %
-the larger \(N\). This tells us that there is no phase transition %
-because a phase transition should occur at exactly the same %
-temperature for all latice sizes. Moreover, it agrees with the %
-theoretical prediction that the Ising model is not magnetised at %
-\(0K\) in the infinite case because it we increase the latticed %
-temperature to infinity then the temperature of net magnetisation %
-should decrease below \(0K\). 
 \end{document}
