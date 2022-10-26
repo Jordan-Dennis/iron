@@ -3,6 +3,7 @@
 *.swp
 *.rpt
 pub/data/*.csv
+pub/data/*.txt
 pub/*.log
 pub/*.aux
 pub/*.pdf
