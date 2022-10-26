@@ -1380,6 +1380,18 @@ the temperature was below \(2.0 \epsilon / k\) as shown in figure \ref{fig:9}.
 \end{figure}
 
 
+\begin{figure*}
+    \centering
+    \includegraphics{pub/figures/physical_parameters_external_field.pdf}
+    \caption{The physical properties of the anti-ferro-magnetic, para-magnetic %
+        and ferro-magnetic systems as a function of the temperature and %
+        for multiple magnetic field strengths. The anti-ferro-magnetic %
+        material properties are plotted on the leftmost graph. The %
+        para-magnetic material properties are plotted in the center and %
+        the ferro-magnetic are on the right.}
+    \label{fig:11}
+\end{figure*}
+
 Figure \ref{fig:11} is a very important figure so I will discuss it in %
 a lot of detail. This figure evidences a lot of the qualitative discussion %
 that I have undergone so far. Let's start by analysing the leftmost %
@@ -1445,15 +1457,66 @@ This matches our predictions and confirms the prescence of a positive %
 feedback relation as opposed to an anti-ferro-magnetic material. 
 
 
-\begin{figure*}[t]
+Using equations \ref{eqn:14}, \ref{eqn:15}, \ref{eqn:16}, \ref{eqn:17} and %
+\ref{eqn:18} we computed \(\chi^{2}\) statistics for the fitted model. %
+To do this we used Poisson counting,
+%
+\begin{align}
+    \chi^{2} &= \sum_{i}\left(\frac{o_{i} - e_{i}}{e_{i}}\right)^{2},
+    \label{eqn:19}
+\end{align}
+%
+where \(o_{i}\) is the oberved data point in the \(i^{th}\) value and %
+\(e_{i}\) is the expected value. This revealed what we would have expected %
+based on the visual appearance of the data. The results of this analysis %
+are included in table \ref{tab:1}.
+
+
+\begin{table}
     \centering
-    \includegraphics{pub/figures/physical_parameters_external_field.pdf}
-    \caption{The physical properties of the anti-ferro-magnetic, para-magnetic %
-        and ferro-magnetic systems as a function of the temperature and %
-        for multiple magnetic field strengths. The anti-ferro-magnetic %
-        material properties are plotted on the leftmost graph. The %
-        para-magnetic material properties are plotted in the center and %
-        the ferro-magnetic are on the right.}
-    \label{fig:11}
-\end{figure*}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        & \(B (T)\) & \(\chi^{2}\) & \(p\) \\
+        \hline
+        \hline
+        \(U\)      & \(0\) & \(NAN\)                 & \(NAN\) \\ 
+        \(\sigma\) & \(0\) & \(3.17 \times 10^{-5}\) & \(NAN\) \\
+        \(F\)      & \(0\) & \(3.17 \times 10^{-5}\) & \(NAN\) \\
+        \(C_{V}\)  & \(0\) & \(NAN\)                 & \(NAN\) \\
+        \(|m|\)    & \(0\) & \(NAN\)                 & \(NAN\) \\
+        \hline
+        \(U\)      & \(1\) & \(5.34 \times 10^{-4}\) & \(<< 0.05\) \\ 
+        \(\sigma\) & \(1\) & \(2.36 \times 10^{-3}\) & \(<< 0.05\) \\
+        \(F\)      & \(1\) & \(1.99 \times 10^{-5}\) & \(<< 0.05\) \\
+        \(C_{V}\)  & \(1\) & \(4.44 \times 10^{-1}\) & \(<< 0.05\) \\
+        \(|m|\)    & \(1\) & \(5.34 \times 10^{-4}\) & \(<< 0.05\) \\
+        \hline
+        \(U\)      & \(2\) & \(4.95 \times 10^{-5}\) & \(<< 0.05\) \\ 
+        \(\sigma\) & \(2\) & \(1.77\)                & \(0.00540\) \\
+        \(F\)      & \(2\) & \(9.84 \times 10^{-5}\) & \(<< 0.05\) \\
+        \(C_{V}\)  & \(2\) & \(80.2\)                & \(\sim 1\)  \\
+        \(|m|\)    & \(2\) & \(4.95 \times 10^{-5}\) & \(<< 0.05\) \\
+        \hline
+    \end{tabular}
+    \caption{\(\chi\) analysis of goodness of fit. I have included %
+        three significant figures when quoting the \(\chi^{2}\) %
+        statistic but it was used to maximum precision in calculations.}
+    \label{tab:1}
+\end{table}
+
+
+Table \ref{tab:1} shows some very interesting trends. Firstly, we see %
+that our model matches, to within a very good approximation, what we %
+predicted in equations \ref{eqn:14}, \ref{eqn:15}, \ref{eqn:16} and %
+\ref{eqn:17}. You may be suspicious of the \(NAN\), \(\chi^{2}\) values %
+that I am reporting. You may notice that in these cases the predicted %
+and model values are constant at zero in appropriate units. This %
+resulted in divide by zero errors when I applied equation \ref{eqn:19}.
+
+
+The next interesting element of table \ref{tab:1}
+
+
+
+
 \end{document}

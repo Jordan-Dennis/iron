@@ -254,8 +254,13 @@ float entropy_paramagnetic(ising_t *system)
         for (int col = 0; col < len; col++)
             up += ensemble[row][col] > 0;
         
-    int total = 2 * len * len;
+    int total = len * len;
     int down = total - up;
+
+    if (up == total || up == 0)
+    {
+        return 0;
+    }
 
     return total * log(total) - up * log(up) - down * log(down);
 }
@@ -272,10 +277,10 @@ float entropy_paramagnetic(ising_t *system)
  */
 float entropy_ising_t(ising_t *system)
 {
-    float magnetic_field = system -> magnetic_field;
+    float epsilon = system -> epsilon;
     float entropy; 
 
-    if (magnetic_field == 0.0)
+    if (epsilon == 0.0)
     {
         entropy = entropy_paramagnetic(system);
     }

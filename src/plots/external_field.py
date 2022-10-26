@@ -210,6 +210,25 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
                 axes[2][_epsilon].plot(temperatures, free_energy, "--")
                 axes[4][_epsilon].plot(temperatures, heat_capacity, "--")
                 axes[3][_epsilon].plot(temperatures, magnetisation, "--")
+
+                m_energy = _energy(subset[:,2], magnetic_field)
+                m_entropy = _entropy(subset[:,2], magnetic_field)
+                m_free_energy = _free_energy(subset[:,2], magnetic_field)
+                m_heat_capacity = _heat_capacity(subset[:,2], magnetic_field)
+                m_magnetisation = _magnetisation(subset[:,2], magnetic_field)
+
+                energy_chisq = _chi_squared(m_energy, subset[:,3])
+                entropy_chisq = _chi_squared(m_entropy, subset[:,5])
+                free_energy_chisq = _chi_squared(m_free_energy, subset[:,7])
+                heat_capacity_chisq = _chi_squared(m_heat_capacity, subset[:,11])
+                magnetisation_chisq = _chi_squared(m_magnetisation, subset[:,9])
+
+                print(f"Magnetic Field: {magnetic_field}")
+                print(f"Chi Squared Energy: {energy_chisq}")
+                print(f"Chi Squared Entropy: {entropy_chisq}")
+                print(f"Chi Squared Free Energy: {free_energy_chisq}")
+                print(f"Chi Squared Heat Capacity: {heat_capacity_chisq}")
+                print(f"Chi Squared Magnetisation: {magnetisation_chisq}")
             
     axes[0][0].set_ylabel(r"$\textrm{Energy} (J)$")
     axes[1][0].set_ylabel(r"$\textrm{Entropy} (JK^{-1})$")
