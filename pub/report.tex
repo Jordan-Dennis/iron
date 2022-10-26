@@ -56,7 +56,7 @@ was initialised in a random state and allowed to equilibrate.
 
 \begin{figure}[h]
     \includegraphics%
-        [width=0.5\textwidth]%
+        [width=0.45\textwidth]%
         {pub/figures/first_and_last_ising_1d.pdf}
     \caption{Each vertical pair of lines %
         represents the spin state. The top one is %
@@ -234,7 +234,7 @@ and Equation \ref{eqn:3},
 \begin{figure}[h]
     \centering
     \includegraphics%
-        [width=0.5\textwidth]%
+        [width=0.45\textwidth]%
         {pub/figures/physical_parameters_ising_1d.pdf}
     \caption{The top left is the energy and the %
         top right is the entropy. The bottom left is the %
@@ -445,7 +445,7 @@ because of equation \ref{eqn:5}.
 \subsection*{Question 1 e)}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\textwidth]{pub/figures/magnetisation_ising_1d.pdf}
+    \includegraphics[width=0.45\textwidth]{pub/figures/magnetisation_ising_1d.pdf}
     \caption{Histograms of the magnetisation for two ising %
         systems of sizes \(N = 100\) and \(N = 500\). The %
         temperatures are labelled in the titles and the %
@@ -573,7 +573,7 @@ destroyed and not even microscopic domains are able to form.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{pub/figures/first_and_last_ising_2d.pdf}
+    \includegraphics[width=0.45\textwidth]{pub/figures/first_and_last_ising_2d.pdf}
     \caption{Snapshots of the Ising system at multiple temperatures %
         given a random initial starting position (top). You will %
         notice that \(\tau = 1.0 \epsilon / k\) and \(\tau = 2.0 \epsilon %
@@ -682,7 +682,7 @@ was set to one.
 \subsection*{Question 2 c)}
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{pub/figures/physical_parameters_ising_2d.pdf}
+    \includegraphics[width=0.45\textwidth]{pub/figures/physical_parameters_ising_2d.pdf}
     \caption{}
     \label{fig:7}
 \end{figure}
@@ -793,7 +793,7 @@ float entropy_ising_t(ising_t *system)
 \subsection*{Question 2 d)}
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{pub/figures/magnetisation_ising_2d.pdf}
+    \includegraphics[width=0.45\textwidth]{pub/figures/magnetisation_ising_2d.pdf}
     \caption{The magnetisation of the Ising model as the %
         temperature and number of spins is varied.}
     \label{fig:8}
@@ -821,7 +821,7 @@ converge down to a step function at the critical temperature.
 \subsection*{Question 2 e)}
 \begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{pub/figures/heating_and_cooling_ising_2d.pdf}
+    \includegraphics[width=0.45\textwidth]{pub/figures/heating_and_cooling_ising_2d.pdf}
     \caption{Heating and cooling an Ising system to change the %
         magnetisation. The leftmost figure is the initial state %
         at the lowest temperature, the middle figure is the highest %
@@ -1156,40 +1156,44 @@ and the monte-carlo step subroutine.
 /*
  * metropolis_step_ising_t
  * -----------------------
- * Evolve the system according to a randomly weighted spin flip that 
- * compares the probability of the two states based on the Boltzmann 
+ * Evolve the system according to a 
+ * randomly weighted spin flip that 
+ * compares the probability of the 
+ * two states based on the Boltzmann 
  * distribution of the two systems. 
  *
  * parameters
  * ----------
- * ising_t *system: The system to evolve. 
+ * ising_t *system: The system to 
+ *     evolve. 
  */
-void metropolis_step_ising_t(ising_t *system)
+void metropolis_step(ising_t *system)
 {
-    int length = system -> length;
-    int **ensemble = system -> ensemble;
-    float epsilon = system -> epsilon;
-    float temperature = system -> temperature;
-    float magnetic_field = system -> magnetic_field;
+    int length=system->length;
+    int **ensemble=system->ensemble;
+    float epsilon=system->epsilon;
+    float temp=system->temperature;
+    float field=system->magnetic_field;
 
     int row = random_index(length);
     int col = random_index(length);
 
     int spin = ensemble[row][col];
     int neighbours = 
-        ensemble[modulo(row + 1, length)][col] + 
-        ensemble[modulo(row - 1, length)][col] + 
-        ensemble[row][modulo(col + 1, length)] + 
-        ensemble[row][modulo(col - 1, length)];
+        ensemble[modulo(row+1,length)][col]+
+        ensemble[modulo(row-1,length)][col]+
+        ensemble[row][modulo(col+1,length)]+
+        ensemble[row][modulo(col-1,length)];
 
-    float magnetic_change = -2 * spin * magnetic_field;
-    float interaction_change = 2 * epsilon * neighbours * spin;
-    float energy_change = magnetic_change + interaction_change;
+    float magnetic=2*spin*field;
+    float interaction=2*epsilon*
+        neighbours*spin;
+    float change=magnetic+interaction;
 
-    if ((energy_change < 0) || 
-        (exp(- energy_change / temperature) > normalised_random()))
+    if ((change<0) || 
+        (exp(-change/temp)>randn()))
     {
-        system -> ensemble[row][col] *= -1;
+        ensemble[row][col]*=-1;
     }
 }
 \end{lstlisting}
@@ -1199,7 +1203,8 @@ void metropolis_step_ising_t(ising_t *system)
 /*
  * energy_ising_t
  * --------------
- * Calculate the energy of the isingn system. 
+ * Calculate the energy of the Ising 
+ * system. 
  *
  * parameters
  * ----------
@@ -1207,25 +1212,27 @@ void metropolis_step_ising_t(ising_t *system)
  */
 float energy_ising_t(ising_t *system)
 {
-    int length = system -> length;
-    int **ensemble = system -> ensemble;
-    float epsilon = system -> epsilon;
-    float magnetic_field = system -> magnetic_field;
-    float magnetic = 0.0;
-    float interactions = 0.0;
+    int len=system->length;
+    int **ensemble=system->ensemble;
+    float epsilon=system->epsilon;
+    float field=system->magnetic_field;
+    float magnetic=0.0;
+    float interactions=0.0;
 
-    for (int row = 0; row < length; row++)
+    for(int row=0;row<len;row++)
     {
-        for (int col = 0; col < length; col++)
+        for(int col=0;col<len;col++)
         {
             float neighbours = 0.0;
-            neighbours += ensemble[modulo(row + 1, length)][col];
-            neighbours += ensemble[modulo(row - 1, length)][col];
-            neighbours += ensemble[row][modulo(col + 1, length)];
-            neighbours += ensemble[row][modulo(col - 1, length)];
+            neighbours+=
+                ensemble[modulo(row+1,len)][col]+
+                ensemble[modulo(row-1,len)][col]+
+                ensemble[row][modulo(col+1,len)]+
+                ensemble[row][modulo(col-1,len)];
 
-            magnetic += ensemble[row][col] * magnetic_field;
-            interactions -= neighbours * epsilon * ensemble[row][col];
+            magnetic-=ensemble[row][col]*field;
+            interactions-=neighbours*epsilon*
+                ensemble[row][col];
         }
     }
 
@@ -1238,38 +1245,62 @@ float energy_ising_t(ising_t *system)
 /*
  * entropy_ising_t
  * --------------
- * Calculate the entropy of the ising system. 
+ * Calculate the entropy of the Ising 
+ * system. 
  *
  * parameters
  * ----------
- * ising_t *system: The system to measure. 
+ * ising_t *system: The system to 
+ *     measure. 
  */
 float entropy_ising_t(ising_t *system)
 {
-    int len = system -> length;
-    int **ensemble = system -> ensemble; 
-    int up = 0;
+    int len=system->length;
+    int **ensemble=system->ensemble;
+    int up=0;
 
-    for (int row = 0; row < len; row++)
+    for(int row=0;row<len;row++)
     {
-        for (int col = 0; col < len; col++)
+        for(int col=0;col<len;col++)
         {
-            up += ensemble[row][col] == ensemble[modulo(row + 1, len)][col];
-            up += ensemble[row][col] == ensemble[row][modulo(col + 1, len)];
+            up += 
+                ensemble[row][col]==
+                ensemble[modulo(row+1,len)][col]+
+                ensemble[row][col]==
+                ensemble[row][modulo(col+1,len)];
         }
     }
         
-    int total = 2 * len * len;
-    int down = total - up;
+    int total=2*len*len;
+    int down=total-up;
 
-    if (up == 0 || up == total)
-    {
-        return log(2);
-    }
-    else
-    {
-        return total * log(total) - up * log(up) - down * log(down);
-    }
+    return total*log(total)-up*log(up)-
+        down*log(down);
 }
 \end{lstlisting}
+
+
+\section*{Results}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.45\textwidth]{pub/figures/external_field_epsilon_minus_one.pdf}
+    \caption{}
+    \label{fig:8}
+\end{figure}
+
+
+\begin{figure}[h]
+    \includegraphics[width=0.45\textwidth]{pub/figures/external_field_epsilon_zero.pdf}
+    \caption{}
+    \label{fig:9}
+\end{figure}
+
+
+\begin{figure}[h]
+    \includegraphics[width=0.45\textwidth]{pub/figures/external_field_epsilon_one.pdf}
+    \caption{}
+    \label{fig:10}
+\end{figure}
+
+
 \end{document}
