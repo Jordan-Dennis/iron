@@ -6,6 +6,16 @@ import matplotlib.pyplot as plt
 mpl.rcParams["text.usetex"] = True
 
 def _print_tensor(tensor: list) -> None:
+    """
+    This is a fun little function that I used for debugging. It determines 
+    the depth of an arbitrary tensor then using this result along with a 
+    little bit of magic to print the tensor it was given. 
+
+    parameters
+    ----------
+    tensor: list
+        An arbitrarily nested list. 
+    """
     def _tensor_depth(tensor: list) -> int:
         def __tensor_depth(tensor: list, depth: int) -> int:
             if not isinstance(tensor[0], list):
@@ -30,6 +40,15 @@ def _print_tensor(tensor: list) -> None:
 
 
 def _parse_ising_system(file: str) -> list:
+    """
+    Used to decode the ising systems once they have been written to 
+    a file. 
+
+    parameters
+    ----------
+    file: str 
+        The file that contains the encoded ising systems.
+    """
     systems = []
     epsilons = []
     temperatures = []
@@ -55,6 +74,18 @@ def _parse_ising_system(file: str) -> list:
 
 
 def snapshots(data_file: str, show: bool, save_file: list = None) -> None:
+    """
+    Plot the systems frozen in time for a variety of parameters.
+
+    parameters
+    ----------
+    data_file: str
+        The file to retrieve the data from. 
+    show: bool
+        True if the result is to be displayed before saving else False. 
+    save_file: str
+        The location to save the plots to. 
+    """
     mpl.rcParams["figure.figsize"] = (8, 10)
     mpl.rcParams["figure.subplot.hspace"] = 0.1
     mpl.rcParams["figure.subplot.wspace"] = 0.0
@@ -96,12 +127,25 @@ def snapshots(data_file: str, show: bool, save_file: list = None) -> None:
 
 
 def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
+    """
+    Plot the physical parameters of the system as a function of the 
+    temperature and the magnetic field. 
+
+    parameters
+    ----------
+    data_file: str
+        The file to retrieve the data from. 
+    show: bool
+        True if the result is to be displayed before saving else False. 
+    save_file: str
+        The location to save the plots to. 
+    """
     with open(f"pub/data/{data_file}") as parameters:
         headers = next(parameters)
         data = [[float(i) for i in line.strip().split(",")] for line in parameters]
         data = np.array(data)
 
-    fig, axes = plt.subplots(5, 3, sharex = "col", sharey = "row")
+    fig, axes = plt.subplots(5, 3, sharex = "col", sharey = "row", figsize=(7.3, 10.3))
     for _epsilon in range(3):
         epsilon = _epsilon - 1
         epsilon_cond = data[:, 0] == epsilon
@@ -126,10 +170,28 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     axes[0][1].set_title(r"$\epsilon = 0$")
     axes[0][2].set_title(r"$\epsilon = 1$")
     fig.legend(["$B = 0$", "$B = 1$", "$B = 2$"])
-    plt.show()
+    
+    if show:
+        plt.show()
+
+    if save_file:
+        fig.savefig(f"pub/figures/{save_file}")
 
 
 def antiferromagnet(data_file: str, show: bool, save_file: str) -> None:
+    """
+    This is a function to animate the behaviour of the system as 
+    a function of time. 
+
+    parameters
+    ----------
+    data_file: str
+        The file to retrieve the data from. 
+    show: bool
+        True if the result is to be displayed before saving else False. 
+    save_file: str
+        The location to save the plots to. 
+    """
     with open(f"pub/data/{data_file}") as data:
         systems, epsilons, temperatures, magnetic_fields = _parse_ising_system(data)
 
