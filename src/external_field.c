@@ -350,13 +350,12 @@ void antiferromagnet(void)
     const char *save_file_name = "pub/data/antiferromagnet.txt";
 
     FILE *save_file = fopen(save_file_name, "w");
-
+    ising_t *system = init_ising_t(3., 0., -1., size);
+    
     do 
     {
         do
         {
-            ising_t *system = init_ising_t(3., 0., -1., size);
-
             for (int it = 0; it < its; it++)
             {
                 metropolis_step_ising_t(system);
@@ -372,8 +371,11 @@ void antiferromagnet(void)
             }
             
             system -> temperature -= 1.;
-            system -> magnetic_field += 1.;
        } while (system -> temperature > .5);
+
+       system -> temperature = 3.;
+       system -> magnetic_field += 1.;
+
     } while (system -> magnetic_field < 3.);
 }
 
