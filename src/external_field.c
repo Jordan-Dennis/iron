@@ -335,6 +335,45 @@ void snapshots(void)
 
 
 /*
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+void antiferromagnet(void)
+{
+    const int size = 100;
+    const int its_per_frame = 10000;
+    const int its = 100 * size * size;
+    const char *save_file_name = "pub/data/antiferromagnet.txt";
+
+    FILE *save_file = fopen(save_file_name, "w");
+    ising_t *system = init_ising_t(3., 0., -1., size);
+
+    for (int it = 0; it < its; it++)
+    {
+        metropolis_step_ising_t(system);
+    }
+
+    do
+    {
+        for (int it = 0; it < its; it++)
+        {
+            metropolis_step_ising_t(system);
+            if(it % its_per_frame == 0)
+            {
+                save_ising_t(save_file, system);
+            }
+        }
+        
+        system -> temperature -= 1.;
+   } while (system -> temperature > .5);
+}
+
+
+/*
  * physical_parameters
  * -------------------
  * Measure the physical parameters of the system for various temperatures,
