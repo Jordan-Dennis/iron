@@ -172,7 +172,7 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
             _energy(temperature, magnetic_field)) / temperature
 
     def _free_energy(temperature: float, magnetic_field: float) -> float:
-        return - magnetic_field - temperature * np.log(1 + np.exp(- 2 * magnetic_field / temperature))
+        return - temperature * np.log(2 * np.cosh(magnetic_field / temperature))
 
     def _heat_capacity(temperature: float, magnetic_field: float) -> float:
         return magnetic_field / temperature ** 2 / \

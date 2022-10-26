@@ -202,7 +202,7 @@ float energy_ising_t(ising_t *system)
  * ----------
  * ising_t *system: The system to measure. 
  */
-float entropy_ising_t(ising_t *system)
+float entropy_ferromagnetic(ising_t *system)
 {
     int len = system -> length;
     int **ensemble = system -> ensemble; 
@@ -222,11 +222,69 @@ float entropy_ising_t(ising_t *system)
 
     if (up == total || up == 0)
     {
-        return 0;
+        return log(2);
     }
 
-    float entropy = total * log(total) - up * log(up) - down * log(down);
-    return entropy / 2.;
+    return total * log(total) - up * log(up) - down * log(down);
+}
+
+
+/*
+ * entropy_paramagnetic
+ * --------------------
+ * Calculate the entropy of the paramagnetic system. This is 
+ * different to the entropy that we have dealt with so far 
+ * because we are counting a different basic unit. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure.
+ *
+ * returns
+ * -------
+ * float entropy: The entropy of the system.
+ */
+float entropy_paramagnetic(ising_t *system)
+{
+    int len = system -> length;
+    int **ensemble = system -> ensemble; 
+    int up = 0;
+
+    for (int row = 0; row < len; row++)
+        for (int col = 0; col < len; col++)
+            up += ensemble[row][col] > 0;
+        
+    int total = 2 * len * len;
+    int down = total - up;
+
+    return total * log(total) - up * log(up) - down * log(down);
+}
+
+
+/*
+ * entropy_ising_t
+ * --------------
+ * Calculate the entropy of the ising system. 
+ *
+ * parameters
+ * ----------
+ * ising_t *system: The system to measure. 
+ */
+float entropy_ising_t(ising_t *system)
+{
+    float magnetic_field = system -> magnetic_field;
+    float entropy; 
+
+    if (magnetic_field == 0.0)
+    {
+        entropy = entropy_paramagnetic(system);
+    }
+    else 
+    {
+        entropy = entropy_ferromagnetic(system);
+    }
+
+    return entropy;
 }
 
 
