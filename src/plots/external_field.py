@@ -54,8 +54,6 @@ def _parse_ising_system(file: str) -> list:
     return systems, epsilons, temperatures, magnetic_fields
 
 
-
-
 def snapshots(data_file: str, show: bool, save_file: list = None) -> None:
     mpl.rcParams["figure.figsize"] = (8, 10)
     mpl.rcParams["figure.subplot.hspace"] = 0.1
@@ -129,6 +127,30 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     axes[0][2].set_title(r"$\epsilon = 1$")
     fig.legend(["$B = 0$", "$B = 1$", "$B = 2$"])
     plt.show()
+
+
+def antiferromagnet(data_file: str, show: bool, save_file: str) -> None:
+    systems, _, _, _ = _parse_ising_systems(data_file);
+
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    import matplotlib.animation as animation
+
+    fps = 30
+    nSeconds = 5
+
+    fig = plt.figure()
+
+    a = systems[0]
+    im = plt.imshow(a, interpolation='none', aspect='auto', vmin=0, vmax=1)
+
+    def animate_func(i):
+        im.set_array(systems[i])
+        return [im]
+
+    anim = animation.FuncAnimation(
+        fig, animate_func, frames = len(systems), interval = 1000 / fps)
 
 
 def main(mode: str) -> None:

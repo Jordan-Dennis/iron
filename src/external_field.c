@@ -345,7 +345,7 @@ void snapshots(void)
 void antiferromagnet(void)
 {
     const int size = 100;
-    const int its_per_frame = 10000;
+    const int its_per_frame = size * size;
     const int its = 100 * size * size;
     const char *save_file_name = "pub/data/antiferromagnet.txt";
 
@@ -531,6 +531,7 @@ int main(int num_args, char **args)
         printf("Error: Please provided the task name. You options are:\n");
         printf("    - snapshots\n");
         printf("    - physical_parameters\n");
+        printf("    - antiferromagnet\n");
         exit(1);
     }
 
@@ -541,6 +542,10 @@ int main(int num_args, char **args)
     else if (strcmp(args[1], "physical_parameters") == 0)
     {
         physical_parameters();
+    }
+    else if (strcmp(args[1], "antiferromagnet") == 0)
+    {
+        antiferromagnet();
     }
     else
     {
