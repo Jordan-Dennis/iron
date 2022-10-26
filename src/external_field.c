@@ -303,7 +303,7 @@ void save_ising_t(FILE *save_file, ising_t *system)
  */
 void snapshots(void)
 {
-    int length = 20;
+    int length = 100;
     int epochs = length * length * 1e3;
     FILE *save_file = fopen("pub/data/external_field.txt", "w");
 
@@ -335,8 +335,8 @@ void snapshots(void)
 
 
 /*
- *
- *
+ * antiferromagnetic
+ * -----------------
  *
  *
  *
@@ -350,33 +350,36 @@ void antiferromagnet(void)
     const char *save_file_name = "pub/data/antiferromagnet.txt";
 
     FILE *save_file = fopen(save_file_name, "w");
-    ising_t *system = init_ising_t(3., 0., -1., size);
     
-    do 
+    for (float epsilon = -1.; epsilon < 1.5; epsilon++)
     {
-        do
+        ising_t *system = init_ising_t(3., 0., epsilon, size);
+        do 
         {
-            for (int it = 0; it < its; it++)
+            do
             {
-                metropolis_step_ising_t(system);
-            }
-
-            for (int it = 0; it < its; it++)
-            {
-                metropolis_step_ising_t(system);
-                if(it % its_per_frame == 0)
+                for (int it = 0; it < its; it++)
                 {
-                    save_ising_t(save_file, system);
+                    metropolis_step_ising_t(system);
                 }
-            }
-            
-            system -> temperature -= 1.;
-       } while (system -> temperature > .5);
 
-       system -> temperature = 3.;
-       system -> magnetic_field += 1.;
+                for (int it = 0; it < its; it++)
+                {
+                    metropolis_step_ising_t(system);
+                    if(it % its_per_frame == 0)
+                    {
+                        save_ising_t(save_file, system);
+                    }
+                }
+                
+                system -> temperature -= 1.;
+           } while (system -> temperature > .5);
 
-    } while (system -> magnetic_field < 3.);
+           system -> temperature = 3.;
+           system -> magnetic_field += 1.;
+
+        } while (system -> magnetic_field < 3.);
+    }
 }
 
 

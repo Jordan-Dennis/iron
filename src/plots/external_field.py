@@ -131,7 +131,7 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
 
 def antiferromagnet(data_file: str, show: bool, save_file: str) -> None:
     with open(f"pub/data/{data_file}") as data:
-        systems, _, temperatures, magnetic_fields = _parse_ising_system(data)
+        systems, epsilons, temperatures, magnetic_fields = _parse_ising_system(data)
 
     import matplotlib
     import matplotlib.pyplot as plt
@@ -148,7 +148,7 @@ def antiferromagnet(data_file: str, show: bool, save_file: str) -> None:
 
     def animate_func(i):
         im.set_array(systems[i])
-        fig.suptitle(f"$T = {temperatures[i]}, B = {magnetic_fields[i]}$")
+        fig.suptitle(f"$T = {temperatures[i]}, B = {magnetic_fields[i]}, \\epsilon = {epsilons[i]}$")
         return [im]
 
     anim = animation.FuncAnimation(

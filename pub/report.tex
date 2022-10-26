@@ -1305,10 +1305,9 @@ A key difference between the anti-ferro-magnetic material and the %
 ferro-magnetic material is that the former has only one possible %
 species. This may call into question my discussion of the \emph{domains} %
 however, these are formed where the chest-board patterns are %
-anti-aligned within two neighbouring regions. Near the critical %
-temperature for the anti-ferro-magnet. This also calls into question %
-what actually happens at the phase transition, since the net %
-magnetisation is practically always zero. 
+anti-aligned within two neighbouring regions (see figure \ref{fig:8}). %
+This also calls into question what actually happens at the phase transition, %
+since the net magnetisation is practically always zero. 
 
 
 Varying the temperature we noticed that the size of the \emph{domains} %
@@ -1320,16 +1319,29 @@ to paramagnetism. Our logic was that once the \emph{zones} were this %
 small the net impact on any one spin essentially cancelled.
 
 
-% TODO: I should discuss the impact that the magnetic field has 
-% qualitatively. Interesting that this has fallen back onto the 
-% high school habit of discussing observations for lack of other 
-% things to do. 
 Adding the magnetic field had all of the impacts that we might have %
 expected from the fero-magnetic material. The size of the \emph{zones} %
-arround the critical temperature reduced. 
+arround the critical temperature reduced and \emph{speckling} became %
+much faster for spins aligned with the magnetic field, but slower for %
+spins anti-aligned with the magnetic field. If purple represents the %
+aligned spins then purple speckles would rapidly appear in the crystal %
+before been overcome, while yellow speckles were almost never observed. %
+We can very clearly see this affect on figure \ref{fig:8} along the top %
+row. 
+
+
+Interestingly, even at the greatest magnetic field we tests \(B = 3.0T\) %
+we the size of the \emph{domains} in the low temperature state remained %
+approximately the same. This makes sense as the states on either side %
+of the domain wall remain equally favoured. Examining figure \ref{fig:8} %
+we can see that there is an analouge to the \emph{meta-stable} states %
+we encountered in the ferr-magnetic case. That is a ring that has formed. %
+For the anti-ferromagnetic case all \emph{domains} appeared to be %
+\emph{meta-stable} in our simulations. 
 
 
 \begin{figure}[h]
+    \centering
     \includegraphics[width=0.45\textwidth]{pub/figures/external_field_epsilon_zero.pdf}
     \caption{Snapshots of the paramagnetic material equilibrated at %
         a variety of temperatures and magentic fields.}
@@ -1337,9 +1349,21 @@ arround the critical temperature reduced.
 \end{figure}
 
 
+The para-magnetic material goes out of its way to be boring. There is only %
+one behaviour and that is \emph{speckling}. The temperature tunes the %
+rate that the \emph{speckling} occurs while magnetic field causes the %
+one color to dominate the sample in a very linear fashion. At the strongest %
+magnetic field the number of spins anti-aligned was almost none one %
+the temperature was below \(2.0 \epsilon / k\) as shown in figure \ref{fig:9}.
+
+
 \begin{figure}[h]
+    \centering
     \includegraphics[width=0.45\textwidth]{pub/figures/external_field_epsilon_one.pdf}
-    \caption{}
+    \caption{Snapshots of a ferro-magnetic material for multiple %
+        different magnetic field strengths and temperatures. For a %
+        discussion of the behaviours I invite you to review my earlier %
+        work.}
     \label{fig:10}
 \end{figure}
 
