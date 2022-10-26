@@ -1514,7 +1514,36 @@ and model values are constant at zero in appropriate units. This %
 resulted in divide by zero errors when I applied equation \ref{eqn:19}.
 
 
-The next interesting element of table \ref{tab:1}
+The next interesting element of table \ref{tab:1} is that the heat capacity %
+performs much worse than the other physical parameters in terms of %
+goodness of fit measured using the \(\chi^{2}\) analysis. I believe that %
+this is because of how the heat capacity is measured, which from equation %
+\ref{eqn:10} we can see uses the variance. For each parameter we run %
+\(1000N^{2}\) trials with measurement and then average the result %
+giving us extremely high accuracy. The heat capacity is the variance %
+of these measurements and has consitently shown to converge slower than %
+the mean (see \ref{fig:2} and \ref{fig:5}).
+
+
+Although hard to see figure \ref{fig:11} contains error bars on all of the %
+parameters except the heat capacity. We calculated the error in the heat %
+capacity in the same way as other parameters using equation \ref{eqn:11}, %
+but it was very large compared to the data and obsured the results on %
+figure \ref{fig:11}. We proposed that better estimates for the heat %
+capacity could be obtained by increasing the size of the lattice. We %
+proposed this because it results in more runs and single flips cause %
+smaller percentage changes in the energy.
+
+
+To generate figure \ref{fig:11} we recorded data at ten evenly space %
+points between zero and three \(\epsilon / k\) incremented by \(0.3 %
+\epsilon / k\). As a result we used nine degrees of freedom to compute %
+the \(p\)-values displayed in table \ref{tab:1}. The remaining unexplained %
+aspects of the method were explain in the discussion of Question 1 b) and %
+Question 2 b) respectively. The same method was applied here extended to %
+account for the additional parameters.
+
+
 
 
 
