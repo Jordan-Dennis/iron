@@ -130,7 +130,8 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
 
 
 def antiferromagnet(data_file: str, show: bool, save_file: str) -> None:
-    systems, _, _, _ = _parse_ising_systems(data_file);
+    with open(f"pub/data/{data_file}") as data:
+        systems, _, _, _ = _parse_ising_system(data)
 
     import matplotlib
     import matplotlib.pyplot as plt
@@ -151,6 +152,7 @@ def antiferromagnet(data_file: str, show: bool, save_file: str) -> None:
 
     anim = animation.FuncAnimation(
         fig, animate_func, frames = len(systems), interval = 1000 / fps)
+    plt.show()
 
 
 def main(mode: str) -> None:
@@ -161,6 +163,9 @@ def main(mode: str) -> None:
 
     elif mode == "physical_parameters":
         physical_parameters("external_field.csv", True, "physical_parameters_external_field.pdf")
+
+    elif mode == "antiferromagnet":
+        antiferromagnet("antiferromagnet.txt", True, None)
 
 option = sys.argv[1]
 main(option)
