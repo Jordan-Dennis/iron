@@ -1020,6 +1020,18 @@ temperature and increase with the magnetic field, much as we %
 would expect. 
 
 
+Using equations \ref{eqn:12} and \ref{eqn:11} we can calculate the %
+energy. Since the math is essentially the same as in the derivation %
+of equation \ref{eqn:7} I have omitted some steps. 
+%
+\begin{align}
+    \tau\sigma &= F - U \nonumber \\ 
+        &= -Ns\left(B + \tanh\left(\frac{sB}{\tau}\right)\right) - \nonumber \\ 
+        &\quad N\tau\ln\left(1 + \exp\left(-\frac{2sB}{\tau}\right)\right) 
+    \label{eqn:13}
+\end{align}
+
+
 Para-magnets are a useful toy model but from our experience %
 with natural and manufactured magnets we know that it is %
 possibe to construct systems that are magnetic without external %
@@ -1373,8 +1385,44 @@ a lot of detail. This figure evidences a lot of the qualitative discussion %
 that I have undergone so far. Let's start by analysing the leftmost %
 column which represents the anti-ferro-magnetic simulations. The most %
 important result, which I will discuss first is the discontinuity in the %
-heat capacity that occurs at approximately \(2.10 \epsilon / k\). 
+heat capacity that occurs at approximately \(2.10 \epsilon / k\). This %
+tells us that there is a second order phase transition. 
 
+
+Moreover, comparing the plots for the entropy, energy, free energy and %
+magnetisation to those in the middle column we can see that the %
+anti-ferro-magnet begins to behave like the para-magnet. This confirms %
+the prediction that the phase transition was from anti-ferro-magnetic %
+to para-magnetic. Curiously both the energy and the entropy rise %
+in the wrong order by magnetic field. The stronger magnetic field %
+resulting in an earlier rise than the weaker. This does not match %
+the para-magnetic behaviour although the asymptotes seem to be the same. 
+
+
+We observe, once again as predicted, that the peak in the heat capacity %
+shifts to lower temperatures as we increase the magnetic field. That said %
+the effect is not noticeable for the first increase in the magnetic field %
+strength which fails to noticeably shift the peak to the left. I also %
+observed that the heat capacity seems to converge to a constant value %
+on the hotter side of the peak. This matches the behaviour of the %
+para-magnetic heat capacity. 
+
+
+Now let's consider the middle column which represents the para-magnetic %
+material. The most interesting thing about the para-magnetic material %
+is that the high temperature behaiour matches the high temperature anti-%
+ferro-magnetic behaviour. We observe that the heat capacity without an %
+external magnetic field drops to zero. This makes sense as according to %
+equation \ref{eqn:14} the energy will be constant. 
+
+
+In particular the energy will be constant on average for an infinite %
+lattice. There are clearly energy changes occuring all the time as %
+spins flip agnostically up and down. However, the spins are exatcly %
+as likely to flip up as they are to flip down so the result is that %
+the average works out to zero. The derivative of a constant is then %
+of course zero. By the same reasoning the magnetisation and the energy %
+are both zero.  
 % TODO: should I zoom in on the peak in the heat capacity and make a finely 
 % meshed plot to get a better estimate for the heat capacity. Yes I think 
 % that this will be a good thing to do. 

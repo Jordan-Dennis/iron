@@ -145,6 +145,24 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
         data = [[float(i) for i in line.strip().split(",")] for line in parameters]
         data = np.array(data)
 
+
+    def _energy(temperature: float, magnetic_field: float) -> float:
+        return - magnetic_field * np.tanh(magnetic_field / temperature)
+
+    def _entropy(temperature: float, magnetic_field: float) -> float:
+        return (_free_energy(temperature, magnetic_field) - 
+            _energy(temperature, magnetic_field)) / temperature
+
+    def _free_energy(temperature: float, magnetic_field: float) -> float:
+        return - magnetic_field - 
+            temperature * np.log(1 + np.exp(- 2 * magnetic_field / temperature))
+
+    def _heat_capacity(temperature: float, magnetic_field: float) -> float:
+
+
+    def _magnetisation(temperature: float, magnetic_field: float) -> float:
+        return 
+
     fig, axes = plt.subplots(5, 3, sharex = "col", sharey = "row", figsize=(7.3, 10.3))
     for _epsilon in range(3):
         epsilon = _epsilon - 1
@@ -158,6 +176,12 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
             axes[3][_epsilon].errorbar(subset[:, 2], subset[:, 9], subset[:, 10])
             axes[4][_epsilon].plot(subset[:, 2], subset[:, 11])
             
+            if epsilon == 0:
+                temperatures = np.linspace(subset[:,2].min(), 
+                    subset[:,2.max(), 1000)
+
+                axes[0][_epsilon].plot()
+            
     axes[0][0].set_ylabel(r"$\textrm{Energy} (J)$")
     axes[1][0].set_ylabel(r"$\textrm{Entropy} (JK^{-1})$")
     axes[2][0].set_ylabel(r"$\textrm{Free Energy} (J)$")
@@ -170,6 +194,9 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
     axes[0][1].set_title(r"$\epsilon = 0$")
     axes[0][2].set_title(r"$\epsilon = 1$")
     fig.legend(["$B = 0$", "$B = 1$", "$B = 2$"])
+
+
+    axes[0][1].plot()
     
     if show:
         plt.show()
