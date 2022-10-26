@@ -150,18 +150,18 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
         return - magnetic_field * np.tanh(magnetic_field / temperature)
 
     def _entropy(temperature: float, magnetic_field: float) -> float:
-        return (_free_energy(temperature, magnetic_field) - 
+        return (- _free_energy(temperature, magnetic_field) + \
             _energy(temperature, magnetic_field)) / temperature
 
     def _free_energy(temperature: float, magnetic_field: float) -> float:
-        return - magnetic_field - 
-            temperature * np.log(1 + np.exp(- 2 * magnetic_field / temperature))
+        return - magnetic_field - temperature * np.log(1 + np.exp(- 2 * magnetic_field / temperature))
 
     def _heat_capacity(temperature: float, magnetic_field: float) -> float:
-
+        return magnetic_field / temperature ** 2 / \
+            np.cosh(magnetic_field / temperature) ** 2
 
     def _magnetisation(temperature: float, magnetic_field: float) -> float:
-        return 
+        return - np.tanh(magnetic_field / temperature)
 
     fig, axes = plt.subplots(5, 3, sharex = "col", sharey = "row", figsize=(7.3, 10.3))
     for _epsilon in range(3):
@@ -177,10 +177,21 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
             axes[4][_epsilon].plot(subset[:, 2], subset[:, 11])
             
             if epsilon == 0:
-                temperatures = np.linspace(subset[:,2].min(), 
-                    subset[:,2.max(), 1000)
+                min_temp = subset[:,2].min()
+                max_temp = subset[:,2].max()
+                num_temp = 1000
+                temperatures = np.linspace(min_temp, max_temp, num_temp)
+                energy = _energy(temperatures, magnetic_field)
+                entropy = _entropy(temperatures, magnetic_field)
+                free_energy = _free_energy(temperatures, magnetic_field)
+                heat_capacity = _heat_capacity(temperatures, magnetic_field)
+                magnetisation = _magnetisation(temperatures, magnetic_field)
 
-                axes[0][_epsilon].plot()
+                axes[0][_epsilon].plot(temperatures, energy)
+                axes[1][_epsilon].plot(temperatures, entropy)
+                axes[2][_epsilon].plot(temperatures, free_energy)
+                axes[4][_epsilon].plot(temperatures, heat_capacity)
+                axes[3][_epsilon].plot(temperatures, magnetisation)
             
     axes[0][0].set_ylabel(r"$\textrm{Energy} (J)$")
     axes[1][0].set_ylabel(r"$\textrm{Entropy} (JK^{-1})$")

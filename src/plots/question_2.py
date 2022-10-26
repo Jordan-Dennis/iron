@@ -197,7 +197,6 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
         axes[1][1].legend(["20", "50", "100"])
 
 
-
     if show:
         plt.show()
     if save_file:

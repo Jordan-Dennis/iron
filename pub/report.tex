@@ -1422,16 +1422,38 @@ spins flip agnostically up and down. However, the spins are exatcly %
 as likely to flip up as they are to flip down so the result is that %
 the average works out to zero. The derivative of a constant is then %
 of course zero. By the same reasoning the magnetisation and the energy %
-are both zero.  
-% TODO: should I zoom in on the peak in the heat capacity and make a finely 
-% meshed plot to get a better estimate for the heat capacity. Yes I think 
-% that this will be a good thing to do. 
+are both zero. 
+
+
+Adding the magnetic field causes the energy and the entropy to vary %
+smoothly as a function of temperature. Examining equations \ref{eqn:12} %
+and \ref{eqn:13} we see that the temperature dependence of the system %
+is related to the quantity \(B / \tau\). Heuristically, this leads to %
+the conclusion that the magnetic field and the temperature have %
+complementary effects. That is if we increase the magnetic field strength %
+we have to increase the temperature to maintain the same value of %
+\(B / \tau\). 
+
+
+I have already given a large amount of discussion to the behaviour of %
+the ferro-magnetic Ising model so I will keep the analysis of the %
+rightmost column brief. The interesting behaviour is invoked by the %
+presence of the external magnetic field. In particular we see as predicted %
+that the heat capacity peak is smoothed out and shifted to higher %
+temperatures implying that the phase transition is now first order. %
+This matches our predictions and confirms the prescence of a positive %
+feedback relation as opposed to an anti-ferro-magnetic material. 
 
 
 \begin{figure*}[t]
     \centering
     \includegraphics{pub/figures/physical_parameters_external_field.pdf}
-    \caption{}
+    \caption{The physical properties of the anti-ferro-magnetic, para-magnetic %
+        and ferro-magnetic systems as a function of the temperature and %
+        for multiple magnetic field strengths. The anti-ferro-magnetic %
+        material properties are plotted on the leftmost graph. The %
+        para-magnetic material properties are plotted in the center and %
+        the ferro-magnetic are on the right.}
     \label{fig:11}
 \end{figure*}
 \end{document}
