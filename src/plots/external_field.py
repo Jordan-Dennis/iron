@@ -126,6 +126,17 @@ def snapshots(data_file: str, show: bool, save_file: list = None) -> None:
             figure.savefig(f"pub/figures/{save_file[epsilon]}")
 
 
+def _chi_squared(theoretical: float, data: float) -> float:
+    """
+    Given a model and data calculate how well the data fits the model. 
+
+    parameters
+    ----------
+    theoretical: float 
+        The 
+    """
+
+
 def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
     """
     Plot the physical parameters of the system as a function of the 
@@ -144,7 +155,6 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
         headers = next(parameters)
         data = [[float(i) for i in line.strip().split(",")] for line in parameters]
         data = np.array(data)
-
 
     def _energy(temperature: float, magnetic_field: float) -> float:
         return - magnetic_field * np.tanh(magnetic_field / temperature)
@@ -187,11 +197,11 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
                 heat_capacity = _heat_capacity(temperatures, magnetic_field)
                 magnetisation = _magnetisation(temperatures, magnetic_field)
 
-                axes[0][_epsilon].plot(temperatures, energy)
-                axes[1][_epsilon].plot(temperatures, entropy)
-                axes[2][_epsilon].plot(temperatures, free_energy)
-                axes[4][_epsilon].plot(temperatures, heat_capacity)
-                axes[3][_epsilon].plot(temperatures, magnetisation)
+                axes[0][_epsilon].plot(temperatures, energy, "--")
+                axes[1][_epsilon].plot(temperatures, entropy, "--")
+                axes[2][_epsilon].plot(temperatures, free_energy, "--")
+                axes[4][_epsilon].plot(temperatures, heat_capacity, "--")
+                axes[3][_epsilon].plot(temperatures, magnetisation, "--")
             
     axes[0][0].set_ylabel(r"$\textrm{Energy} (J)$")
     axes[1][0].set_ylabel(r"$\textrm{Entropy} (JK^{-1})$")

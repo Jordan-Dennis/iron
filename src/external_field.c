@@ -220,6 +220,11 @@ float entropy_ising_t(ising_t *system)
     int total = 2 * len * len;
     int down = total - up;
 
+    if (up == total || up == 0)
+    {
+        return log(2);
+    }
+
     float entropy = total * log(total) - up * log(up) - down * log(down);
     return entropy / 2.;
 }
