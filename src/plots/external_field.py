@@ -133,8 +133,16 @@ def _chi_squared(theoretical: float, data: float) -> float:
     parameters
     ----------
     theoretical: float 
-        The 
+        The model of the data. 
+    data: float 
+        The actual data that was recorded. 
+
+    returns
+    -------
+    chi_squared: float 
+        The chi squared value of the fit. 
     """
+    return np.sum(((theoretical - data) / theoretical) ** 2)
 
 
 def physical_parameters(data_file: str, show: bool, save_file: str = None) -> None:
