@@ -445,6 +445,69 @@ void antiferromagnet(void)
 }
 
 
+void heat_capactity(void)
+{
+    const int length = 50;
+    const int num_sys = 8;
+    const int num_its = 100 * length * length;
+    const float max_temp = 3.;
+    const float min_temp = 1.5;
+    const float del_temp = 0.1;
+
+    int num_temp = (int) ((max_temp - min_temp) / del_temp);
+    float heat_capacity[num_temp][num_sys];
+
+    for (int sys = 0; sys < num_sys; sys++)
+    {
+        ising_t *system = init_ising_t(max_temp, 0., -1., length);
+
+        for (int _tau = 0; _tau < num_temp; _tau++)
+        {
+            float tau = max_temp - _tau * del_temp;
+            system -> temperature = tau;
+            float energy[num_its];
+            float energy_sq[num_its];
+
+            for (int it = 0; it < num_its; it++)
+            {
+                metropolis_step_ising_t(system);
+                energy[it] = energy_ising_t(system);
+                energy_sq[it] = energy[it] * energy[it];
+            }
+
+            float energy_exp = mean(energy, num_its);
+            float energy_sq_exp = mean(energy_sq, num_its);
+
+            heat_capacity[_tau][sys] = (energy_sq_exp - energy_exp)/tau/tau;
+        }
+
+        free_ising_t(system);
+    }
+
+    const char *file_name = "pub/data/heat_capacity.csv";
+    FILE *file = fopen(file_name, "w");
+
+    if (!file)
+    {
+        printf("Error: Could not open '%s'", file_name);
+        exit(1);
+    }
+
+    fprintf(file, "Temperature, Heat Capacity, Heat Capacity Err\n");
+
+    for (int _tau = 0; _tau < num_temp; _tau++)
+    {
+        float tau = max_temp - _tau * del_temp;
+        float c_v_est = mean(heat_capacity[_tau], num_sys);
+        float c_v_err = variance(heat_capacity[_tau], c_v_est, num_sys);
+        
+        fprintf(file, "%f, %f, %f\n", tau, c_v_est, c_v_err);
+    }
+    
+    fclose(file);
+}
+
+
 /*
  * physical_parameters
  * -------------------
@@ -456,7 +519,7 @@ void physical_parameters(void)
     const int runs = 5;
     const int length = 20;
     const int num = length * length;
-    const int epochs = length * 1e3;
+    const int epochs = num * 100;
     const int num_temps = 10;
     const int num_fields = 3;
     const int num_epsilons = 3;
@@ -486,6 +549,7 @@ void physical_parameters(void)
             {
                 float temperature = 3.0 - (3.0 / (float) num_temps) * (float)  _temperature;
                 system -> temperature = temperature;
+                printf("Temperature: %f\n", temperature);
 
                 float _energies[runs];
                 float _entropies[runs];
