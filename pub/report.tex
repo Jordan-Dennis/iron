@@ -19,7 +19,7 @@
 \def\ttdefault{pcr}
 \begin{document}
 \section*{Foreword}
-I used the \verb!c! programming language to complete this task. I %
+I used the \verb!C! programming language to complete this task. I %
 represented the system of spins as a \verb!struct!, %
 defined below in one dimension. 
 
@@ -46,6 +46,22 @@ keyword and its uses. I am describing this because you may %
 notice discrepancies in the code snippets that I have include %
 where \verb!int *(*)ensemble = system -> ensemble;! is invoked %
 to access the array of spins. 
+
+
+\verb!C! does not have native tooling for generating plots %
+so I wrote the output of the simulations to \verb!.csv! files %
+that I then plotted using \verb!python! and \verb!matplotlib!. %
+I managed to get some of my \verb!C! code to run in parallel %
+which was very cool but nevertheless, I ended up waiting for %
+a very long time (\(\sim 9hrs\)) for some of the code to run. %
+If I were writing the assessment again I would reduce the %
+recommended size downward from one-hundred except when generating %
+visuals in two dimensions. My \verb!github! is \verb!Jordan-Dennis!
+and the repository is \verb!iron!; %
+\verb!https://github.com/Jordan-Dennis/iron.!
+
+
+\section*{Introduction}
 
 
 \subsection*{Question 1 a)}
@@ -1594,8 +1610,28 @@ strengths are the same and all that has changed is the sign.
 \section*{Conclusion}
 I used a two dimensional Ising simulation to investigate the thermodynamic %
 properties of anti-ferro-magnetic, para-magnetic and ferro-magnetic %
-materials. 
+materials. With this simulation I was able to assess how well the %
+para-magnetic simulation matched the theoretical models given by %
+equations \ref{eqn:14}, \ref{eqn:15}, \ref{eqn:16} and \ref{eqn:17}. %
+I found that the agreement was in general very good, but that the %
+heat capacity failed to converge for the model in the strongest %
+magnetic field. This was attributed to limitations of the simulation %
+and not the theoretical model. I performed the goodness of fit tests %
+using the \(\chi^{2}\) statistic and distribution.
 
 
+I was also able to estimate the Neel temperature for a anti-ferro-magnetic %
+Ising model. I did so graphically by plotting the output of my simulation %
+and found that it was \(T = 2.28 \pm 0.01 \epsilon / k\), which was %
+very similar to the Currie temperature for ferro-magnetic materials. %
+The behaviour of the anti-ferro-magnetic, para-magnetic and ferro-magnetic %
+material simulations is something that I discussed in detail. I observed %
+that the anti-ferro-magnetic and ferro-magnetic materials displayed %
+qualitatively similar behaviours, although the underlying spin distributions %
+were markedly different. Among these behaviours was the formation of %
+\emph{domains}, \emph{zones} and \emph{speckles}. 
 
+
+\bibliographystyle{plain}
+\bibliography{pub/citations}
 \end{document}
