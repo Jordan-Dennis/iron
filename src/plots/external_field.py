@@ -314,10 +314,15 @@ def heat_capacity(data_file: str, show: bool, save_file: str) -> None:
 
     fig = plt.figure()
     axes = plt.axes()
-    axes.plot(data[:, 0], data[:, 1])
+    axes.errorbar(data[:, 0], data[:, 1], data[:, 2] / 8)
+    axes.set_ylabel("$C_{V} (J(\epsilon / k)^{-1})$")
+    axes.set_xlabel(r"$\tau (\epsilon / k)$")
     
     if show:
         plt.show()
+
+    if save_file:
+        fig.savefig(f"pub/figures/{save_file}")    
 
 
 def main(mode: str) -> None:
@@ -333,7 +338,7 @@ def main(mode: str) -> None:
         antiferromagnet("antiferromagnet.txt", True, None)
 
     elif mode == "heat_capacity":
-        heat_capacity("heat_capacity.csv", True, None)
+        heat_capacity("heat_capacity.csv", True, "heat_capacity_external_field.pdf")
 
 option = sys.argv[1]
 main(option)
