@@ -293,6 +293,33 @@ def antiferromagnet(data_file: str, show: bool, save_file: str) -> None:
     plt.show()
 
 
+def heat_capacity(data_file: str, show: bool, save_file: str) -> None:
+    """
+    Plot the heat capacity in a lot more detail to get a better estimate 
+    of the Neel temperature. 
+
+    parameters
+    ----------
+    data_file: str
+        The file to retrieve the data from. 
+    show: bool
+        True if the result is to be displayed before saving else False. 
+    save_file: str
+        The location to save the plots to. 
+    """
+    with open(f"pub/data/{data_file}") as data:
+        headers = next(parameters)
+        data = [[float(i) for i in line.strip().split(",")] for line in parameters]
+        data = np.array(data)
+
+    fig = plt.figure()
+    axes = plt.axes()
+    axes.plot(data[:, 0], data[:, 1])
+    
+    if show:
+        plt.show()
+
+
 def main(mode: str) -> None:
     if mode == "snapshots":
         save_files = ["external_field_epsilon_minus_one.pdf", 

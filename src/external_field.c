@@ -445,18 +445,20 @@ void antiferromagnet(void)
 }
 
 
-void heat_capactity(void)
+void heat_capacity(void)
 {
     const int length = 50;
     const int num_sys = 8;
-    const int num_its = 100 * length * length;
-    const float max_temp = 3.;
-    const float min_temp = 1.5;
+    const int num = length * length;
+    const int num_its = 100 * num;
+    const float max_temp = 2.5;
+    const float min_temp = 1.0;
     const float del_temp = 0.1;
 
     int num_temp = (int) ((max_temp - min_temp) / del_temp);
     float heat_capacity[num_temp][num_sys];
 
+    # pragma omp parallel for num_threads(8) shared(heat_capacity) 
     for (int sys = 0; sys < num_sys; sys++)
     {
         ising_t *system = init_ising_t(max_temp, 0., -1., length);
@@ -467,6 +469,7 @@ void heat_capactity(void)
             system -> temperature = tau;
             float energy[num_its];
             float energy_sq[num_its];
+            printf("Temperature: %f\n", tau);
 
             for (int it = 0; it < num_its; it++)
             {
@@ -498,8 +501,8 @@ void heat_capactity(void)
     for (int _tau = 0; _tau < num_temp; _tau++)
     {
         float tau = max_temp - _tau * del_temp;
-        float c_v_est = mean(heat_capacity[_tau], num_sys);
-        float c_v_err = variance(heat_capacity[_tau], c_v_est, num_sys);
+        float c_v_est = mean(heat_capacity[_tau], num_sys) / num;
+        float c_v_err = sqrt(variance(heat_capacity[_tau], c_v_est, num_sys)) / num;
         
         fprintf(file, "%f, %f, %f\n", tau, c_v_est, c_v_err);
     }
@@ -675,6 +678,10 @@ int main(int num_args, char **args)
     else if (strcmp(args[1], "antiferromagnet") == 0)
     {
         antiferromagnet();
+    }
+    else if (strcmp(args[1], "heat_capacity") == 0)
+    {
+        heat_capacity();
     }
     else
     {
