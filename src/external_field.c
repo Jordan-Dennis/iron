@@ -447,13 +447,13 @@ void antiferromagnet(void)
 
 void heat_capacity(void)
 {
-    const int length = 50;
+    const int length = 20;
     const int num_sys = 8;
     const int num = length * length;
-    const int num_its = 100 * num;
+    const int num_its = 1000 * num;
     const float max_temp = 2.5;
-    const float min_temp = 1.0;
-    const float del_temp = 0.1;
+    const float min_temp = 2.0;
+    const float del_temp = 0.025;
 
     int num_temp = (int) ((max_temp - min_temp) / del_temp);
     float heat_capacity[num_temp][num_sys];
@@ -475,13 +475,12 @@ void heat_capacity(void)
             {
                 metropolis_step_ising_t(system);
                 energy[it] = energy_ising_t(system);
-                energy_sq[it] = energy[it] * energy[it];
             }
 
-            float energy_exp = mean(energy, num_its);
-            float energy_sq_exp = mean(energy_sq, num_its);
+            float energy_est = mean(energy, num_its);
+            float energy_err = variance(energy, energy_est, num_its);
 
-            heat_capacity[_tau][sys] = (energy_sq_exp - energy_exp)/tau/tau;
+            heat_capacity[_tau][sys] = energy_err / tau / tau;
         }
 
         free_ising_t(system);

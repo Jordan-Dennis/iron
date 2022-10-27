@@ -307,7 +307,7 @@ def heat_capacity(data_file: str, show: bool, save_file: str) -> None:
     save_file: str
         The location to save the plots to. 
     """
-    with open(f"pub/data/{data_file}") as data:
+    with open(f"pub/data/{data_file}") as parameters:
         headers = next(parameters)
         data = [[float(i) for i in line.strip().split(",")] for line in parameters]
         data = np.array(data)
@@ -331,6 +331,9 @@ def main(mode: str) -> None:
 
     elif mode == "antiferromagnet":
         antiferromagnet("antiferromagnet.txt", True, None)
+
+    elif mode == "heat_capacity":
+        heat_capacity("heat_capacity.csv", True, None)
 
 option = sys.argv[1]
 main(option)
