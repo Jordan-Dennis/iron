@@ -1197,7 +1197,7 @@ void metropolis_step(ising_t *system)
         ensemble[row][modulo(col+1,length)]+
         ensemble[row][modulo(col-1,length)];
 
-    float magnetic=2*spin*field;
+    float magnetic=-2*spin*field;
     float interaction=2*epsilon*
         neighbours*spin;
     float change=magnetic+interaction;
@@ -1242,7 +1242,7 @@ float energy_ising_t(ising_t *system)
                 ensemble[row][modulo(col+1,len)]+
                 ensemble[row][modulo(col-1,len)];
 
-            magnetic-=ensemble[row][col]*field;
+            magnetic+=ensemble[row][col]*field;
             interactions-=neighbours*epsilon*
                 ensemble[row][col];
         }
@@ -1291,6 +1291,16 @@ float entropy_ising_t(ising_t *system)
 }
 \end{lstlisting}
 
+However, the entropy subroutine that I have provided above does not %
+work for the case \(\epsilon = 0\). This is because the base unit for %
+the paramagnet is not a pair but a single spin. In this case we %
+need to change how we count the number of up pairs/spins to actually %
+count the number of up spins. I achieved this by changing the contents %
+of the nested \verb!for! loop to \verb!up += ensemble[row][col] > 0!. %
+The two different entropy calculations added the minor detail that %
+the program had to chose/know which version of the function to apply. %
+I will not bore you with the details, but I used function pointers %
+to perform this task. 
 
 \section*{Results}
 \begin{figure}[h]
@@ -1332,8 +1342,8 @@ small the net impact on any one spin essentially cancelled.
 
 
 Adding the magnetic field had all of the impacts that we might have %
-expected from the fero-magnetic material. The size of the \emph{zones} %
-arround the critical temperature reduced and \emph{speckling} became %
+expected from the ferro-magnetic material. The size of the \emph{zones} %
+around the critical temperature reduced and \emph{speckling} became %
 much faster for spins aligned with the magnetic field, but slower for %
 spins anti-aligned with the magnetic field. If purple represents the %
 aligned spins then purple speckles would rapidly appear in the crystal %
@@ -1422,15 +1432,15 @@ para-magnetic heat capacity.
 
 Now let's consider the middle column which represents the para-magnetic %
 material. The most interesting thing about the para-magnetic material %
-is that the high temperature behaiour matches the high temperature anti-%
+is that the high temperature behaviour matches the high temperature anti-%
 ferro-magnetic behaviour. We observe that the heat capacity without an %
 external magnetic field drops to zero. This makes sense as according to %
 equation \ref{eqn:14} the energy will be constant. 
 
 
 In particular the energy will be constant on average for an infinite %
-lattice. There are clearly energy changes occuring all the time as %
-spins flip agnostically up and down. However, the spins are exatcly %
+lattice. There are clearly energy changes occurring all the time as %
+spins flip agnostically up and down. However, the spins are exactly %
 as likely to flip up as they are to flip down so the result is that %
 the average works out to zero. The derivative of a constant is then %
 of course zero. By the same reasoning the magnetisation and the energy %
@@ -1453,7 +1463,7 @@ rightmost column brief. The interesting behaviour is invoked by the %
 presence of the external magnetic field. In particular we see as predicted %
 that the heat capacity peak is smoothed out and shifted to higher %
 temperatures implying that the phase transition is now first order. %
-This matches our predictions and confirms the prescence of a positive %
+This matches our predictions and confirms the presence of a positive %
 feedback relation as opposed to an anti-ferro-magnetic material. 
 
 
@@ -1466,7 +1476,7 @@ To do this we used Poisson counting,
     \label{eqn:19}
 \end{align}
 %
-where \(o_{i}\) is the oberved data point in the \(i^{th}\) value and %
+where \(o_{i}\) is the observed data point in the \(i^{th}\) value and %
 \(e_{i}\) is the expected value. This revealed what we would have expected %
 based on the visual appearance of the data. The results of this analysis %
 are included in table \ref{tab:1}.
@@ -1521,14 +1531,14 @@ this is because of how the heat capacity is measured, which from equation %
 \ref{eqn:10} we can see uses the variance. For each parameter we run %
 \(1000N^{2}\) trials with measurement and then average the result %
 giving us extremely high accuracy. The heat capacity is the variance %
-of these measurements and has consitently shown to converge slower than %
+of these measurements and has consistently shown to converge slower than %
 the mean (see \ref{fig:2} and \ref{fig:5}).
 
 
 Although hard to see figure \ref{fig:11} contains error bars on all of the %
 parameters except the heat capacity. We calculated the error in the heat %
 capacity in the same way as other parameters using equation \ref{eqn:11}, %
-but it was very large compared to the data and obsured the results on %
+but it was very large compared to the data and obscured the results on %
 figure \ref{fig:11}. We proposed that better estimates for the heat %
 capacity could be obtained by increasing the size of the lattice. We %
 proposed this because it results in more runs and single flips cause %
@@ -1544,7 +1554,47 @@ Question 2 b) respectively. The same method was applied here extended to %
 account for the additional parameters.
 
 
+I did not use figure \ref{fig:11} to estimate the Neel temperature %
+because the samples were taken to broadly. Instead I wrote another %
+program to measure the heat capacity over a much finer grid for a %
+\(20 \times 20\) lattice. This program sampled temperatures from %
+\(2.5 \epsilon / k\) to \(2.0 \epsilon / k\) in increments of %
+\(0.025 \epsilon / k\). At each temperature the program ran for %
+only \(100N^{2}\). I believe that lower number of steps maintains %
+accuracy because the cooling is much slower. 
 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{pub/figures/heat_capacity_external_field.pdf}
+    \caption{A finely gridded heat capacity measurement on a \(20 \times 20\) %
+        lattice.}
+    \label{fig:12}
+\end{figure}
+
+
+Figure \ref{fig:12} allows use to estimate the Neel temperature, but %
+before we do it is worth discussing some of its features. Unlike figure %
+\ref{fig:11} the heat capacity is included with error. This is because %
+I ran more independent simulations, eight instead of five. Apparently %
+even this small increase dramatically reduced the spread. Additionally, %
+we observe that the curve, appears bumpy, when we know that minus %
+the peak, the curve should be smooth. 
+
+
+To estimate the Neel temperature I took the temperature corresponding %
+to the greatest heat capacity, in this case \(T = 2.28 \pm 0.01\). %
+The uncertainty that I have quoted for the Neel temperature is half %
+the temperature increment rounded to one significant figure. %
+Remarkably the Neel temperature is very similar to the Currie temperature. %
+I believe that in our scenario this makes sense since the interactions %
+strengths are the same and all that has changed is the sign. 
+
+
+\section*{Conclusion}
+I used a two dimensional Ising simulation to investigate the thermodynamic %
+properties of anti-ferro-magnetic, para-magnetic and ferro-magnetic %
+materials. 
 
 
 
