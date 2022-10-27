@@ -62,6 +62,119 @@ and the repository is \verb!iron!; %
 
 
 \section*{Introduction}
+The (initial) aim of my analysis is to construct a simple model, %
+and simulation of a ferro-magnetic material. Ferro-magnetic materials %
+behave as magnets below a certain temperature but like para-magnets %
+above that temperature. A para-magnet can be thought of as an %
+ensemble of spins which, in the absence of an external magnetic %
+field have no tendency to align \cite{Schroder2021}. It follows %
+that a ferro-magnetic material is characterised by interactions %
+between the spins in the ensemble. 
+
+
+Before diving into the model it is worth considering examples %
+of real materials that have ferro-magnetic properties. The most %
+obvious example is Iron, which is the name-sake. If you were %
+to hold a lump of pure Iron in your hand it would almost certainly %
+not exhibit no macroscopic magnetic properties. The temperature %
+would not affect you perception of the magnetisation either. %
+You could freeze or melt it and it would still seem magnetically %
+inert. 
+
+
+The explanation lies in the way the spins in iron influence each %
+other. The effects are local so microscopic segments of Iron, %
+which still correspond to billions of atoms, align themselves. %
+The reason we do not necessarily observe this magnetic affect %
+is because neighbouring sets of aligned spins called \emph{domains} %
+do not necessarily align with each other. In fact often they %
+destroy the magnetic affect of the neighbouring \emph{domains}. 
+
+
+Heating the Iron we can destroy the domains. As we energise the %
+sample the interactions between the spins becomes much less %
+than the thermal energy and so they flip between states %
+much more readily destroying the coherent structures. To %
+make the magnetic affect permanent we can force all of the %
+spins to align using an external magnetic field and then %
+cool the Iron back down essentially freezing the spins in place. 
+
+
+It is worth discussing this example because it informs us of the %
+properties that we should expect to see in our model. Firstly, %
+we are expecting temperature to play a role in the net magnetisation %
+of the ensemble. Moreover, we want to observe \emph{domains} form %
+below some temperature. These should be \emph{quasi-stable} %
+meaning that they have a lifetime much longer than the lifetime %
+of an individual spin. 
+
+
+Our ferro-magnetic model is an implementation of the Ising model. %
+The Ising model is widely used \cite{MacKay2003}, because of its %
+inherent simplicity. The assumptions of this model are that %
+every spin in the ensemble can either point upward or downward %
+but not in any other direction. This is obviously untrue of %
+nature, but we should still be able to see domains along the %
+two orientations. The second assumption of the Ising model %
+is that only nearest neighbours interact. 
+
+
+The nearest neighbour assumption is probably fine since in nature %
+long range forces tend to fall of with \(1 / r^{2}\) so the %
+dominant force will be from the nearest neighbour. However, %
+the term nearest neighbour implies a structure upon the model. %
+In one dimensional it is relatively unambiguous but in two and %
+three dimensions there are a lot of ways to arrange the spins %
+in the ensemble and hence chose the nearest neighbours. How %
+this selection impacts the outcomes is not a focus of this %
+report. 
+
+
+Without further ado I will introduce the expression for the %
+energy in the absence of an external magnetic field, 
+%
+\begin{align}
+    U &= -\epsilon\sum_{p(i,j)}s_{i}s_{j},
+    \label{eqn:20}
+\end{align}
+%
+where, \(i\) and \(j\) are integers specifying the locations of %
+two spins, denoted \(s\), that are pairs, denoted (\(p(i, j)\). %
+\(\epsilon\) has the units of energy and represents the strength %
+of the interaction. For this analysis I work in units of \(\epsilon\). %
+Equation \ref{eqn:20} allows us to compute the partition function %
+of the system,
+%
+\begin{align}
+    Z &= \sum_{k}\exp\left(-\frac{U_{k}}{\tau}\right)
+    \label{eqn:21}
+\end{align}
+%
+where \(\tau = kT\) is the temperature in units of energy and %
+\(k\) denotes a specific configuration of the ensemble. There %
+are \(2^{N}\) ways to order the lattice hence the summation %
+can be over a very large number of states indeed. 
+
+
+Since this sum is so large I have opted to use a monte-carlo %
+sampling pattern. Rather than attempt to evaluate all the %
+terms in the sum monte-carlo techniques attempt to find a %
+representative sample by making weighted random guesses. In %
+this case we weight our guess by the Boltzmann factor of the %
+state. The details of this algorithm were provided to us %
+without proof and so I will not attempt to explain the %
+technique in more detail.
+
+
+Equipped with this information I first simulated a one dimensional %
+ensemble of spins and investigated its thermodynamic properties. %
+I have included this analysis in sections labelled by question %
+because I thought it would be easier to mark. Once I had analysed %
+the one dimensional Ising model I extended the simulations into %
+two dimensions, the analysis for which I have also provided %
+in a by section format. I have discussed methods where I thought %
+it fitted best with the question format and I have not cited the %
+information that was provided with the cover letter. 
 
 
 \subsection*{Question 1 a)}
@@ -123,7 +236,7 @@ void metropolis_step(ising_t *system)
 where, \verb!rand! generates a random number in the range %
 \([0, 1]\), and \verb!modulo! is modified to produce %
 positive input on negative numbers like the \verb!python! %
-implmentation. This is not the native \verb!c! implementation. %
+implementation. This is not the native \verb!C! implementation. %
 I used the \verb!||! short circuit operator so that %
 the second comparison was not evaluated on every call %
 to the function. 
@@ -139,94 +252,93 @@ are anti-aligned with the corresponding energies.
 %
 \begin{align}
     Z_{i} &= \sum_{s_{i} = \pm 1}
-            \exp\left(-\frac{\varepsilon s_{i}s_{i+1}}{\tau}\right)
+            \exp\left(-\frac{\epsilon s_{i}s_{i+1}}{\tau}\right)
             \nonumber\\
-        &= \exp\left(-\frac{\varepsilon}{\tau}\right) +
-            \exp\left(\frac{\varepsilon}{\tau}\right)
+        &= \exp\left(-\frac{\epsilon}{\tau}\right) +
+            \exp\left(\frac{\epsilon}{\tau}\right)
             \nonumber\\
-        &= 2\cosh\left(\frac{\varepsilon}{\tau}\right).
+        &= 2\cosh\left(\frac{\epsilon}{\tau}\right).
     \label{eqn:1}
 \end{align}
 
 
-Similarly to the para-magnetic case we can multiply the system %
-partition functions of single constituents together to get the %
-partition function of the entire system. However, the condition %
-to do this was that the constiutuents were independent, but the %
-Ising model contains interactions. In the case of the Ising model %
-the constituents that are independent are the pairs, not the %
-individual spins. You may think think then that we only consider %
-\(N / 2\) unique pairs but this is not the case. In a chain each %
-spin is counted in two pairs so the power is still \(N\). 
+We can multiply the partition functions of single constituents%
+together to get the partition function of the entire system. %
+However, the condition to do this is that the constituents were %
+independent, but the Ising model contains interactions. In the case %
+of the Ising model the constituents that are independent are the %
+pairs, not the individual spins. You may think think then that we %
+only consider \(N / 2\) unique pairs but this is not the case. In a %
+chain each spin is counted in two pairs so the power is still \(N\). 
 
 
 A small detail that I skipped was what happens at the boundary. %
-The two spins on the end of the chains are not (neccessarily) %
+The two spins on the end of the chains are not (necessarily) %
 counted twice. In the limit of a very large chain of spins we %
 can see that the boundary affect will not matter however, we %
-got about this nuance in a much more interesting way by considering %
+got about this nuance in a much more interesting way using %
 cyclic boundary conditions. That is to say that the spin on the %
 far end of the chain is a neighbour to the spin at the start of the %
 chain and vice versa. 
 
 
-Given the partition function \(Z = (2\cosh(\varepsilon / \tau))^{N}\), we 
+Given the partition function \(Z = (2\cosh(\epsilon / \tau))^{N}\), we 
 calculated the internal energy using,
 
 \begin{align}
-    U &= \tau^{2}\partial_{\tau}\ln(Z)\label{EQN1}\\
+    U &= \tau^{2}\partial_{\tau}\ln(Z) \nonumber\\
         &= \tau^{2}\partial_{\tau}
-            \ln\left(2\cosh\left(\frac{\varepsilon}{\tau}\right)^{N}\right)
+            \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)^{N}\right)
             \nonumber \\
         &= N\tau^{2}\partial_{\tau}
-            \ln\left(2\cosh\left(\frac{\varepsilon}{\tau}\right)\right)
+            \ln\left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
             \nonumber \\
         &= N\tau^{2}\partial_{\tau}
-            \left(2\cosh\left(\frac{\varepsilon}{\tau}\right)\right)
-            \frac{1}{2\cosh\left(\frac{\varepsilon}{\tau}\right)}
+            \left(2\cosh\left(\frac{\epsilon}{\tau}\right)\right)
+            \frac{1}{2\cosh\left(\frac{\epsilon}{\tau}\right)}
             \nonumber \\
-        &= N\tau^{2}\partial_{\tau}\left(\frac{\varepsilon}{\tau}\right)
-            \frac{\sinh\left(\frac{\varepsilon}{\tau}\right)}
-            {\cosh\left(\frac{\varepsilon}{\tau}\right)}\nonumber \\
-        &= -\varepsilon N\tanh\left(\frac{\varepsilon}{\tau}\right)
+        &= N\tau^{2}\partial_{\tau}\left(\frac{\epsilon}{\tau}\right)
+            \frac{\sinh\left(\frac{\epsilon}{\tau}\right)}
+            {\cosh\left(\frac{\epsilon}{\tau}\right)}\nonumber \\
+        &= -\epsilon N\tanh\left(\frac{\varepsilon}{\tau}\right)
     \label{eqn:2}.
 \end{align}
 
-We calculated the free energy of the system using,
+We also calculated the free energy:
 
 \begin{align}
-    F &= -\tau\ln Z \\
+    F &= -\tau\ln Z \nonumber \\
         &= -\tau\ln\left(\left(
-            2\cosh\left(\frac{\varepsilon}{\tau}\right)\right)^{N}\right) 
+            2\cosh\left(\frac{\epsilon}{\tau}\right)\right)^{N}\right) 
             \nonumber \\
         &= -N\tau\ln\left(
-            2\cosh\left(\frac{\varepsilon}{\tau}\right)\right) 
+            2\cosh\left(\frac{\epsilon}{\tau}\right)\right) 
             \nonumber \\
         &= -N\tau\ln\left(
-            \exp\left(\frac{\varepsilon}{\tau}\right) + 
-            \exp\left(-\frac{\varepsilon}{\tau}\right)\right) \nonumber \\
-        &= -N\tau\ln\left(\exp\left(\frac{\varepsilon}{\tau}\right)
-            \left(1 + \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)
+            \exp\left(\frac{\epsilon}{\tau}\right) + 
+            \exp\left(-\frac{\epsilon}{\tau}\right)\right) \nonumber \\
+        &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)
+            \left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
             \right)\nonumber \\
-        &= -N\tau\ln\left(\exp\left(\frac{\varepsilon}{\tau}\right)\right)
+        &= -N\tau\ln\left(\exp\left(\frac{\epsilon}{\tau}\right)\right)
             - N\tau\ln\left(1 + 
-            \exp\left(-2\frac{\varepsilon}{\tau}\right)\right) \nonumber \\
-        &= -N\varepsilon - N\tau\ln\left(1 + 
-            \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)
+            \exp\left(-2\frac{\epsilon}{\tau}\right)\right) \nonumber \\
+        &= -N\epsilon - N\tau\ln\left(1 + 
+            \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
     \label{eqn:3}. 
 \end{align}
 
 The entropy followed from the combination of Equation \ref{eqn:2} and %
-Equation \ref{eqn:1} using Equation \ref{eqn:3},
+Equation \ref{eqn:3},
 
 \begin{align}
-    \tau\sigma &= F - U\\
-        &= -N\varepsilon\tanh\left(\frac{\varepsilon}{\tau}\right) + 
-            N\varepsilon + N\tau\ln\left(1 + 
-            \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)\nonumber \\
-    \sigma &= \frac{\varepsilon}{\tau}\left(1 - 
-            \tanh\left(\frac{\varepsilon}{\tau}\right)\right) +
-            \ln\left(1 + \exp\left(-2\frac{\varepsilon}{\tau}\right)\right)
+    \tau\sigma &= F - U \nonumber \\
+        &= -N\epsilon\tanh\left(\frac{\epsilon}{\tau}\right) + 
+            N\epsilon + N\tau\ln\left(1 + 
+            \exp\left(-2\frac{\epsilon}{\tau}\right)\right)\nonumber \\
+    \sigma &= \frac{\epsilon}{\tau}\left(1 - 
+            \tanh\left(\frac{\epsilon}{\tau}\right)\right) +
+            \ln\left(1 + \exp\left(-2\frac{\epsilon}{\tau}\right)\right)
     \label{eqn:4}.
 \end{align} 
 
@@ -234,7 +346,7 @@ Finally, we determined the specific heat using Equation \ref{eqn:2} %
 and Equation \ref{eqn:3},
 
 \begin{align}
-    C &= \partial_{\tau}U\\
+    C &= \partial_{\tau}U \nonumber \\
         &= \partial_{\tau}\left(-N\varepsilon\tanh\left(
             \frac{\varepsilon}{\tau}\right)\right)\nonumber\\
         &= -N\varepsilon\partial_{\tau}\left(\frac{\varepsilon}{\tau}\right)
@@ -258,14 +370,6 @@ and Equation \ref{eqn:3},
     \label{fig:2}
 \end{figure}        
 
-I started by simulating a one dimensional Ising model with no %
-external magnetic field, which I compared to the analytic %
-expressions derived above. I used periodic boundary conditions %
-and chose to implement my models using a lattice size of one-hundred %
-spins. I chose to use one-hundred spins because it evaluated %
-fast on my device and was large enough to be interesting. 
-
-
 Starting with our one dimensional model we equilibrated the %
 system for multiple different temperatures and settled on %
 using \(1000N\) as the length of the loop. This was likely %
@@ -280,7 +384,7 @@ initialised the system only once at the highest temperature %
 that we sampled, \(3.8 \epsilon / k\). I equilibrated the %
 system at this temperature by evolving it for \(1000N\) %
 and then started to cool the system taking measurements %
-at each new system. 
+at each new temperature. 
 
 
 The alternative model was to randomly initialise the system %
@@ -315,7 +419,7 @@ loop allows the system to explore the equilibrium space %
 but I think that it does matter for the error estimate. 
 
 
-I belive that it matters for the error estimate because %
+I believe that it matters for the error estimate because %
 the state of the system is highly correlated to the %
 past state of the system within some \emph{correlation %
 length}. This \emph{correlation length} is roughly the %
@@ -376,7 +480,7 @@ float energy_ising_t(ising_t *system)
 \end{lstlisting}
 
 
-You may notice that I am only counting the righthand neighbour %
+You may notice that I am only counting the right-hand neighbour %
 of each spin. I chose this method because it is more optimal. %
 If I was to count each neighbour then every pair would be %
 counted twice and we would have to divide the final result by %
@@ -384,7 +488,7 @@ counted twice and we would have to divide the final result by %
 halved the number of computations. 
 
 
-A pair of spins is the \emph{base unit} of the ising model %
+A pair of spins is the \emph{base unit} of the Ising model %
 so to calculate the entropy I counted the number of aligned %
 pairs and then used the \emph{chose} function to calculate %
 the multiplicity. However, it was not quite this simples %
@@ -392,7 +496,7 @@ since \(100!\) is \(\sim 10^{157}\), which overflows an %
 integer in the programs memory. 
 
 
-To fix this problem I used the stirling approximation to %
+To fix this problem I used the Stirling approximation to %
 compute the entropy directly. This implies that the %
 entropy should be less accurate at lower temperatures %
 where the entropy is low and the Stirling approximation %
