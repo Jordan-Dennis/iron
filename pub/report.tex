@@ -67,7 +67,7 @@ and simulation of a ferro-magnetic material. Ferro-magnetic materials %
 behave as magnets below a certain temperature but like para-magnets %
 above that temperature. A para-magnet can be thought of as an %
 ensemble of spins which, in the absence of an external magnetic %
-field have no tendency to align \cite{Schroder2021}. It follows %
+field have no tendency to align \cite{Schroeder2021}. It follows %
 that a ferro-magnetic material is characterised by interactions %
 between the spins in the ensemble. 
 
@@ -566,10 +566,10 @@ because of equation \ref{eqn:5}.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.45\textwidth]{pub/figures/magnetisation_ising_1d.pdf}
-    \caption{Histograms of the magnetisation for two ising %
+    \caption{Histograms of the magnetisation for two Ising %
         systems of sizes \(N = 100\) and \(N = 500\). The %
         temperatures are labelled in the titles and the %
-        \(y\)-axis is a unitless count.}
+        \(y\)-axis is a unit-less count.}
     \label{fig:3}
 \end{figure}
 
@@ -592,10 +592,14 @@ Ising model. This means that there is no phase transition.
 
 
 \subsection*{Question 2 a)}
+\textbf{Note}: We were given that the critical temperature was %
+\(2.27 \epsilon / k\).
+
+
 For \(\tau = 1.0 \epsilon / k\) the random lattice very quickly %
 relaxed into large \emph{domains} of up and down spins. Over time %
 the boundaries of the \emph{domains} moved around the lattice %
-coherently. I am/will using/use \emph{coherent motion} to refer %
+coherently. I will use \emph{coherent motion} to refer %
 to a blob transporting across the network. For example, a group %
 of down spins may start in the top right corner and remaining %
 a single blob move to the middle of the system. 
@@ -612,7 +616,7 @@ represent the side length of the system.
 
 This is important because at lower temperatures the system took longer %
 to equilibrate. As I saw for the one-dimensional case the %
-\emph{coherent domains} have a \emph{meta-stable} lifetime before decaying. %
+\emph{coherent domains} have a \emph{quasi-stable} lifetime before decaying. %
 The shape of this domain influences the lifetime. The size %
 seems to be a direct predictor of lifetime with the largest %
 domain nearly always coming out on top. Another important %
@@ -658,7 +662,7 @@ Moreover, the rapid speckling assists in the destruction of the %
 
 
 Something worthy of note before we move above the condensation %
-temperature is that \emph{domains} die at there corners. This %
+temperature is that \emph{domains} die at their corners. This %
 is because the corners represent an interface where a spin has %
 more neighbours of one color than the other. This is another %
 factor that prolongs the life of the \emph{meta-stable} states, %
@@ -676,8 +680,8 @@ In addition \emph{domains} do not form at this temperature.
 I have been using \emph{domain} to refer to a structure that is %
 \emph{macroscopic} and \emph{semi-permanent}. \emph{Zonation} %
 does occur at \(\tau = 3.0 \epsilon / k\) bur it does not meet %
-these criteria. By this I mean that the zones are small \(\sim 10\) %
-spins maximum and temporary. Rather than considering the rapid %
+these criteria. By this I mean that the zones are small, \(\sim 10\) %
+spins maximum, and temporary. Rather than considering the rapid %
 zonation to be the evolution of the \emph{domain} behaviour I %
 consider it the evolution of the \emph{speckling} behaviour.
 
@@ -706,13 +710,23 @@ destroyed and not even microscopic domains are able to form.
 \end{figure}
 
 
-\subsection*{Question 2 b)}
-Smoothly varying the temperature using I found that the \emph{speckling} %
+\subsection*{Question 2 d)}
+\textbf{Note}: A lot of my discussion in this section is similar %
+to the discussion the previous section. They key difference is %
+that this discussion contains to a continuous temperature scale %
+instead of a discrete. The key result is in the first paragraph %
+and if you are satisfied you need not read any further. My %
+implementation of the \verb!metropolis_step! is in the final %
+segment.
+
+
+Smoothly varying the temperature I found that the \emph{speckling} %
 and \emph{zonation} seems to dominate above \(\sim 2.3 \epsilon / k\) %
 while below this \emph{domains} start to form and given enough time %
 the entire crystal becomes magnetised. The transition is smooth %
 with respect to the \emph{speckles}, which at very low temperatures %
-are very small and isolated with out a lifetime. 
+are very small and isolated with out a lifetime. The transition is %
+not smooth with respect to \emph{domains}
 
 
 As I increased the temperature the \emph{speckles} increases in size and %
@@ -803,15 +817,29 @@ was set to one.
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{pub/figures/physical_parameters_ising_2d.pdf}
-    \caption{}
+    \caption{The physical parameters of the system as a function of %
+        temperature. We observe that the differences are quite %
+        small. This is because the averaging is over a very vast %
+        number of samples and the lattice sizes are not that different.}
     \label{fig:7}
 \end{figure}
+
 I noticed that the heat capacity \emph{spike} increased in %
 height as I increased the size of the crystal. This suggests %
 that the infinite Ising model will have an infinitely tall %
 heat capacity \emph{spike} at the critical temperature. I also %
 noticed that at the critical temperature all of the physical %
-parameters changed the fastest. 
+parameters changed the fastest. This simulation to nine %
+hours to run and has been averaged over a vast number of %
+runs. 
+
+
+\textbf{Note}: You may notice that the different sizes are not %
+very different. This is because the lattice sizes that I used %
+were \(N = 10, 15\) and \(20\). I ran a simulation for nine %
+hours at larger sizes but the heat capacity diverged at %
+lower temperatures. I did not have time to re-run this simulation %
+so I ran it with smaller values.
 
 
 This makes sense because a phase transition is loosely defined %
@@ -961,14 +989,12 @@ This technique avoids the \emph{meta-stable} rings from forming.
 The cooled system represents the leftmost figure in \ref{fig:9}. %
 We can see that the magnetisation is complete and in this case %
 there are not even any speckles. This is suspiciously good but %
-I cannot find the error in my code so I will run with it. At %
+I cannot find an error in my code. At %
 the highest temperature we see that the state appears to be %
 almost entirely random. Cooling it back down I managed to get %
 a \emph{meta-stable} ring state.
 
 
-In all the heating and cooling operations I raised the temperature %
-slowly and re-equilibrated the system at each new temperature. %
 I am annoyed by the ring state because this gradual cooling is %
 supposed to prevent such states for the most part. Again this %
 state is markedly non-speckled and I think this is because the %
@@ -1000,14 +1026,14 @@ Curie temperature. In the briefing %
 we were given that the critical temperature for the two dimensional %
 Ising model was \(T_{c} \approx 2.27\epsilon / k\). The Curie %
 temperature of iron is \(T_{c} = 1043K\), hence \(\epsilon = %
-1043K * k / 2.27 = 0.0396eV\). 
+1043K \times k / 2.27 = 0.0396eV\). 
 \vfill
 
 
 \clearpage
 \section*{Introduction}
 The study of magnetic materials is an area of academic %
-and industrial interest \cite{Shroeder2021}. For example, magnetic %
+and industrial interest \cite{Schroeder2021}. For example, magnetic %
 technologies are important in the ongoing development of %
 quantum computers, superconducting circuits and other %
 examples in electronics. At a fundamental level %
@@ -1154,7 +1180,7 @@ of equation \ref{eqn:7} I have omitted some steps.
 
 Para-magnets are a useful toy model but from our experience %
 with natural and manufactured magnets we know that it is %
-possibe to construct systems that are magnetic without external %
+possible to construct systems that are magnetic without external %
 fields. The one-dimensional Ising model is a simple model of %
 such systems. The Ising model is a natural extension of the %
 paramagnetic model that we discussed, and operates on the same %
@@ -1266,14 +1292,8 @@ the lattice based on the location of the \(B = 0\) peak.
 
 
 We used the same method to test how the ferro-magnetic phase transition %
-was changed by the external magnetic field. However, we also tested %
-increasing the strength of the magnetic field once the system was %
-equilibrated below above and at the critical temperature. This gave %
-us the ability to look for a similar, but not the same phase transition %
-which we expected to be first order. 
-
-
-To test our predictions for the paramagnetic substance we simulated it %
+was changed by the external magnetic field. To test our predictions for %
+the paramagnetic substance we simulated it %
 over a fine grid of temperatures and the same three magnetic fields as %
 the other simulations. We quantitatively assessed our models by calculating %
 the \(\chi^{2}\) statistics for each fit and the associated \(p\)-value. %
@@ -1476,8 +1496,8 @@ Interestingly, even at the greatest magnetic field we tests \(B = 3.0T\) %
 we the size of the \emph{domains} in the low temperature state remained %
 approximately the same. This makes sense as the states on either side %
 of the domain wall remain equally favoured. Examining figure \ref{fig:8} %
-we can see that there is an analouge to the \emph{meta-stable} states %
-we encountered in the ferr-magnetic case. That is a ring that has formed. %
+we can see that there is an analogue to the \emph{meta-stable} states %
+we encountered in the ferro-magnetic case. That is a ring that has formed. %
 For the anti-ferromagnetic case all \emph{domains} appeared to be %
 \emph{meta-stable} in our simulations. 
 
@@ -1486,7 +1506,7 @@ For the anti-ferromagnetic case all \emph{domains} appeared to be %
     \centering
     \includegraphics[width=0.45\textwidth]{pub/figures/external_field_epsilon_zero.pdf}
     \caption{Snapshots of the paramagnetic material equilibrated at %
-        a variety of temperatures and magentic fields.}
+        a variety of temperatures and magnetic fields.}
     \label{fig:9}
 \end{figure}
 
@@ -1587,8 +1607,8 @@ This matches our predictions and confirms the presence of a positive %
 feedback relation as opposed to an anti-ferro-magnetic material. 
 
 
-Using equations \ref{eqn:14}, \ref{eqn:15}, \ref{eqn:16}, \ref{eqn:17} and %
-\ref{eqn:18} we computed \(\chi^{2}\) statistics for the fitted model. %
+Using equations \ref{eqn:9}, \ref{eqn:10}, \ref{eqn:11}, \ref{eqn:12} and %
+\ref{eqn:13} we computed \(\chi^{2}\) statistics for the fitted model. %
 To do this we used Poisson counting,
 %
 \begin{align}
@@ -1637,8 +1657,8 @@ are included in table \ref{tab:1}.
 
 Table \ref{tab:1} shows some very interesting trends. Firstly, we see %
 that our model matches, to within a very good approximation, what we %
-predicted in equations \ref{eqn:14}, \ref{eqn:15}, \ref{eqn:16} and %
-\ref{eqn:17}. You may be suspicious of the \(NAN\), \(\chi^{2}\) values %
+predicted in equations \ref{eqn:10}, \ref{eqn:11}, \ref{eqn:12} and %
+\ref{eqn:13}. You may be suspicious of the \(NAN\), \(\chi^{2}\) values %
 that I am reporting. You may notice that in these cases the predicted %
 and model values are constant at zero in appropriate units. This %
 resulted in divide by zero errors when I applied equation \ref{eqn:19}.
@@ -1716,7 +1736,7 @@ I used a two dimensional Ising simulation to investigate the thermodynamic %
 properties of anti-ferro-magnetic, para-magnetic and ferro-magnetic %
 materials. With this simulation I was able to assess how well the %
 para-magnetic simulation matched the theoretical models given by %
-equations \ref{eqn:14}, \ref{eqn:15}, \ref{eqn:16} and \ref{eqn:17}. %
+equations \ref{eqn:10}, \ref{eqn:11}, \ref{eqn:12} and \ref{eqn:13}. %
 I found that the agreement was in general very good, but that the %
 heat capacity failed to converge for the model in the strongest %
 magnetic field. This was attributed to limitations of the simulation %

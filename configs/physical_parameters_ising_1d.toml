@@ -1,5 +1,5 @@
 number_of_spins = 100
 save_file = pub/data/physical_parameters_ising_1d.csv
-lowest_temperature = 1.0
+lowest_temperature = 0.2
 highest_temperature = 4.0
 temperature_step = 0.1

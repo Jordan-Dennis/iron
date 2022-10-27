@@ -191,10 +191,10 @@ def physical_parameters(data_file: str, show: bool, save_file: str = None) -> No
             heat_capacity_est[cond],
             heat_capacity_err[cond]) 
         
-        axes[0][0].legend(["20", "50", "100"])
-        axes[1][0].legend(["20", "50", "100"])
-        axes[0][1].legend(["20", "50", "100"])
-        axes[1][1].legend(["20", "50", "100"])
+        axes[0][0].legend(["10", "15", "20"])
+        axes[1][0].legend(["10", "15", "20"])
+        axes[0][1].legend(["10", "15", "20"])
+        axes[1][1].legend(["10", "15", "20"])
 
 
     if show:

@@ -3,10 +3,9 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: report.aux
 The style file: plain.bst
 Database file #1: pub/citations.bib
-Warning--I didn't find a database entry for "Shroeder2021"
 You've used 4 entries,
             2118 wiz_defined-function locations,
-            526 strings with 4485 characters,
+            524 strings with 4461 characters,
 and the built_in function-call counts, 1029 in all, are:
 = -- 90
 > -- 45
@@ -45,4 +44,3 @@ warning$ -- 0
 while$ -- 9
 width$ -- 5
 write$ -- 43
-(There was 1 warning)
